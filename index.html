@@ -13,6 +13,9 @@
 <div class="brand">
 
 <div class="logos">
+<img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo">
+     <img src="logo-emive.png" class="logo emive">
   <img src="logo-digital.png" alt="Logo Digital" class="logo">
   <img src="logo-emive.png" class="logo emive">
 </div>
@@ -217,11 +220,11 @@ let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
 
 lista.forEach(r => {
 tbody.innerHTML += `
-       <tr>
-         <td><strong>${r.dataBR}</strong></td>
-         <td>${r.pessoas.join("<br>")}</td>
-       </tr>
-     `;
+      <tr>
+        <td><strong>${r.dataBR}</strong></td>
+        <td>${r.pessoas.join("<br>")}</td>
+      </tr>
+    `;
 });
 }
 
@@ -266,4 +269,3 @@ carregarDiario();
 
 </body>
 </html>
-
