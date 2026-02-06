@@ -58,10 +58,8 @@ display:block;
 
 /* LOGO EMIVE MAIOR */
 .logo.emive{
-  height:90px;
   height:110px;
 }
-
 /* TITULO */
 .brand-title{
 font-weight:700;
@@ -267,6 +265,7 @@ align-items:flex-start;
 .logo{
 height:50px;
 }
+
 
 
 
