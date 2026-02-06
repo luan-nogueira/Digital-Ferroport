@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presença diária — Ferroport</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="logo-digital.png" class="logo">
+
+    <div>
+      <div class="brand-title">Presença diária — Ferroport</div>
+      <div class="brand-subtitle">Controle de técnicos no contrato</div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+<section class="card">
+  <div class="card-head">
+    <h2>Presença por dia</h2>
+    <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label>Data</label>
+      <input id="dataDia" type="date" />
+    </div>
+
+    <div class="field">
+      <label>Pessoas</label>
+      <div class="chips" id="chipsDiario"></div>
+
+      <div class="add-nome">
+        <input type="text" id="novoNome" placeholder="Adicionar novo técnico">
+        <button class="btn" onclick="adicionarNome()">+ Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="salvarDiario()">💾 Salvar dia</button>
+    <button class="btn secondary" onclick="limparDiario()">🧹 Limpar</button>
+    <button class="btn danger" onclick="apagarDiarios()">🗑 Apagar tudo</button>
+    <button class="btn" onclick="exportarDiarioCSV()">⬇ Exportar Excel</button>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Presenças registradas</h2>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Pessoas</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaDiario"></tbody>
+  </table>
+</section>
+
+<footer class="footer">
+  DIGITAL • Tecnologia e Segurança
+</footer>
+
+</main>
+
+<script>
+const KEY_DIARIOS = "presencas_diarias";
+const KEY_NOMES = "nomes_tecnicos";
+
+let NOMES = JSON.parse(localStorage.getItem(KEY_NOMES)) || 
+["Luan Nogueira","Lucas Gregorio","Phillipe Carvalho"];
+
+let selecaoDiaria = [];
+
+// montar chips com botão excluir
+function renderChipsDiario(){
+  const wrap = document.getElementById("chipsDiario");
+  wrap.innerHTML="";
+
+  NOMES.forEach(nome=>{
+    const div = document.createElement("div");
+    div.className="chip-box";
+
+    const btn = document.createElement("button");
+    btn.className="chip";
+    btn.innerText=nome;
+
+    btn.onclick=()=>{
+      btn.classList.toggle("active");
+      if(selecaoDiaria.includes(nome))
+        selecaoDiaria=selecaoDiaria.filter(n=>n!==nome);
+      else
+        selecaoDiaria.push(nome);
+    };
+
+    const excluir=document.createElement("span");
+    excluir.className="remove";
+    excluir.innerText="✖";
+
+    excluir.onclick=(e)=>{
+      e.stopPropagation();
+      excluirNome(nome);
+    };
+
+    div.appendChild(btn);
+    div.appendChild(excluir);
+    wrap.appendChild(div);
+  });
+}
+
+// adicionar nome
+function adicionarNome(){
+  const input=document.getElementById("novoNome");
+  const nome=input.value.trim();
+
+  if(!nome){alert("Digite um nome");return;}
+  if(NOMES.includes(nome)){alert("Nome já existe");return;}
+
+  NOMES.push(nome);
+  salvarNomes();
+  input.value="";
+  renderChipsDiario();
+}
+
+// excluir nome
+function excluirNome(nome){
+  if(!confirm("Excluir "+nome+" ?")) return;
+
+  NOMES=NOMES.filter(n=>n!==nome);
+  salvarNomes();
+  renderChipsDiario();
+}
+
+function salvarNomes(){
+  localStorage.setItem(KEY_NOMES,JSON.stringify(NOMES));
+}
+
+// salvar presença
+function salvarDiario(){
+  const data=document.getElementById("dataDia").value;
+  if(!data){alert("Selecione a data");return;}
+  if(selecaoDiaria.length==0){alert("Selecione pessoas");return;}
+
+  const item={
+    dataISO:data,
+    dataBR:formatarDataBR(data),
+    pessoas:[...selecaoDiaria]
+  };
+
+  let lista=JSON.parse(localStorage.getItem(KEY_DIARIOS)||"[]");
+  const idx=lista.findIndex(x=>x.dataISO===data);
+  if(idx>=0)lista[idx]=item;
+  else lista.push(item);
+
+  localStorage.setItem(KEY_DIARIOS,JSON.stringify(lista));
+  carregarDiario();
+  limparDiario();
+}
+
+// carregar tabela
+function carregarDiario(){
+  const tbody=document.getElementById("tabelaDiario");
+  tbody.innerHTML="";
+  let lista=JSON.parse(localStorage.getItem(KEY_DIARIOS)||"[]");
+
+  lista.forEach(r=>{
+    tbody.innerHTML+=`
+      <tr>
+        <td>${r.dataBR}</td>
+        <td>${r.pessoas.join("<br>")}</td>
+      </tr>
+    `;
+  });
+}
+
+// limpar
+function limparDiario(){
+  document.getElementById("dataDia").value="";
+  selecaoDiaria=[];
+  renderChipsDiario();
+}
+
+// apagar tudo
+function apagarDiarios(){
+  if(confirm("Apagar todos registros?")){
+    localStorage.removeItem(KEY_DIARIOS);
+    carregarDiario();
+  }
+}
+
+// exportar excel
+function exportarDiarioCSV(){
+  let lista=JSON.parse(localStorage.getItem(KEY_DIARIOS)||"[]");
+  let csv="Data;Pessoas\n";
+
+  lista.forEach(r=>{
+    csv+=`${r.dataBR};${r.pessoas.join(", ")}\n`;
+  });
+
+  const blob=new Blob([csv],{type:"text/csv"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="presencas.csv";
+  link.click();
+}
+
+// data BR
+function formatarDataBR(data){
+  const [y,m,d]=data.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+renderChipsDiario();
+carregarDiario();
+</script>
+
+</body>
+</html>

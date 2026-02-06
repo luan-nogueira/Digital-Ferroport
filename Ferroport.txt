@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Controle de Técnicos - Ferroport</title>
+
+<style>
+body {
+    font-family: Arial;
+    background:#f2f2f2;
+    padding:20px;
+}
+.box {
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    max-width:900px;
+    margin:auto;
+}
+input, button {
+    padding:8px;
+    margin:4px;
+}
+table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th, td {
+    border:1px solid #ccc;
+    padding:6px;
+    text-align:center;
+}
+th {
+    background:#eee;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Controle Mensal de Técnicos – Ferroport</h2>
+
+<form id="form">
+<input id="nome" placeholder="Nome do Técnico" required>
+<input id="funcao" placeholder="Função">
+<input id="mes" placeholder="Mês (ex: Março/2026)" required>
+<input type="date" id="inicio">
+<input type="date" id="fim">
+<input id="obs" placeholder="Observações">
+<button type="submit">Adicionar</button>
+</form>
+
+<table>
+<thead>
+<tr>
+<th>Nome</th>
+<th>Empresa</th>
+<th>Função</th>
+<th>Mês</th>
+<th>Início</th>
+<th>Fim</th>
+<th>Local</th>
+<th>Obs</th>
+</tr>
+</thead>
+
+<tbody id="tabela"></tbody>
+</table>
+
+<button onclick="exportar()">📥 Exportar para Excel (CSV)</button>
+
+</div>
+
+<script>
+let tecnicos = [];
+
+document.getElementById("form").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const tecnico = {
+        nome: nome.value,
+        funcao: funcao.value,
+        mes: mes.value,
+        inicio: inicio.value,
+        fim: fim.value,
+        obs: obs.value
+    };
+
+    tecnicos.push(tecnico);
+    atualizarTabela();
+    this.reset();
+});
+
+function atualizarTabela(){
+    const tabela = document.getElementById("tabela");
+    tabela.innerHTML = "";
+
+    tecnicos.forEach(t => {
+        tabela.innerHTML += `
+        <tr>
+            <td>${t.nome}</td>
+            <td>DG
