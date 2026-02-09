@@ -27,249 +27,205 @@
 
 <main class="container">
 
-  <section class="card">
-    <div class="card-head">
-      <h2>Presença por dia</h2>
-      <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
+<section class="card">
+  <div class="card-head">
+    <h2>Presença por dia</h2>
+    <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label>Data</label>
+      <input id="dataDia" type="date" />
     </div>
 
-    <div class="grid-2">
-      <div class="field">
-        <label>Data</label>
-        <input id="dataDia" type="date" />
+    <div class="field">
+      <label>Pessoas</label>
+
+      <div class="chips" id="chipsDiario"></div>
+
+      <div class="add-nome">
+        <input type="text" id="novoNome" placeholder="Adicionar técnico">
+        <button class="btn" type="button" onclick="adicionarNome()">+ Adicionar</button>
       </div>
 
-      <div class="field">
-        <label>Pessoas</label>
-
-        <div class="chips" id="chipsDiario"></div>
-
-        <div class="add-nome">
-          <input type="text" id="novoNome" placeholder="Adicionar técnico (ex: João Silva)">
-          <button class="btn" type="button" onclick="adicionarNome()">+ Adicionar</button>
-        </div>
-
-        <p class="muted small">Os nomes ficam salvos no navegador.</p>
-      </div>
+      <p class="muted small">Os nomes ficam salvos no navegador.</p>
     </div>
+  </div>
 
-    <div class="actions">
-      <button class="btn" onclick="salvarDiario()">💾 Salvar dia</button>
-      <button class="btn secondary" onclick="limparDiario()">🧹 Limpar</button>
-      <button class="btn danger" onclick="apagarDiarios()">🗑 Apagar tudo</button>
-      <button class="btn" onclick="exportarDiarioCSV()">⬇ Exportar Excel</button>
-    </div>
-  </section>
+  <div class="actions">
+    <button class="btn" onclick="salvarDiario()">💾 Salvar dia</button>
+    <button class="btn secondary" onclick="limparDiario()">🧹 Limpar</button>
+    <button class="btn danger" onclick="apagarDiarios()">🗑 Apagar tudo</button>
+    <button class="btn" onclick="exportarDiarioCSV()">⬇ Exportar Excel</button>
+  </div>
+</section>
 
-  <section class="card">
-    <div class="card-head">
-      <h2>Presenças registradas</h2>
-      <p class="muted">Se salvar a mesma data novamente, o sistema atualiza.</p>
-    </div>
+<section class="card">
+  <div class="card-head">
+    <h2>Presenças registradas</h2>
+    <p class="muted">Cada linha possui um botão para apagar somente aquele dia.</p>
+  </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Pessoas</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaDiario"></tbody>
-    </table>
-  </section>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Pessoas</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaDiario"></tbody>
+  </table>
+</section>
 
-  <footer class="footer">
-    DIGITAL • EMIVE • Tecnologia e Segurança
-  </footer>
+<footer class="footer">
+DIGITAL • EMIVE • Tecnologia e Segurança
+</footer>
 
 </main>
 
 <script>
-  const KEY_DIARIOS = "presencas_diarias";
-  const KEY_NOMES = "nomes_tecnicos";
 
-  const NOMES_PADRAO = ["Luan Nogueira", "Lucas Gregorio", "Phillipe Carvalho"];
-  let NOMES = JSON.parse(localStorage.getItem(KEY_NOMES)) || [...NOMES_PADRAO];
+const KEY_DIARIOS = "presencas_diarias";
+const KEY_NOMES = "nomes_tecnicos";
 
-  let selecaoDiaria = [];
+const NOMES_PADRAO = ["Luan Nogueira", "Lucas Gregorio", "Phillipe Carvalho"];
+let NOMES = JSON.parse(localStorage.getItem(KEY_NOMES)) || [...NOMES_PADRAO];
 
-  function salvarNomes(){
-    localStorage.setItem(KEY_NOMES, JSON.stringify(NOMES));
-  }
+let selecaoDiaria = [];
 
-  function formatarDataBR(dataISO){
-    const [y,m,d] = dataISO.split("-");
-    return `${d}/${m}/${y}`;
-  }
+function salvarNomes(){
+  localStorage.setItem(KEY_NOMES, JSON.stringify(NOMES));
+}
 
-  function renderChipsDiario(){
-    const wrap = document.getElementById("chipsDiario");
-    wrap.innerHTML = "";
+function formatarDataBR(dataISO){
+  const [y,m,d] = dataISO.split("-");
+  return `${d}/${m}/${y}`;
+}
 
-    NOMES.forEach(nome => {
-      const box = document.createElement("div");
-      box.className = "chip-box";
+function renderChipsDiario(){
+  const wrap = document.getElementById("chipsDiario");
+  wrap.innerHTML = "";
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "chip" + (selecaoDiaria.includes(nome) ? " active" : "");
-      btn.innerText = nome;
+  NOMES.forEach(nome => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.innerText = nome;
 
-      btn.onclick = () => {
-        if (selecaoDiaria.includes(nome)) {
-          selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
-        } else {
-          selecaoDiaria.push(nome);
-        }
-        renderChipsDiario();
-      };
-
-      const remover = document.createElement("span");
-      remover.className = "remove";
-      remover.title = "Excluir nome";
-      remover.innerText = "✖";
-
-      remover.onclick = (e) => {
-        e.stopPropagation();
-        excluirNome(nome);
-      };
-
-      box.appendChild(btn);
-      box.appendChild(remover);
-      wrap.appendChild(box);
-    });
-  }
-
-  function adicionarNome(){
-    const input = document.getElementById("novoNome");
-    const nome = input.value.trim();
-
-    if(!nome){
-      alert("Digite um nome.");
-      return;
-    }
-
-    const existe = NOMES.some(n => n.toLowerCase() === nome.toLowerCase());
-    if(existe){
-      alert("Esse nome já existe.");
-      return;
-    }
-
-    NOMES.push(nome);
-    NOMES.sort((a,b) => a.localeCompare(b, "pt-BR"));
-    salvarNomes();
-
-    input.value = "";
-    renderChipsDiario();
-  }
-
-  function excluirNome(nome){
-    if(!confirm(`Deseja excluir "${nome}"?`)) return;
-
-    NOMES = NOMES.filter(n => n !== nome);
-    selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
-    salvarNomes();
-    renderChipsDiario();
-  }
-
-  function salvarDiario(){
-    const data = document.getElementById("dataDia").value;
-
-    if(!data){
-      alert("Selecione a data.");
-      return;
-    }
-
-    if(selecaoDiaria.length === 0){
-      alert("Selecione pelo menos uma pessoa.");
-      return;
-    }
-
-    const item = {
-      dataISO: data,
-      dataBR: formatarDataBR(data),
-      pessoas: [...selecaoDiaria]
+    btn.onclick = () => {
+      if (selecaoDiaria.includes(nome)) {
+        selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
+        btn.classList.remove("active");
+      } else {
+        selecaoDiaria.push(nome);
+        btn.classList.add("active");
+      }
     };
 
-    let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+    wrap.appendChild(btn);
+  });
+}
 
-    const idx = lista.findIndex(x => x.dataISO === data);
-    if(idx >= 0) lista[idx] = item;
-    else lista.push(item);
+function adicionarNome(){
+  const input = document.getElementById("novoNome");
+  const nome = input.value.trim();
 
-    lista.sort((a,b) => a.dataISO.localeCompare(b.dataISO));
-    localStorage.setItem(KEY_DIARIOS, JSON.stringify(lista));
+  if(!nome) return alert("Digite um nome.");
 
-    carregarDiario();
-    limparDiario();
-  }
-
-  function carregarDiario(){
-    const tbody = document.getElementById("tabelaDiario");
-    tbody.innerHTML = "";
-
-    let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
-
-    lista.forEach(r => {
-      tbody.innerHTML += `
-        <tr>
-          <td><strong>${r.dataBR}</strong></td>
-          <td>${r.pessoas.join("<br>")}</td>
-          <td>
-            <button class="btn danger btn-sm" onclick="excluirDia('${r.dataISO}')">🗑 Excluir</button>
-          </td>
-        </tr>
-      `;
-    });
-  }
-
-  function excluirDia(dataISO){
-    if(!confirm("Deseja apagar este dia registrado?")) return;
-
-    let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
-    lista = lista.filter(item => item.dataISO !== dataISO);
-
-    localStorage.setItem(KEY_DIARIOS, JSON.stringify(lista));
-    carregarDiario();
-  }
-
-  function limparDiario(){
-    document.getElementById("dataDia").value = "";
-    selecaoDiaria = [];
-    renderChipsDiario();
-  }
-
-  function apagarDiarios(){
-    if(confirm("Deseja apagar todos os registros?")){
-      localStorage.removeItem(KEY_DIARIOS);
-      carregarDiario();
-    }
-  }
-
-  function exportarDiarioCSV(){
-    let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
-
-    if(lista.length === 0){
-      alert("Não há registros para exportar.");
-      return;
-    }
-
-    let csv = "Data;Pessoas\n";
-    lista.forEach(r => {
-      csv += `${r.dataBR};"${r.pessoas.join(", ")}"\n`;
-    });
-
-    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "presencas_ferroport.csv";
-    link.click();
-  }
-
+  NOMES.push(nome);
   salvarNomes();
+  input.value = "";
   renderChipsDiario();
+}
+
+function salvarDiario(){
+  const data = document.getElementById("dataDia").value;
+
+  if(!data) return alert("Selecione a data.");
+  if(selecaoDiaria.length === 0) return alert("Selecione pessoas.");
+
+  const item = {
+    dataISO: data,
+    dataBR: formatarDataBR(data),
+    pessoas: [...selecaoDiaria]
+  };
+
+  let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+
+  const idx = lista.findIndex(x => x.dataISO === data);
+  if(idx >= 0) lista[idx] = item;
+  else lista.push(item);
+
+  localStorage.setItem(KEY_DIARIOS, JSON.stringify(lista));
+
   carregarDiario();
+  limparDiario();
+}
+
+function carregarDiario(){
+  const tbody = document.getElementById("tabelaDiario");
+  tbody.innerHTML = "";
+
+  let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+
+  lista.forEach(r => {
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${r.dataBR}</strong></td>
+        <td>${r.pessoas.join("<br>")}</td>
+        <td>
+          <button onclick="excluirDia('${r.dataISO}')" class="btn danger">🗑 Apagar dia</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function excluirDia(dataISO){
+
+  if(!confirm("Deseja apagar somente este dia?")) return;
+
+  let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+
+  lista = lista.filter(item => item.dataISO !== dataISO);
+
+  localStorage.setItem(KEY_DIARIOS, JSON.stringify(lista));
+
+  carregarDiario();
+}
+
+function limparDiario(){
+  document.getElementById("dataDia").value = "";
+  selecaoDiaria = [];
+  renderChipsDiario();
+}
+
+function apagarDiarios(){
+  if(confirm("Apagar TODOS os registros?")){
+    localStorage.removeItem(KEY_DIARIOS);
+    carregarDiario();
+  }
+}
+
+function exportarDiarioCSV(){
+  let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+
+  let csv = "Data;Pessoas\n";
+  lista.forEach(r => {
+    csv += `${r.dataBR};"${r.pessoas.join(", ")}"\n`;
+  });
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "presencas_ferroport.csv";
+  link.click();
+}
+
+renderChipsDiario();
+carregarDiario();
+
 </script>
 
 </body>
