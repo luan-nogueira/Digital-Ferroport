@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Presença diária — Ferroport</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Presença diária — Ferroport</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
@@ -27,7 +27,7 @@
 
 <main class="container">
 
-<section class="card">
+<section class="card" id="cardPresenca">
   <div class="card-head">
     <h2>Presença por dia</h2>
     <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
@@ -45,7 +45,7 @@
       <div class="chips" id="chipsDiario"></div>
 
       <div class="add-nome">
-        <input type="text" id="novoNome" placeholder="Adicionar técnico">
+        <input type="text" id="novoNome" placeholder="Adicionar técnico (ex: João Silva)">
         <button class="btn" type="button" onclick="adicionarNome()">+ Adicionar</button>
       </div>
 
@@ -64,7 +64,7 @@
 <section class="card">
   <div class="card-head">
     <h2>Presenças registradas</h2>
-    <p class="muted">Cada linha possui um botão para apagar somente aquele dia.</p>
+    <p class="muted">Se salvar a mesma data novamente, o sistema atualiza. Use “Editar” para carregar um registro.</p>
   </div>
 
   <table>
@@ -80,13 +80,12 @@
 </section>
 
 <footer class="footer">
-DIGITAL • EMIVE • Tecnologia e Segurança
+  DIGITAL • EMIVE • Tecnologia e Segurança
 </footer>
 
 </main>
 
 <script>
-
 const KEY_DIARIOS = "presencas_diarias";
 const KEY_NOMES = "nomes_tecnicos";
 
@@ -104,26 +103,42 @@ function formatarDataBR(dataISO){
   return `${d}/${m}/${y}`;
 }
 
+// Render dos nomes com botão de excluir
 function renderChipsDiario(){
   const wrap = document.getElementById("chipsDiario");
   wrap.innerHTML = "";
 
   NOMES.forEach(nome => {
+    const box = document.createElement("div");
+    box.className = "chip-box";
+
     const btn = document.createElement("button");
-    btn.className = "chip";
+    btn.type = "button";
+    btn.className = "chip" + (selecaoDiaria.includes(nome) ? " active" : "");
     btn.innerText = nome;
 
     btn.onclick = () => {
       if (selecaoDiaria.includes(nome)) {
         selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
-        btn.classList.remove("active");
       } else {
         selecaoDiaria.push(nome);
-        btn.classList.add("active");
       }
+      renderChipsDiario();
     };
 
-    wrap.appendChild(btn);
+    const remover = document.createElement("span");
+    remover.className = "remove";
+    remover.title = "Excluir nome";
+    remover.innerText = "✖";
+
+    remover.onclick = (e) => {
+      e.stopPropagation();
+      excluirNome(nome);
+    };
+
+    box.appendChild(btn);
+    box.appendChild(remover);
+    wrap.appendChild(box);
   });
 }
 
@@ -131,19 +146,46 @@ function adicionarNome(){
   const input = document.getElementById("novoNome");
   const nome = input.value.trim();
 
-  if(!nome) return alert("Digite um nome.");
+  if(!nome){
+    alert("Digite um nome.");
+    return;
+  }
+
+  const existe = NOMES.some(n => n.toLowerCase() === nome.toLowerCase());
+  if(existe){
+    alert("Esse nome já existe.");
+    return;
+  }
 
   NOMES.push(nome);
+  NOMES.sort((a,b) => a.localeCompare(b, "pt-BR"));
   salvarNomes();
+
   input.value = "";
+  renderChipsDiario();
+}
+
+function excluirNome(nome){
+  if(!confirm(`Deseja excluir "${nome}"?`)) return;
+
+  NOMES = NOMES.filter(n => n !== nome);
+  selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
+  salvarNomes();
   renderChipsDiario();
 }
 
 function salvarDiario(){
   const data = document.getElementById("dataDia").value;
 
-  if(!data) return alert("Selecione a data.");
-  if(selecaoDiaria.length === 0) return alert("Selecione pessoas.");
+  if(!data){
+    alert("Selecione a data.");
+    return;
+  }
+
+  if(selecaoDiaria.length === 0){
+    alert("Selecione pelo menos uma pessoa.");
+    return;
+  }
 
   const item = {
     dataISO: data,
@@ -153,9 +195,13 @@ function salvarDiario(){
 
   let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
 
+  // Atualiza se já existir a data
   const idx = lista.findIndex(x => x.dataISO === data);
   if(idx >= 0) lista[idx] = item;
   else lista.push(item);
+
+  // Ordena por data
+  lista.sort((a,b) => a.dataISO.localeCompare(b.dataISO));
 
   localStorage.setItem(KEY_DIARIOS, JSON.stringify(lista));
 
@@ -175,24 +221,48 @@ function carregarDiario(){
         <td><strong>${r.dataBR}</strong></td>
         <td>${r.pessoas.join("<br>")}</td>
         <td>
-          <button onclick="excluirDia('${r.dataISO}')" class="btn danger">🗑 Apagar dia</button>
+          <div class="row-actions">
+            <button class="btn small secondary" type="button" onclick="editarRegistro('${r.dataISO}')">✏ Editar</button>
+            <button class="btn small danger" type="button" onclick="apagarRegistro('${r.dataISO}')">🗑 Apagar</button>
+          </div>
         </td>
       </tr>
     `;
   });
 }
 
-function excluirDia(dataISO){
+function editarRegistro(dataISO){
+  let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+  const reg = lista.find(x => x.dataISO === dataISO);
 
-  if(!confirm("Deseja apagar somente este dia?")) return;
+  if(!reg){
+    alert("Registro não encontrado.");
+    return;
+  }
+
+  // Carrega no formulário
+  document.getElementById("dataDia").value = reg.dataISO;
+  selecaoDiaria = [...reg.pessoas];
+
+  renderChipsDiario();
+
+  // Leva o usuário pro topo/form
+  document.getElementById("cardPresenca").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function apagarRegistro(dataISO){
+  if(!confirm("Deseja apagar somente este dia registrado?")) return;
 
   let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
-
-  lista = lista.filter(item => item.dataISO !== dataISO);
+  lista = lista.filter(x => x.dataISO !== dataISO);
 
   localStorage.setItem(KEY_DIARIOS, JSON.stringify(lista));
-
   carregarDiario();
+
+  // Se estiver com essa data carregada no formulário, limpa
+  if(document.getElementById("dataDia").value === dataISO){
+    limparDiario();
+  }
 }
 
 function limparDiario(){
@@ -202,7 +272,7 @@ function limparDiario(){
 }
 
 function apagarDiarios(){
-  if(confirm("Apagar TODOS os registros?")){
+  if(confirm("Deseja apagar todos os registros?")){
     localStorage.removeItem(KEY_DIARIOS);
     carregarDiario();
   }
@@ -210,6 +280,11 @@ function apagarDiarios(){
 
 function exportarDiarioCSV(){
   let lista = JSON.parse(localStorage.getItem(KEY_DIARIOS) || "[]");
+
+  if(lista.length === 0){
+    alert("Não há registros para exportar.");
+    return;
+  }
 
   let csv = "Data;Pessoas\n";
   lista.forEach(r => {
@@ -223,9 +298,10 @@ function exportarDiarioCSV(){
   link.click();
 }
 
+// Inicializa
+salvarNomes();
 renderChipsDiario();
 carregarDiario();
-
 </script>
 
 </body>
