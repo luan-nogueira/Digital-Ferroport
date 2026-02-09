@@ -341,13 +341,64 @@ th{ background:#f0f0f0; }
 
 /* Impressão: mostra só o relatório */
 @media print{
-  body{ background:#fff; }
-  .no-print{ display:none !important; }
-  .print-only{ display:block !important; }
 
-  /* garante impressão limpa */
-  .report{ padding:0; }
-  .report-box{ break-inside: avoid; }
+  body{
+    background:#fff;
+    margin:0;
+    padding:0;
+  }
+
+  .no-print{
+    display:none !important;
+  }
+
+  .print-only{
+    display:block !important;
+  }
+
+  /* CENTRALIZA TODO O RELATÓRIO */
+  .report{
+    width:900px;
+    margin:0 auto;
+    padding:20px 10px;
+  }
+
+  /* CABEÇALHO CENTRAL */
+  .report-head{
+    justify-content:center;
+    text-align:center;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .report-logos{
+    justify-content:center;
+  }
+
+  .report-titles{
+    text-align:center;
+  }
+
+  /* TABELAS CENTRALIZADAS */
+  .report-grid{
+    width:100%;
+    margin:0 auto;
+  }
+
+  .report-box{
+    break-inside: avoid;
+  }
+
+  .report-table{
+    width:100%;
+    margin:0 auto;
+  }
+
+  /* RODAPÉ CENTRAL */
+  .report-footer{
+    text-align:center;
+    margin-top:20px;
+  }
 }
 
 /* ===================== RESPONSIVO ===================== */
@@ -372,3 +423,4 @@ th{ background:#f0f0f0; }
   .logo{ height:50px; }
   .logo.emive{ height:75px; }
 }
+
