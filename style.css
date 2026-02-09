@@ -22,7 +22,6 @@ body{
 }
 
 /* ===================== TOPO ===================== */
-
 .topbar{
   background:white;
   border-bottom:1px solid var(--border);
@@ -53,24 +52,13 @@ body{
   object-fit:contain;
   display:block;
 }
-
-.logo.emive{
-  height:110px;
-}
+.logo.emive{ height:110px; }
 
 /* TITULO */
-.brand-title{
-  font-weight:700;
-  font-size:18px;
-}
-
-.brand-subtitle{
-  color:var(--muted);
-  font-size:13px;
-}
+.brand-title{ font-weight:700; font-size:18px; }
+.brand-subtitle{ color:var(--muted); font-size:13px; }
 
 /* ===================== CONTAINER ===================== */
-
 .container{
   max-width:900px;
   margin:22px auto;
@@ -81,7 +69,6 @@ body{
 }
 
 /* ===================== CARDS ===================== */
-
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -89,14 +76,16 @@ body{
   box-shadow:var(--shadow);
   padding:18px;
 }
-
 .card-head{ margin-bottom:10px; }
-
 .muted{ color:var(--muted); }
 .small{ font-size:12px; }
 
-/* ===================== CAMPOS ===================== */
+.h3{
+  margin:8px 0 10px;
+  font-size:14px;
+}
 
+/* ===================== GRIDS ===================== */
 .grid-2{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -104,6 +93,21 @@ body{
   align-items:start;
 }
 
+.grid-3{
+  display:grid;
+  grid-template-columns: 220px 1fr 260px;
+  gap:14px;
+  align-items:start;
+}
+
+.split{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  margin-top:12px;
+}
+
+/* ===================== CAMPOS ===================== */
 .field label{
   display:block;
   margin-bottom:6px;
@@ -119,8 +123,30 @@ input{
   text-align:center;
 }
 
-/* ===================== CHIPS (NOMES) ===================== */
+/* ===================== KPI ===================== */
+.kpi-wrap{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.kpi{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  min-width:150px;
+  background:#fff;
+}
+.kpi-label{
+  font-size:12px;
+  color:var(--muted);
+}
+.kpi-value{
+  font-size:22px;
+  font-weight:800;
+  margin-top:4px;
+}
 
+/* ===================== CHIPS ===================== */
 .chips{
   display:flex;
   flex-wrap:wrap;
@@ -141,12 +167,10 @@ input{
   transition:.15s;
   user-select:none;
 }
-
 .chip:hover{
   transform:translateY(-1px);
   border-color:rgba(203,51,68,.45);
 }
-
 .chip.active{
   background:var(--digital-red);
   color:white;
@@ -166,17 +190,14 @@ input{
 }
 
 /* ===================== ADICIONAR NOME ===================== */
-
 .add-nome{
   display:flex;
   gap:10px;
   margin-top:10px;
 }
-
 .add-nome input{ flex:1; }
 
 /* ===================== BOTÕES ===================== */
-
 .actions{
   display:flex;
   flex-wrap:wrap;
@@ -194,20 +215,16 @@ input{
   font-weight:700;
   transition:.2s;
 }
-
 .btn:hover{ background:#a32633; }
-
 .btn.secondary{ background:var(--digital-dark); }
 .btn.danger{ background:#dc3545; }
 
-/* botões menores (usados na tabela) */
 .btn.small{
   padding:8px 12px;
   font-size:12px;
   border-radius:10px;
 }
 
-/* ações lado a lado */
 .row-actions{
   display:flex;
   gap:8px;
@@ -215,8 +232,7 @@ input{
   flex-wrap:wrap;
 }
 
-/* ===================== TABELA ===================== */
-
+/* ===================== TABELAS ===================== */
 table{
   width:100%;
   border-collapse:collapse;
@@ -229,18 +245,120 @@ th, td{
   text-align:center;
   vertical-align:top;
 }
-
 th{ background:#f0f0f0; }
 
-/* ===================== RODAPÉ ===================== */
+.table-compact th, .table-compact td{
+  padding:8px;
+}
 
+/* ===================== RODAPÉ ===================== */
 .footer{
   text-align:center;
   color:var(--muted);
   margin-top:6px;
 }
 
+/* ===================== PDF / IMPRESSÃO ===================== */
+.print-only{ display:none; }
+.no-print{ display:block; }
+
+.report{
+  padding:22px;
+}
+
+.report-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  border-bottom:2px solid #111;
+  padding-bottom:12px;
+  margin-bottom:14px;
+}
+
+.report-logos{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.report-titles{
+  text-align:right;
+}
+
+.report-title{
+  font-size:18px;
+  font-weight:800;
+}
+.report-subtitle{
+  font-size:12px;
+  color:#333;
+  margin-top:3px;
+}
+
+.report-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+.report-box{
+  border:1px solid #111;
+  border-radius:10px;
+  padding:12px;
+}
+
+.box-title{
+  font-weight:800;
+  margin-bottom:10px;
+  font-size:13px;
+}
+
+.report-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.report-table th, .report-table td{
+  border:1px solid #111;
+  padding:8px;
+  text-align:left;
+  vertical-align:top;
+  font-size:12px;
+}
+.report-table th{
+  background:#f2f2f2;
+  text-align:left;
+}
+
+.report-footer{
+  margin-top:14px;
+  padding-top:10px;
+  border-top:1px solid #111;
+  font-size:11px;
+  color:#333;
+  text-align:center;
+}
+
+/* Impressão: mostra só o relatório */
+@media print{
+  body{ background:#fff; }
+  .no-print{ display:none !important; }
+  .print-only{ display:block !important; }
+
+  /* garante impressão limpa */
+  .report{ padding:0; }
+  .report-box{ break-inside: avoid; }
+}
+
 /* ===================== RESPONSIVO ===================== */
+@media (max-width: 900px){
+  .grid-3{
+    grid-template-columns: 1fr;
+  }
+  .split{
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 800px){
   .grid-2{ grid-template-columns:1fr; }
