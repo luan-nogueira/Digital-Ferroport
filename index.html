@@ -56,8 +56,6 @@
         <label>Contrato</label>
         <select id="contratoSelect">
           <option value="ferroport">Ferroport</option>
-          <option value="porto-sudeste">Porto Sudeste</option>
-          <option value="vale">Vale</option>
         </select>
       </div>
 
@@ -275,11 +273,9 @@
   };
 
   // ✅ DEFINA AQUI OS E-MAILS DE GESTOR/ADMIN (podem apagar tudo e apagar registros)
-  const ADMIN_EMAILS = [
-    // "luan.nogueira@digitaltecnologia.com.br",
-    // "outro@empresa.com"
-  ];
-
+const ADMIN_EMAILS = [
+  "luan.nogueira@digitaltecnologia.com.br"
+];
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -776,4 +772,5 @@
 
 </body>
 </html>
+
 
