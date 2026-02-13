@@ -143,6 +143,11 @@
       </thead>
       <tbody id="tabelaDiario"></tbody>
     </table>
+
+    <!-- ✅ VER MAIS / VER MENOS -->
+    <div class="ver-mais-wrap">
+      <button class="btn secondary small" id="btnVerMais" type="button" onclick="toggleVerMais()">Ver mais registros</button>
+    </div>
   </section>
 
   <footer class="footer no-print">
@@ -208,6 +213,10 @@ const KEY_NOMES = "nomes_tecnicos";
 const NOMES_PADRAO = ["Luan Nogueira", "Lucas Gregorio", "Phillipe Carvalho"];
 let NOMES = JSON.parse(localStorage.getItem(KEY_NOMES)) || [...NOMES_PADRAO];
 let selecaoDiaria = [];
+
+/* ✅ VER MAIS / VER MENOS */
+let mostrarTodosRegistros = false;
+const LIMITE_REGISTROS = 5;
 
 /* ===================== UTIL ===================== */
 function salvarNomes(){
@@ -342,9 +351,12 @@ function carregarDiario(){
   const tbody = document.getElementById("tabelaDiario");
   tbody.innerHTML = "";
 
-  let lista = getLista();
+  // ✅ mais recentes primeiro
+  let lista = getLista().sort((a,b) => b.dataISO.localeCompare(a.dataISO));
 
-  lista.forEach(r => {
+  const listaExibida = mostrarTodosRegistros ? lista : lista.slice(0, LIMITE_REGISTROS);
+
+  listaExibida.forEach(r => {
     tbody.innerHTML += `
       <tr>
         <td><strong>${r.dataBR}</strong></td>
@@ -358,6 +370,26 @@ function carregarDiario(){
       </tr>
     `;
   });
+
+  atualizarBotaoVerMais(lista.length);
+}
+
+function atualizarBotaoVerMais(total){
+  const btn = document.getElementById("btnVerMais");
+  if(!btn) return;
+
+  if(total <= LIMITE_REGISTROS){
+    btn.style.display = "none";
+    return;
+  }
+
+  btn.style.display = "inline-block";
+  btn.innerText = mostrarTodosRegistros ? "Ver menos" : "Ver mais registros";
+}
+
+function toggleVerMais(){
+  mostrarTodosRegistros = !mostrarTodosRegistros;
+  carregarDiario();
 }
 
 function editarRegistro(dataISO){
@@ -430,7 +462,6 @@ function atualizarPainel(){
   const sel = getMesAnoSelecionado();
   const lista = getLista();
 
-  // se não tiver mês selecionado, assume mês atual
   if(!sel){
     const hoje = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
@@ -438,14 +469,12 @@ function atualizarPainel(){
     return atualizarPainel();
   }
 
-  const prefixo = `${sel.y}-${sel.m}`; // YYYY-MM
+  const prefixo = `${sel.y}-${sel.m}`;
   const registrosMes = lista.filter(r => r.dataISO.startsWith(prefixo));
 
-  // KPI
   document.getElementById("kpiDias").innerText = registrosMes.length;
 
-  // Contagem por técnico (dias, sem duplicar no mesmo dia)
-  const contagem = new Map(); // nome -> dias
+  const contagem = new Map();
   registrosMes.forEach(r => {
     const unicos = Array.from(new Set(r.pessoas));
     unicos.forEach(p => contagem.set(p, (contagem.get(p) || 0) + 1));
@@ -453,12 +482,10 @@ function atualizarPainel(){
 
   document.getElementById("kpiTecnicos").innerText = contagem.size;
 
-  // Ranking ordenado por dias desc, nome asc
   const ranking = Array.from(contagem.entries())
     .map(([nome, dias]) => ({ nome, dias }))
     .sort((a,b) => b.dias - a.dias || a.nome.localeCompare(b.nome, "pt-BR"));
 
-  // Tabela ranking (tela)
   const tbodyRank = document.getElementById("tabelaRanking");
   tbodyRank.innerHTML = ranking.length
     ? ranking.map((x, i) => `
@@ -470,7 +497,6 @@ function atualizarPainel(){
       `).join("")
     : `<tr><td colspan="3" class="muted">Sem registros neste mês.</td></tr>`;
 
-  // Tabela do mês (tela)
   const tbodyMes = document.getElementById("tabelaMes");
   tbodyMes.innerHTML = registrosMes.length
     ? registrosMes
@@ -483,7 +509,6 @@ function atualizarPainel(){
         `).join("")
     : `<tr><td colspan="2" class="muted">Sem registros neste mês.</td></tr>`;
 
-  // Preenche também as versões de impressão
   document.getElementById("printRanking").innerHTML = ranking.length
     ? ranking.map((x, i) => `
         <tr>
@@ -505,37 +530,29 @@ function atualizarPainel(){
         `).join("")
     : `<tr><td colspan="2">Sem registros neste mês.</td></tr>`;
 
-  // Cabeçalho do relatório (impressão)
   const mesBR = `${sel.m}/${sel.y}`;
   document.getElementById("reportPeriodo").innerText = `Período: ${mesBR}`;
   document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
 }
 
 function gerarPDF(){
-  // garante que o painel/relatório esteja atualizado antes de imprimir
   atualizarPainel();
-
-  // pequena espera para garantir render (sem depender de libs)
   setTimeout(() => window.print(), 50);
 }
 
 /* ===================== INIT ===================== */
 (function init(){
-  // data padrão hoje no formulário
   document.getElementById("dataDia").value = hojeISO();
 
   salvarNomes();
   renderChipsDiario();
   carregarDiario();
 
-  // mês atual
   const d = new Date();
   const pad = (n)=> String(n).padStart(2,"0");
   document.getElementById("mesAno").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
 
   atualizarPainel();
-
-  // auto atualizar quando mudar mês
   document.getElementById("mesAno").addEventListener("change", atualizarPainel);
 })();
 </script>
