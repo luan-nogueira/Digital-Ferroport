@@ -56,6 +56,8 @@
         <label>Contrato</label>
         <select id="contratoSelect">
           <option value="ferroport">Ferroport</option>
+          <option value="porto-sudeste">Porto Sudeste</option>
+          <option value="vale">Vale</option>
         </select>
       </div>
 
@@ -135,6 +137,13 @@
           </thead>
           <tbody id="tabelaMes"></tbody>
         </table>
+
+        <!-- ✅ VER MAIS / VER MENOS (PAINEL DO GESTOR) -->
+        <div class="ver-mais-wrap">
+          <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
+            Ver mais registros
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -261,7 +270,6 @@
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  // ✅ Sua config (ok expor no front)
   const firebaseConfig = {
     apiKey: "AIzaSyBzgChouE4W25XnD-vFybJrKVN9yl3R0IQ",
     authDomain: "ferroportluannogueira.firebaseapp.com",
@@ -272,15 +280,14 @@
     measurementId: "G-61BRVCSHD7"
   };
 
-  // ✅ DEFINA AQUI OS E-MAILS DE GESTOR/ADMIN (podem apagar tudo e apagar registros)
-const ADMIN_EMAILS = [
-  "luan.nogueira@digitaltecnologia.com.br"
-];
+  const ADMIN_EMAILS = [
+    "luan.nogueira@digitaltecnologia.com.br"
+  ];
+
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Estado
   let LISTA = [];
   let NOMES = [];
   let selecaoDiaria = [];
@@ -290,11 +297,14 @@ const ADMIN_EMAILS = [
   let mostrarTodosRegistros = false;
   const LIMITE_REGISTROS = 5;
 
-  // Contrato atual (multi-contratos)
+  // ✅ Ver mais (registros do mês no painel)
+  let mostrarTodosMes = false;
+  const LIMITE_MES = 6;
+
+  // Contrato atual
   const KEY_CONTRATO = "contrato_atual";
   let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
 
-  // Refs (mudam conforme contrato)
   let refDiarios = null;
   let refNomes = null;
   let unsubDiarios = null;
@@ -354,7 +364,6 @@ const ADMIN_EMAILS = [
     pill.textContent = isAdmin ? "Gestor" : "Técnico";
     pill.classList.toggle("admin", isAdmin);
 
-    // Só gestor pode apagar tudo
     btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
     permMsg.style.display = isAdmin ? "none" : "block";
   }
@@ -427,13 +436,15 @@ const ADMIN_EMAILS = [
     setRefsContrato();
     ligarRealtime();
 
-    // atualiza título do PDF
     document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
 
-    // limpa seleção diária ao trocar contrato
     selecaoDiaria = [];
     renderChipsDiario();
     limparDiario(true);
+
+    // reseta "ver mais" do mês ao trocar contrato
+    mostrarTodosMes = false;
+
     atualizarPainel();
   }
 
@@ -464,8 +475,6 @@ const ADMIN_EMAILS = [
       remover.className = "remove";
       remover.title = "Excluir nome (gestor)";
       remover.innerText = "✖";
-
-      // Só gestor pode excluir nome
       remover.style.display = isAdmin ? "inline-flex" : "none";
 
       remover.onclick = (e) => {
@@ -483,26 +492,17 @@ const ADMIN_EMAILS = [
     const input = document.getElementById("novoNome");
     const nome = input.value.trim();
 
-    if(!nome){
-      alert("Digite um nome.");
-      return;
-    }
+    if(!nome) return alert("Digite um nome.");
 
     const existe = NOMES.some(n => n.toLowerCase() === nome.toLowerCase());
-    if(existe){
-      alert("Esse nome já existe.");
-      return;
-    }
+    if(existe) return alert("Esse nome já existe.");
 
     await setDoc(doc(db, "contratos", contratoAtual, "nomes", idSeguro(nome)), { nome });
     input.value = "";
   };
 
   async function excluirNome(nome){
-    if(!isAdmin){
-      alert("Somente gestor pode excluir nomes.");
-      return;
-    }
+    if(!isAdmin) return alert("Somente gestor pode excluir nomes.");
     if(!confirm(`Deseja excluir "${nome}"?`)) return;
     await deleteDoc(doc(db, "contratos", contratoAtual, "nomes", idSeguro(nome)));
     selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
@@ -511,16 +511,10 @@ const ADMIN_EMAILS = [
   /* ===================== CRUD DIÁRIO ===================== */
   window.salvarDiario = async function(){
     const data = document.getElementById("dataDia").value;
-
     if(!data) return alert("Selecione a data.");
     if(selecaoDiaria.length === 0) return alert("Selecione pelo menos uma pessoa.");
 
-    const item = {
-      dataISO: data,
-      dataBR: formatarDataBR(data),
-      pessoas: [...selecaoDiaria]
-    };
-
+    const item = { dataISO: data, dataBR: formatarDataBR(data), pessoas: [...selecaoDiaria] };
     await setDoc(doc(db, "contratos", contratoAtual, "diarios", data), item);
     limparDiario();
   };
@@ -537,15 +531,10 @@ const ADMIN_EMAILS = [
   };
 
   window.apagarRegistro = async function(dataISO){
-    if(!isAdmin){
-      alert("Somente gestor pode apagar registros.");
-      return;
-    }
+    if(!isAdmin) return alert("Somente gestor pode apagar registros.");
     if(!confirm("Deseja apagar somente este dia registrado?")) return;
     await deleteDoc(doc(db, "contratos", contratoAtual, "diarios", dataISO));
-    if(document.getElementById("dataDia").value === dataISO){
-      limparDiario();
-    }
+    if(document.getElementById("dataDia").value === dataISO) limparDiario();
   };
 
   window.limparDiario = function(silencioso=false){
@@ -556,26 +545,17 @@ const ADMIN_EMAILS = [
   };
 
   window.apagarDiarios = async function(){
-    if(!isAdmin){
-      alert("Somente gestor pode apagar tudo.");
-      return;
-    }
+    if(!isAdmin) return alert("Somente gestor pode apagar tudo.");
     if(!confirm("Deseja apagar TODOS os registros deste contrato?")) return;
 
     const snap = await getDocs(refDiarios);
-    for(const d of snap.docs){
-      await deleteDoc(d.ref);
-    }
+    for(const d of snap.docs) await deleteDoc(d.ref);
   };
 
   window.exportarDiarioCSV = function(){
-    if(LISTA.length === 0){
-      alert("Não há registros para exportar.");
-      return;
-    }
+    if(LISTA.length === 0) return alert("Não há registros para exportar.");
 
     const ordenado = [...LISTA].sort((a,b) => a.dataISO.localeCompare(b.dataISO));
-
     let csv = "Contrato;Data;Pessoas\n";
     ordenado.forEach(r => {
       csv += `${nomeContratoBonito(contratoAtual)};${r.dataBR};"${(r.pessoas || []).join(", ")}"\n`;
@@ -588,7 +568,7 @@ const ADMIN_EMAILS = [
     link.click();
   };
 
-  /* ===================== VER MAIS (LISTA) ===================== */
+  /* ===================== VER MAIS (LISTA GERAL) ===================== */
   function atualizarBotaoVerMais(total){
     const btn = document.getElementById("btnVerMais");
     if(!btn) return;
@@ -605,6 +585,25 @@ const ADMIN_EMAILS = [
   window.toggleVerMais = function(){
     mostrarTodosRegistros = !mostrarTodosRegistros;
     carregarDiario();
+  };
+
+  /* ===================== VER MAIS (PAINEL DO MÊS) ===================== */
+  function atualizarBotaoVerMaisMes(total){
+    const btn = document.getElementById("btnVerMaisMes");
+    if(!btn) return;
+
+    if(total <= LIMITE_MES){
+      btn.style.display = "none";
+      return;
+    }
+
+    btn.style.display = "inline-block";
+    btn.innerText = mostrarTodosMes ? "Ver menos" : "Ver mais registros";
+  }
+
+  window.toggleVerMaisMes = function(){
+    mostrarTodosMes = !mostrarTodosMes;
+    atualizarPainel();
   };
 
   /* ===================== TABELA DIÁRIA ===================== */
@@ -650,11 +649,10 @@ const ADMIN_EMAILS = [
 
     document.getElementById("kpiDias").innerText = registrosMes.length;
 
-    // total de presenças (somatório de pessoas)
     const totalPresencas = registrosMes.reduce((acc, r) => acc + (r.pessoas ? r.pessoas.length : 0), 0);
     document.getElementById("kpiPresencas").innerText = totalPresencas;
 
-    const contagem = new Map(); // nome -> dias
+    const contagem = new Map();
     registrosMes.forEach(r => {
       const unicos = Array.from(new Set(r.pessoas || []));
       unicos.forEach(p => contagem.set(p, (contagem.get(p) || 0) + 1));
@@ -684,17 +682,21 @@ const ADMIN_EMAILS = [
         `).join("")
       : `<tr><td colspan="4" class="muted">Sem registros neste mês.</td></tr>`;
 
+    // ✅ Tabela do mês com "ver mais"
     const tbodyMes = document.getElementById("tabelaMes");
-    tbodyMes.innerHTML = registrosMes.length
-      ? [...registrosMes]
-          .sort((a,b)=> a.dataISO.localeCompare(b.dataISO))
-          .map(r => `
-            <tr>
-              <td><strong>${r.dataBR}</strong></td>
-              <td>${(r.pessoas || []).join("<br>")}</td>
-            </tr>
-          `).join("")
+    const ordenados = [...registrosMes].sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
+    const exibidaMes = mostrarTodosMes ? ordenados : ordenados.slice(0, LIMITE_MES);
+
+    tbodyMes.innerHTML = exibidaMes.length
+      ? exibidaMes.map(r => `
+          <tr>
+            <td><strong>${r.dataBR}</strong></td>
+            <td>${(r.pessoas || []).join("<br>")}</td>
+          </tr>
+        `).join("")
       : `<tr><td colspan="2" class="muted">Sem registros neste mês.</td></tr>`;
+
+    atualizarBotaoVerMaisMes(registrosMes.length);
 
     // impressão (sempre completo)
     document.getElementById("printRanking").innerHTML = ranking.length
@@ -730,19 +732,19 @@ const ADMIN_EMAILS = [
   };
 
   function initUI(){
-    // contrato
     const selContrato = document.getElementById("contratoSelect");
     selContrato.value = contratoAtual;
     selContrato.addEventListener("change", () => setContrato(selContrato.value));
 
-    // data padrão hoje
     document.getElementById("dataDia").value = hojeISO();
 
-    // mês atual
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
     document.getElementById("mesAno").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
     document.getElementById("mesAno").addEventListener("change", atualizarPainel);
+
+    // garante o contrato no PDF
+    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
   }
 
   onAuthStateChanged(auth, (user) => {
@@ -752,16 +754,13 @@ const ADMIN_EMAILS = [
       return;
     }
 
-    // define role
     const email = (user.email || "").toLowerCase();
     isAdmin = ADMIN_EMAILS.map(x => String(x).toLowerCase()).includes(email);
 
-    // UI
     document.getElementById("userBadge").textContent = `Logado como: ${user.email || "—"}`;
     aplicarPermissoesUI();
     mostrarApp(true);
 
-    // refs + realtime
     setRefsContrato();
     ligarRealtime();
 
@@ -772,5 +771,3 @@ const ADMIN_EMAILS = [
 
 </body>
 </html>
-
-
