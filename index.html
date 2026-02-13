@@ -74,6 +74,11 @@
             </tr>
           </thead>
           <tbody id="tabelaRanking"></tbody>
+          <div class="ver-mais-wrap">
+  <button class="btn secondary small" id="btnVerMaisRanking" type="button" onclick="toggleVerMaisRanking()">
+    Ver mais ranking
+  </button>
+</div>
         </table>
 
         <!-- ✅ VER MAIS RANKING -->
@@ -92,6 +97,11 @@
             </tr>
           </thead>
           <tbody id="tabelaMes"></tbody>
+          <div class="ver-mais-wrap">
+  <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
+    Ver mais registros do mês
+  </button>
+</div>
         </table>
 
         <!-- ✅ VER MAIS REGISTROS DO MÊS -->
@@ -223,6 +233,16 @@ const KEY_NOMES = "nomes_tecnicos";
 const NOMES_PADRAO = ["Luan Nogueira", "Lucas Gregorio", "Phillipe Carvalho"];
 let NOMES = JSON.parse(localStorage.getItem(KEY_NOMES)) || [...NOMES_PADRAO];
 let selecaoDiaria = [];
+  // ✅ VER MAIS (LISTA GERAL)
+let mostrarTodosRegistros = false;
+const LIMITE_REGISTROS = 5;
+
+// ✅ VER MAIS (PAINEL DO GESTOR)
+let mostrarRankingCompleto = false;
+let mostrarMesCompleto = false;
+const LIMITE_RANKING = 8;
+const LIMITE_MES = 10;
+
 
 /* ✅ VER MAIS / VER MENOS (LISTA GERAL) */
 let mostrarTodosRegistros = false;
@@ -589,3 +609,4 @@ function gerarPDF(){
 
 </body>
 </html>
+
