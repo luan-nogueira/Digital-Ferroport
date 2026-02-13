@@ -50,16 +50,46 @@ body{
   margin-left:auto;
   display:flex;
   gap:10px;
-  align-items:center;
+  align-items:flex-end;
+  flex-wrap:wrap;
 }
 
+.field.inline label{
+  font-size:12px;
+  margin-bottom:4px;
+}
+
+select{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  text-align:center;
+  background:#fff;
+}
+
+.role-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:38px;
+  padding:0 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-weight:800;
+  font-size:12px;
+}
+.role-pill.admin{
+  border-color: rgba(203,51,68,.4);
+}
+
+/* LOGOS */
 .logos{
   display:flex;
   align-items:center;
   gap:16px;
 }
-
-/* LOGO */
 .logo{
   height:60px;
   width:auto;
@@ -160,6 +190,20 @@ input{
   margin-top:4px;
 }
 
+/* ===================== BARRA (dashboard) ===================== */
+.bar{
+  height:10px;
+  border-radius:999px;
+  background:#f1f1f1;
+  overflow:hidden;
+  border:1px solid #e7e7e7;
+}
+.bar-fill{
+  height:100%;
+  background: var(--digital-red);
+  width:0%;
+}
+
 /* ===================== CHIPS ===================== */
 .chips{
   display:flex;
@@ -201,6 +245,7 @@ input{
   font-size:10px;
   padding:2px 5px;
   cursor:pointer;
+  display:inline-flex;
 }
 
 /* ===================== ADICIONAR NOME ===================== */
@@ -237,6 +282,11 @@ input{
   padding:8px 12px;
   font-size:12px;
   border-radius:10px;
+}
+
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
 }
 
 .row-actions{
@@ -355,7 +405,7 @@ th{ background:#f0f0f0; }
   text-align:center;
 }
 
-/* Impressão: mostra só o relatório */
+/* Impressão */
 @media print{
   body{
     background:#fff;
@@ -388,12 +438,7 @@ th{ background:#f0f0f0; }
   }
 
   .report-box{
-    break-inside: avoid;
-  }
-
-  .report-table{
-    width:100%;
-    margin:0 auto;
+    break-inside: auto;
   }
 
   .report-footer{
@@ -421,6 +466,7 @@ th{ background:#f0f0f0; }
     margin-left:0;
     width:100%;
     justify-content:flex-start;
+    align-items:flex-start;
   }
 
   .logo{ height:50px; }
