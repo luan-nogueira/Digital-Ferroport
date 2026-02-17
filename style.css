@@ -522,4 +522,9 @@ html{ -webkit-text-size-adjust:100%; }
 .login-card button{
   font-size:16px;
 }
+@media (max-width: 900px){
+  .dash-box{ min-height: auto; }
+  .dash-canvas{ min-height: 380px; } /* evita cortar */
+}
+
 
