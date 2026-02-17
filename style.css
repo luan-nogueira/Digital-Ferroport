@@ -12,6 +12,20 @@
   --radius:16px;
 }
 
+/* ===================== DARK MODE ===================== */
+:root[data-theme="dark"]{
+  --bg:#0f1115;
+  --card:#151923;
+  --text:#E8EDF5;
+  --muted:#A7B0C0;
+  --border:#242B3A;
+
+  --digital-red:#CB3344;
+  --digital-dark:#E8EDF5;
+
+  --shadow:0 16px 40px rgba(0,0,0,.35);
+}
+
 *{ box-sizing:border-box; }
 
 body{
@@ -21,7 +35,7 @@ body{
   color:var(--text);
 }
 
-/* ===================== LOGIN (CENTRAL + PREMIUM) ===================== */
+/* ===================== LOGIN ===================== */
 .login-page{
   min-height:100vh;
   display:flex;
@@ -37,7 +51,7 @@ body{
 .login-card{
   width:100%;
   max-width:560px;
-  background:#fff;
+  background:var(--card);
   border:1px solid var(--border);
   border-radius:22px;
   padding:34px 34px 26px;
@@ -57,10 +71,7 @@ body{
   z-index:0;
 }
 
-.login-card > *{
-  position:relative;
-  z-index:1;
-}
+.login-card > *{ position:relative; z-index:1; }
 
 .login-logos{
   display:flex;
@@ -75,13 +86,9 @@ body{
   font-size:22px;
 }
 
-.login-card .muted{
-  margin:0 0 18px;
-}
+.login-card .muted{ margin:0 0 18px; }
 
-.actions.center{
-  justify-content:center;
-}
+.actions.center{ justify-content:center; }
 
 .login-status{
   margin-top:14px;
@@ -101,16 +108,14 @@ body{
   animation:spin .8s linear infinite;
 }
 
-@keyframes spin{
-  to{ transform:rotate(360deg); }
-}
+@keyframes spin{ to{ transform:rotate(360deg); } }
 
 .center{ text-align:center; }
 .tiny{ font-size:11px; }
 
 /* ===================== TOPO ===================== */
 .topbar{
-  background:white;
+  background:var(--card);
   border-bottom:1px solid var(--border);
   padding:16px 0;
   display:flex;
@@ -145,7 +150,8 @@ select{
   border:1px solid var(--border);
   border-radius:10px;
   text-align:center;
-  background:#fff;
+  background:var(--card);
+  color:var(--text);
 }
 
 /* LOGOS */
@@ -174,7 +180,7 @@ select{
   padding:0 12px;
   border-radius:999px;
   border:1px solid var(--border);
-  background:#fff;
+  background:var(--card);
   font-weight:800;
   font-size:12px;
 }
@@ -229,6 +235,33 @@ select{
   margin-top:12px;
 }
 
+/* ===================== DASHBOARD VISUAL ===================== */
+.dash{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  margin-top:14px;
+}
+
+.dash-box{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  background:var(--card);
+}
+
+.dash-title{
+  font-weight:800;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+canvas{
+  width:100%;
+  max-width:100%;
+  display:block;
+}
+
 /* ===================== CAMPOS ===================== */
 .field label{
   display:block;
@@ -243,6 +276,8 @@ input{
   border:1px solid var(--border);
   border-radius:10px;
   text-align:center;
+  background:var(--card);
+  color:var(--text);
 }
 
 /* ===================== KPI ===================== */
@@ -256,7 +291,7 @@ input{
   border-radius:12px;
   padding:10px 12px;
   min-width:150px;
-  background:#fff;
+  background:var(--card);
 }
 .kpi-label{
   font-size:12px;
@@ -272,9 +307,9 @@ input{
 .bar{
   height:10px;
   border-radius:999px;
-  background:#f1f1f1;
+  background:rgba(255,255,255,.08);
   overflow:hidden;
-  border:1px solid #e7e7e7;
+  border:1px solid var(--border);
 }
 .bar-fill{
   height:100%;
@@ -295,11 +330,12 @@ input{
 }
 
 .chip{
-  border:1px solid #ccc;
+  border:1px solid var(--border);
   border-radius:30px;
   padding:8px 14px;
   cursor:pointer;
-  background:white;
+  background:var(--card);
+  color:var(--text);
   transition:.15s;
   user-select:none;
 }
@@ -352,8 +388,10 @@ input{
   font-weight:700;
   transition:.2s;
 }
-.btn:hover{ background:#a32633; }
-.btn.secondary{ background:var(--digital-dark); }
+.btn:hover{ filter:brightness(.92); }
+.btn.secondary{ background:var(--digital-dark); color:#fff; }
+:root[data-theme="dark"] .btn.secondary{ background:#2b3142; color:var(--text); }
+
 .btn.danger{ background:#dc3545; }
 
 .btn.small{
@@ -387,11 +425,14 @@ th, td{
   text-align:center;
   vertical-align:top;
 }
-th{ background:#f0f0f0; }
-
-.table-compact th, .table-compact td{
-  padding:8px;
+th{
+  background:rgba(0,0,0,.04);
 }
+:root[data-theme="dark"] th{
+  background:rgba(255,255,255,.06);
+}
+
+.table-compact th, .table-compact td{ padding:8px; }
 
 /* ✅ Ver mais */
 .ver-mais-wrap{
@@ -412,81 +453,10 @@ th{ background:#f0f0f0; }
 
 .report{ padding:22px; }
 
-.report-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  border-bottom:2px solid #111;
-  padding-bottom:12px;
-  margin-bottom:14px;
-}
-
-.report-logos{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.report-titles{ text-align:right; }
-
-.report-title{
-  font-size:18px;
-  font-weight:800;
-}
-.report-subtitle{
-  font-size:12px;
-  color:#333;
-  margin-top:3px;
-}
-
-.report-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:14px;
-}
-
-.report-box{
-  border:1px solid #111;
-  border-radius:10px;
-  padding:12px;
-}
-
-.box-title{
-  font-weight:800;
-  margin-bottom:10px;
-  font-size:13px;
-}
-
-.report-table{
-  width:100%;
-  border-collapse:collapse;
-}
-.report-table th, .report-table td{
-  border:1px solid #111;
-  padding:8px;
-  text-align:left;
-  vertical-align:top;
-  font-size:12px;
-}
-.report-table th{
-  background:#f2f2f2;
-  text-align:left;
-}
-
-.report-footer{
-  margin-top:14px;
-  padding-top:10px;
-  border-top:1px solid #111;
-  font-size:11px;
-  color:#333;
-  text-align:center;
-}
-
-/* Impressão */
 @media print{
   body{
-    background:#fff;
+    background:#fff !important;
+    color:#000 !important;
     margin:0;
     padding:0;
   }
@@ -494,30 +464,12 @@ th{ background:#f0f0f0; }
   .no-print{ display:none !important; }
   .print-only{ display:block !important; }
 
+  :root{ --bg:#fff; --card:#fff; --text:#000; --muted:#333; --border:#111; }
+
   .report{
     width:900px;
     margin:0 auto;
     padding:20px 10px;
-  }
-
-  .report-head{
-    justify-content:center;
-    text-align:center;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .report-logos{ justify-content:center; }
-  .report-titles{ text-align:center; }
-
-  .report-grid{
-    width:100%;
-    margin:0 auto;
-  }
-
-  .report-footer{
-    text-align:center;
-    margin-top:20px;
   }
 }
 
@@ -525,6 +477,7 @@ th{ background:#f0f0f0; }
 @media (max-width: 900px){
   .grid-3{ grid-template-columns: 1fr; }
   .split{ grid-template-columns: 1fr; }
+  .dash{ grid-template-columns: 1fr; }
 }
 
 @media (max-width: 800px){
