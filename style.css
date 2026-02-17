@@ -1,29 +1,49 @@
 :root{
   --bg:#f5f6f8;
-  --card:#fff;
+  --card:#ffffff;
+  --card-2:#fbfbfc;
+
   --text:#1E2328;
+  --text-invert:#ffffff;
   --muted:#6B7280;
+
   --border:#E6E8EE;
-
-  --digital-red:#CB3344;
-  --digital-dark:#36393B;
-
   --shadow:0 12px 30px rgba(0,0,0,.08);
   --radius:16px;
+
+  --digital-red:#CB3344;
+
+  /* Botões e superfícies */
+  --btn-secondary:#36393B;
+  --btn-secondary-text:#ffffff;
+
+  /* Tabela / barras / chips */
+  --th-bg:#f0f2f5;
+  --bar-bg:#E6E8EE;
+  --chip-bg:#ffffff;
 }
 
-/* ===================== DARK MODE ===================== */
+/* ===================== DARK MODE (tudo muda junto) ===================== */
 :root[data-theme="dark"]{
   --bg:#0f1115;
   --card:#151923;
+  --card-2:#111520;
+
   --text:#E8EDF5;
+  --text-invert:#0f1115;
   --muted:#A7B0C0;
+
   --border:#242B3A;
+  --shadow:0 16px 40px rgba(0,0,0,.35);
 
   --digital-red:#CB3344;
-  --digital-dark:#E8EDF5;
 
-  --shadow:0 16px 40px rgba(0,0,0,.35);
+  --btn-secondary:#2b3142;
+  --btn-secondary-text:#E8EDF5;
+
+  --th-bg:rgba(255,255,255,.06);
+  --bar-bg:rgba(255,255,255,.10);
+  --chip-bg:#151923;
 }
 
 *{ box-sizing:border-box; }
@@ -70,7 +90,6 @@ body{
   opacity:.35;
   z-index:0;
 }
-
 .login-card > *{ position:relative; z-index:1; }
 
 .login-logos{
@@ -81,14 +100,8 @@ body{
   margin-bottom:18px;
 }
 
-.login-card h2{
-  margin:0 0 8px;
-  font-size:22px;
-}
-
+.login-card h2{ margin:0 0 8px; font-size:22px; }
 .login-card .muted{ margin:0 0 18px; }
-
-.actions.center{ justify-content:center; }
 
 .login-status{
   margin-top:14px;
@@ -107,7 +120,6 @@ body{
   border-radius:50%;
   animation:spin .8s linear infinite;
 }
-
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
 .center{ text-align:center; }
@@ -144,16 +156,6 @@ body{
   margin-bottom:4px;
 }
 
-select{
-  width:100%;
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  text-align:center;
-  background:var(--card);
-  color:var(--text);
-}
-
 /* LOGOS */
 .logos{
   display:flex;
@@ -168,7 +170,6 @@ select{
 }
 .logo.emive{ height:110px; }
 
-/* TITULO */
 .brand-title{ font-weight:700; font-size:18px; }
 .brand-subtitle{ color:var(--muted); font-size:13px; }
 
@@ -208,10 +209,7 @@ select{
 .muted{ color:var(--muted); }
 .small{ font-size:12px; }
 
-.h3{
-  margin:8px 0 10px;
-  font-size:14px;
-}
+.h3{ margin:8px 0 10px; font-size:14px; }
 
 /* ===================== GRIDS ===================== */
 .grid-2{
@@ -235,7 +233,7 @@ select{
   margin-top:12px;
 }
 
-/* ===================== DASHBOARD (GRAFICOS MAIORES) ===================== */
+/* ===================== DASHBOARD ===================== */
 .dash{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -247,7 +245,7 @@ select{
   border:1px solid var(--border);
   border-radius:16px;
   padding:14px;
-  background:var(--card);
+  background:var(--card-2);
   min-height:360px;
   display:flex;
   flex-direction:column;
@@ -265,7 +263,7 @@ select{
 .dash-canvas{
   width:100%;
   flex:1;
-  min-height:240px;
+  min-height:260px;
   border:1px solid var(--border);
   border-radius:12px;
   background:rgba(255,255,255,.02);
@@ -282,7 +280,7 @@ select{
   border:1px solid var(--border);
   border-radius:12px;
   padding:12px;
-  background:rgba(255,255,255,.02);
+  background:var(--card);
 }
 .insight-label{
   font-size:12px;
@@ -302,7 +300,7 @@ select{
   color:var(--muted);
 }
 
-input{
+input, select{
   width:100%;
   padding:10px;
   border:1px solid var(--border);
@@ -310,6 +308,12 @@ input{
   text-align:center;
   background:var(--card);
   color:var(--text);
+  outline:none;
+}
+
+input:focus, select:focus{
+  border-color: rgba(203,51,68,.55);
+  box-shadow: 0 0 0 3px rgba(203,51,68,.12);
 }
 
 /* ===================== KPI ===================== */
@@ -325,21 +329,14 @@ input{
   min-width:150px;
   background:var(--card);
 }
-.kpi-label{
-  font-size:12px;
-  color:var(--muted);
-}
-.kpi-value{
-  font-size:22px;
-  font-weight:800;
-  margin-top:4px;
-}
+.kpi-label{ font-size:12px; color:var(--muted); }
+.kpi-value{ font-size:22px; font-weight:800; margin-top:4px; }
 
-/* ===================== BARRA ===================== */
+/* ===================== BARRA (tabela ranking) ===================== */
 .bar{
   height:10px;
   border-radius:999px;
-  background:rgba(255,255,255,.08);
+  background:var(--bar-bg);
   overflow:hidden;
   border:1px solid var(--border);
 }
@@ -356,17 +353,14 @@ input{
   gap:10px;
 }
 
-.chip-box{
-  position:relative;
-  display:inline-block;
-}
+.chip-box{ position:relative; display:inline-block; }
 
 .chip{
   border:1px solid var(--border);
   border-radius:30px;
   padding:8px 14px;
   cursor:pointer;
-  background:var(--card);
+  background:var(--chip-bg);
   color:var(--text);
   transition:.15s;
   user-select:none;
@@ -377,7 +371,7 @@ input{
 }
 .chip.active{
   background:var(--digital-red);
-  color:white;
+  color:#fff;
   border-color:var(--digital-red);
 }
 
@@ -409,10 +403,11 @@ input{
   gap:10px;
   margin-top:14px;
 }
+.actions.center{ justify-content:center; }
 
 .btn{
   background:var(--digital-red);
-  color:white;
+  color:#fff;
   border:none;
   padding:10px 16px;
   border-radius:10px;
@@ -420,9 +415,12 @@ input{
   font-weight:700;
   transition:.2s;
 }
-.btn:hover{ filter:brightness(.92); }
-.btn.secondary{ background:var(--digital-dark); color:#fff; }
-:root[data-theme="dark"] .btn.secondary{ background:#2b3142; color:var(--text); }
+.btn:hover{ filter:brightness(.93); }
+
+.btn.secondary{
+  background:var(--btn-secondary);
+  color:var(--btn-secondary-text);
+}
 
 .btn.danger{ background:#dc3545; }
 
@@ -435,13 +433,6 @@ input{
 .btn:disabled{
   opacity:.55;
   cursor:not-allowed;
-}
-
-.row-actions{
-  display:flex;
-  gap:8px;
-  justify-content:center;
-  flex-wrap:wrap;
 }
 
 /* ===================== TABELAS ===================== */
@@ -457,11 +448,10 @@ th, td{
   text-align:center;
   vertical-align:top;
 }
+
 th{
-  background:rgba(0,0,0,.04);
-}
-:root[data-theme="dark"] th{
-  background:rgba(255,255,255,.06);
+  background:var(--th-bg);
+  color:var(--text);
 }
 
 .table-compact th, .table-compact td{ padding:8px; }
@@ -495,14 +485,6 @@ th{
 
   .no-print{ display:none !important; }
   .print-only{ display:block !important; }
-
-  :root{ --bg:#fff; --card:#fff; --text:#000; --muted:#333; --border:#111; }
-
-  .report{
-    width:900px;
-    margin:0 auto;
-    padding:20px 10px;
-  }
 }
 
 /* ===================== RESPONSIVO ===================== */
