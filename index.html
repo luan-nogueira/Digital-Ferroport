@@ -9,7 +9,7 @@
 
 <body>
 
-<!-- ===================== LOGIN (CENTRAL + PREMIUM) ===================== -->
+<!-- ===================== LOGIN ===================== -->
 <section class="login-page" id="loginBox" style="display:none;">
   <div class="login-card">
     <div class="login-logos">
@@ -62,13 +62,17 @@
       <div class="brand-subtitle" id="userBadge">Logado como: —</div>
     </div>
 
+    <!-- ✅ BOTÃO TEMA + CONTRATO + ROLE + SAIR -->
     <div class="top-actions">
+
+      <button class="btn secondary small" type="button" id="btnTema" onclick="toggleTema()">🌙 Tema</button>
+
       <div class="field inline">
         <label>Contrato</label>
         <select id="contratoSelect">
           <option value="ferroport">Ferroport</option>
-          <option value="NOV">NOV</option>
-          <option value="TechNip">TechNip</option>
+          <option value="porto-sudeste">Porto Sudeste</option>
+          <option value="vale">Vale</option>
         </select>
       </div>
 
@@ -80,7 +84,7 @@
 
 <main class="container">
 
-  <!-- ====== RELATÓRIO / PAINEL DO GESTOR ====== -->
+  <!-- ====== PAINEL DO GESTOR ====== -->
   <section class="card">
     <div class="card-head">
       <h2>Painel do gestor</h2>
@@ -156,6 +160,21 @@
         </div>
       </div>
     </div>
+
+    <!-- ✅ DASHBOARD VISUAL -->
+    <div class="dash">
+      <div class="dash-box">
+        <div class="dash-title">📊 Dias por técnico (Top 10)</div>
+        <canvas id="chartRanking" height="220"></canvas>
+        <p class="muted small">Mostra quem trabalhou mais dias no mês selecionado.</p>
+      </div>
+
+      <div class="dash-box">
+        <div class="dash-title">📈 Presenças por dia (no mês)</div>
+        <canvas id="chartDias" height="220"></canvas>
+        <p class="muted small">Total de presenças registradas por dia.</p>
+      </div>
+    </div>
   </section>
 
   <!-- ====== FORMULÁRIO DIÁRIO ====== -->
@@ -226,7 +245,7 @@
 
 </div>
 
-<!-- ====== PDF (impressão) ====== -->
+<!-- ====== PDF ====== -->
 <section class="print-only report">
   <div class="report-head">
     <div class="report-logos">
@@ -315,6 +334,166 @@
   let unsubDiarios = null;
   let unsubNomes = null;
 
+  // ===================== TEMA (CLARO / ESCURO) =====================
+  const KEY_TEMA = "tema_site"; // "light" | "dark"
+  function aplicarTema(theme){
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(KEY_TEMA, theme);
+
+    const btn = document.getElementById("btnTema");
+    if(btn){
+      btn.textContent = theme === "dark" ? "☀️ Tema" : "🌙 Tema";
+    }
+  }
+  window.toggleTema = function(){
+    const atual = document.documentElement.getAttribute("data-theme") || "light";
+    aplicarTema(atual === "dark" ? "light" : "dark");
+  };
+  (function(){
+    const salvo = localStorage.getItem(KEY_TEMA) || "light";
+    aplicarTema(salvo);
+  })();
+
+  /* ===================== CHARTS (SEM LIB) ===================== */
+  function fitCanvasToCSS(canvas){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(300, Math.floor(rect.width * dpr));
+    canvas.height = Math.floor((canvas.getAttribute("height") || 220) * dpr);
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return ctx;
+  }
+  function roundRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, h/2, w/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+  function drawBarChart(canvasId, items){
+    const canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+
+    const ctx = fitCanvasToCSS(canvas);
+    const w = canvas.getBoundingClientRect().width;
+    const h = (canvas.getBoundingClientRect().height || 220);
+
+    const padL = 10, padR = 10, padT = 10, padB = 10;
+    const innerW = w - padL - padR;
+    const innerH = h - padT - padB;
+
+    ctx.clearRect(0,0,w,h);
+
+    if(!items || items.length === 0){
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Sem dados para este mês.", w/2, h/2);
+      return;
+    }
+
+    const maxV = Math.max(...items.map(x=>x.value), 1);
+    const rowH = Math.max(18, Math.floor(innerH / items.length));
+    const barH = Math.max(10, rowH - 10);
+
+    ctx.font = "12px Arial";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    items.forEach((it, i) => {
+      const y = padT + i*rowH + rowH/2;
+
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#1E2328";
+      const label = it.label.length > 18 ? it.label.slice(0,18) + "…" : it.label;
+      ctx.fillText(label, padL, y);
+
+      const labelW = 140;
+      const barX = padL + labelW;
+      const barMaxW = Math.max(50, innerW - labelW);
+      const barW = (it.value / maxV) * barMaxW;
+
+      ctx.fillStyle = "rgba(0,0,0,.08)";
+      roundRect(ctx, barX, y - barH/2, barMaxW, barH, 999);
+      ctx.fill();
+
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--digital-red").trim() || "#CB3344";
+      roundRect(ctx, barX, y - barH/2, Math.max(6, barW), barH, 999);
+      ctx.fill();
+
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#6B7280";
+      ctx.textAlign = "right";
+      ctx.fillText(String(it.value), barX + barMaxW, y);
+      ctx.textAlign = "left";
+    });
+  }
+  function drawLineChart(canvasId, points){
+    const canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+
+    const ctx = fitCanvasToCSS(canvas);
+    const w = canvas.getBoundingClientRect().width;
+    const h = (canvas.getBoundingClientRect().height || 220);
+
+    ctx.clearRect(0,0,w,h);
+
+    if(!points || points.length === 0){
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Sem dados para este mês.", w/2, h/2);
+      return;
+    }
+
+    const pad = 18;
+    const innerW = w - pad*2;
+    const innerH = h - pad*2;
+
+    const maxV = Math.max(...points.map(p=>p.value), 1);
+
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--border").trim() || "#E6E8EE";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad, pad + innerH);
+    ctx.lineTo(pad + innerW, pad + innerH);
+    ctx.stroke();
+
+    const color = getComputedStyle(document.documentElement).getPropertyValue("--digital-dark").trim() || "#36393B";
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    points.forEach((p, i) => {
+      const x = pad + (i/(points.length-1 || 1)) * innerW;
+      const y = pad + innerH - ((p.value)/(maxV || 1))*innerH;
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--digital-red").trim() || "#CB3344";
+    points.forEach((p, i) => {
+      const x = pad + (i/(points.length-1 || 1)) * innerW;
+      const y = pad + innerH - ((p.value)/(maxV || 1))*innerH;
+      ctx.beginPath();
+      ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.fill();
+    });
+
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#6B7280";
+    ctx.font = "11px Arial";
+    ctx.textAlign = "center";
+    const step = Math.ceil(points.length / 4);
+    for(let i=0; i<points.length; i+=step){
+      const x = pad + (i/(points.length-1 || 1)) * innerW;
+      ctx.fillText(points[i].label, x, h - 6);
+    }
+  }
+
+  /* ===================== FIREBASE / DADOS ===================== */
   function setRefsContrato(){
     refDiarios = collection(db, "contratos", contratoAtual, "diarios");
     refNomes   = collection(db, "contratos", contratoAtual, "nomes");
@@ -652,9 +831,7 @@
     atualizarBotaoVerMaisMes(registrosMes.length);
 
     document.getElementById("printRanking").innerHTML = ranking.length
-      ? ranking.map((x,i)=>`
-          <tr><td>${i+1}</td><td>${x.nome}</td><td><strong>${x.dias}</strong></td></tr>
-        `).join("")
+      ? ranking.map((x,i)=>`<tr><td>${i+1}</td><td>${x.nome}</td><td><strong>${x.dias}</strong></td></tr>`).join("")
       : `<tr><td colspan="3">Sem registros neste mês.</td></tr>`;
 
     document.getElementById("printMes").innerHTML = registrosMes.length
@@ -667,6 +844,15 @@
     document.getElementById("reportPeriodo").innerText = `Período: ${mesBR}`;
     document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
     document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
+
+    // ✅ DASHBOARD VISUAL
+    const top10 = ranking.slice(0, 10).map(x => ({ label: x.nome, value: x.dias }));
+    drawBarChart("chartRanking", top10);
+
+    const porDia = registrosMes
+      .sort((a,b)=> a.dataISO.localeCompare(b.dataISO))
+      .map(r => ({ label: (r.dataBR || "").slice(0,5), value: (r.pessoas || []).length }));
+    drawLineChart("chartDias", porDia);
   };
 
   window.gerarPDF = function(){
@@ -710,9 +896,14 @@
     ligarRealtime();
     initUI();
     atualizarPainel();
+
+    window.addEventListener("resize", () => atualizarPainel());
   });
+
+  // primeira carga
+  setRefsContrato();
+  document.getElementById("contratoSelect").value = contratoAtual;
 </script>
 
 </body>
 </html>
-
