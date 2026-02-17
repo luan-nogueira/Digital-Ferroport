@@ -29,15 +29,17 @@
       <div class="field">
         <label>Senha</label>
 
-        <!-- ✅ INPUT COM ÍCONE DE CÂMERA (MOSTRAR/OCULTAR) -->
+        <!-- ✅ senha + ícone ao lado -->
         <div class="input-icon">
           <input id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password">
 
-          <button class="icon-btn" type="button" onclick="toggleSenha('loginSenha', this)"
-            aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha">
+          <button class="icon-btn" type="button"
+            onclick="toggleSenha('loginSenha', this)"
+            aria-label="Mostrar/ocultar senha"
+            title="Mostrar/ocultar senha">
 
-            <!-- CÂMERA FECHADA (senha oculta) -->
             <span class="cam-icon cam-closed">
+              <!-- câmera fechada -->
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
                 <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
@@ -45,8 +47,8 @@
               </svg>
             </span>
 
-            <!-- CÂMERA ABERTA (senha visível) -->
             <span class="cam-icon cam-open" style="display:none;">
+              <!-- câmera aberta -->
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
                 <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
@@ -376,22 +378,6 @@
   let unsubDiarios = null;
   let unsubNomes = null;
 
-  // ===================== MOSTRAR/OCULTAR SENHA (CÂMERA) =====================
-  window.toggleSenha = function(inputId, btn){
-    const input = document.getElementById(inputId);
-    if(!input || !btn) return;
-
-    const mostrando = input.type === "text";
-    input.type = mostrando ? "password" : "text";
-
-    const closed = btn.querySelector(".cam-closed");
-    const open = btn.querySelector(".cam-open");
-    if(closed && open){
-      closed.style.display = mostrando ? "inline-flex" : "none";
-      open.style.display = mostrando ? "none" : "inline-flex";
-    }
-  };
-
   // ===================== TEMA (CLARO / ESCURO) =====================
   const KEY_TEMA = "tema_site";
 
@@ -418,7 +404,23 @@
     aplicarTema(salvo);
   });
 
-  // ===================== CANVAS (GRÁFICO) =====================
+  // ===================== MOSTRAR/OCULTAR SENHA (CÂMERA) =====================
+  window.toggleSenha = function(inputId, btn){
+    const input = document.getElementById(inputId);
+    if(!input || !btn) return;
+
+    const mostrando = input.type === "text";
+    input.type = mostrando ? "password" : "text";
+
+    const closed = btn.querySelector(".cam-closed");
+    const open = btn.querySelector(".cam-open");
+    if(closed && open){
+      closed.style.display = mostrando ? "inline-flex" : "none";
+      open.style.display = mostrando ? "none" : "inline-flex";
+    }
+  };
+
+  /* ===================== CANVAS / CHART ===================== */
   function cssVar(name, fallback){
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
@@ -449,11 +451,11 @@
     ctx.closePath();
   }
 
+  // ✅ Gráfico responsivo e sem cortar no mobile
   function drawBarChart(canvasId, items){
     const canvas = document.getElementById(canvasId);
     if(!canvas) return;
 
-    // ✅ altura automática (não corta no mobile)
     const rows = (items && items.length) ? items.length : 1;
     const autoH = Math.max(260, rows * 34 + 50);
     canvas.style.height = autoH + "px";
@@ -491,9 +493,9 @@
     items.forEach((it, i) => {
       const y = padT + i*rowH + rowH/2;
 
-      // label
       ctx.fillStyle = textColor;
       ctx.textAlign = "left";
+
       const maxChars = (w < 420) ? 18 : 26;
       const label = it.label.length > maxChars ? it.label.slice(0,maxChars) + "…" : it.label;
       ctx.fillText(label, padL, y);
@@ -502,17 +504,14 @@
       const barMaxW = Math.max(120, innerW - labelW - 20);
       const barW = (it.value / maxV) * barMaxW;
 
-      // fundo
       ctx.fillStyle = barBg;
       roundRect(ctx, barX, y - barH/2, barMaxW, barH, 999);
       ctx.fill();
 
-      // barra
       ctx.fillStyle = red;
       roundRect(ctx, barX, y - barH/2, Math.max(6, barW), barH, 999);
       ctx.fill();
 
-      // valor dentro se couber, senão fora
       const valueText = String(it.value);
       const textW = ctx.measureText(valueText).width;
 
@@ -528,7 +527,7 @@
     });
   }
 
-  // ===================== FIREBASE / DADOS =====================
+  /* ===================== FIREBASE / DADOS ===================== */
   function setRefsContrato(){
     refDiarios = collection(db, "contratos", contratoAtual, "diarios");
     refNomes   = collection(db, "contratos", contratoAtual, "nomes");
@@ -881,11 +880,9 @@
     document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
     document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
 
-    // ✅ DASHBOARD VISUAL (Top 10)
     const top10 = ranking.slice(0, 10).map(x => ({ label: x.nome, value: x.dias }));
     drawBarChart("chartRanking", top10);
 
-    // ✅ INSIGHTS
     const topNome = ranking[0]?.nome || "—";
     const topDias = ranking[0]?.dias || 0;
     const mediaDia = diasRegistrados ? (totalPresencas / diasRegistrados) : 0;
@@ -915,7 +912,6 @@
     document.getElementById("mesAno").addEventListener("change", atualizarPainel);
 
     document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-
     window.addEventListener("resize", () => atualizarPainel());
   }
 
