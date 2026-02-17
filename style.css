@@ -514,3 +514,12 @@ th{
   .logo{ height:50px; }
   .logo.emive{ height:75px; }
 }
+html{ -webkit-text-size-adjust:100%; }
+
+.login-card input,
+.login-card select,
+.login-card textarea,
+.login-card button{
+  font-size:16px;
+}
+
