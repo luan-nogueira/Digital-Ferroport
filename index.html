@@ -1,11 +1,344 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presença diária — Contratos</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ✅ Firebase (COMPAT) - TEM que ficar ANTES do seu script -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<section class="login-page" id="loginBox">
+  <div class="login-card">
+    <div class="login-logos">
+      <img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
+    </div>
+
+    <h2>Acesso restrito</h2>
+    <p class="muted">Entre com seu e-mail e senha para acessar o controle.</p>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>E-mail</label>
+        <input id="loginEmail" type="email" placeholder="seuemail@empresa.com" autocomplete="username">
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+        <div class="input-icon">
+          <input id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button class="icon-btn" type="button"
+            onclick="toggleSenha('loginSenha', this)"
+            aria-label="Mostrar/ocultar senha"
+            title="Mostrar/ocultar senha">
+            <span class="cam-icon cam-closed">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
+                <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
+                <path d="M3 3l18 18" class="stroke"></path>
+              </svg>
+            </span>
+            <span class="cam-icon cam-open" style="display:none;">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
+                <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions center">
+      <button class="btn" id="btnEntrar" type="button" onclick="login()">Entrar</button>
+      <button class="btn secondary" type="button" onclick="esqueciSenha()">Esqueci minha senha</button>
+      <button class="btn secondary small" type="button" id="btnTemaLogin" onclick="toggleTema()">🌙 Tema</button>
+    </div>
+
+    <div class="login-status" id="loginStatus" style="display:none;">
+      <span class="spinner"></span>
+      <span>Entrando...</span>
+    </div>
+
+    <p class="muted small center" id="loginMsg"></p>
+    <p class="muted tiny center">DIGITAL • EMIVE — Tecnologia e Segurança</p>
+  </div>
+</section>
+
+<!-- ===================== APP ===================== -->
+<div id="appRoot" style="display:none;">
+
+<header class="topbar no-print">
+  <div class="brand">
+    <div class="logos">
+      <img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
+    </div>
+
+    <div>
+      <div class="brand-title">Controle — Contratos</div>
+      <div class="brand-subtitle" id="userBadge">Logado como: —</div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn secondary small" type="button" id="btnTema" onclick="toggleTema()">🌙 Tema</button>
+
+      <div class="field inline">
+        <label>Contrato</label>
+        <select id="contratoSelect" disabled>
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+
+      <span class="role-pill" id="rolePill">—</span>
+      <button class="btn secondary small" type="button" onclick="logout()">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ===================== PAINEL ===================== -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Painel</h2>
+      <p class="muted">Selecione o mês para gerar relatório em PDF e visualizar dados do contrato.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Mês/Ano</label>
+        <input id="mesAno" type="month" />
+      </div>
+
+      <div class="field">
+        <label>Resumo</label>
+        <div class="kpi-wrap">
+          <div class="kpi">
+            <div class="kpi-label">Dias registrados</div>
+            <div class="kpi-value" id="kpiDias">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Técnicos/Condutores</div>
+            <div class="kpi-value" id="kpiTecnicos">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Presenças/Registros</div>
+            <div class="kpi-value" id="kpiPresencas">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Ações</label>
+        <div class="actions">
+          <button class="btn" type="button" onclick="atualizarPainel()">🔄 Atualizar</button>
+          <button class="btn secondary" type="button" onclick="gerarPDF()">📄 Gerar PDF</button>
+        </div>
+        <p class="muted small">O PDF é gerado via impressão do navegador (Ctrl+P).</p>
+      </div>
+    </div>
+
+    <!-- Ferroport -->
+    <div id="blocoFerroport">
+      <div class="split">
+        <div>
+          <h3 class="h3">Ranking (dias trabalhados no mês)</h3>
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Técnico</th>
+                <th>Dias</th>
+                <th style="width:38%;">Progresso</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaRanking"></tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 class="h3">Registros do mês</h3>
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Pessoas</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaMes"></tbody>
+          </table>
+
+          <div class="ver-mais-wrap">
+            <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
+              Ver mais registros
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash">
+        <div class="dash-box">
+          <div class="dash-title">📊 Dias por técnico (Top 10)</div>
+          <canvas id="chartRanking" class="dash-canvas"></canvas>
+          <p class="muted small">Mostra quem trabalhou mais dias no mês selecionado.</p>
+        </div>
+
+        <div class="dash-box">
+          <div class="dash-title">📌 Insights rápidos</div>
+          <div class="insights">
+            <div class="insight">
+              <div class="insight-label">Maior frequência</div>
+              <div class="insight-value" id="insightTopNome">—</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Dias do Top 1</div>
+              <div class="insight-value" id="insightTopDias">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média presenças/dia</div>
+              <div class="insight-value" id="insightMediaDia">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média dias/técnico</div>
+              <div class="insight-value" id="insightMediaTec">0</div>
+            </div>
+          </div>
+          <p class="muted small">Resumo automático com base no mês selecionado.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ferroport form -->
+  <section class="card" id="cardPresenca">
+    <div class="card-head">
+      <h2>Presença por dia (Ferroport)</h2>
+      <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Data</label>
+        <input id="dataDia" type="date" />
+      </div>
+
+      <div class="field">
+        <label>Pessoas</label>
+        <div class="chips" id="chipsDiario"></div>
+
+        <div class="add-nome">
+          <input type="text" id="novoNome" placeholder="Adicionar técnico (ex: João Silva)">
+          <button class="btn" type="button" onclick="adicionarNome()">+ Adicionar</button>
+        </div>
+
+        <p class="muted small">Os nomes ficam salvos no banco (tempo real).</p>
+        <p class="muted small" id="permMsg" style="display:none;">Você está como Técnico: algumas ações ficam bloqueadas.</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="button" onclick="salvarDiario()">💾 Salvar dia</button>
+      <button class="btn secondary" type="button" onclick="limparDiario()">🧹 Limpar</button>
+      <button class="btn danger" id="btnApagarTudo" type="button" onclick="apagarDiarios()">🗑 Apagar tudo</button>
+      <button class="btn" type="button" onclick="exportarDiarioCSV()">⬇ Exportar Excel</button>
+    </div>
+  </section>
+
+  <section class="card no-print" id="cardListaFerroport">
+    <div class="card-head">
+      <h2>Presenças registradas (Ferroport)</h2>
+      <p class="muted">Se salvar a mesma data novamente, o sistema atualiza. Use “Editar” para carregar um registro.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Pessoas</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaDiario"></tbody>
+    </table>
+
+    <div class="ver-mais-wrap">
+      <button class="btn secondary small" id="btnVerMais" type="button" onclick="toggleVerMais()">
+        Ver mais registros
+      </button>
+    </div>
+  </section>
+
+  <footer class="footer no-print">
+    DIGITAL • EMIVE • Tecnologia e Segurança
+  </footer>
+
+</main>
+</div>
+
+<!-- ===================== PDF ===================== -->
+<section class="print-only report">
+  <div class="report-head">
+    <div class="report-logos">
+      <img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
+    </div>
+
+    <div class="report-titles">
+      <div class="report-title">Relatório — <span id="reportContrato">—</span></div>
+      <div class="report-subtitle" id="reportPeriodo">Período: —</div>
+      <div class="report-subtitle" id="reportGeradoEm">Gerado em: —</div>
+    </div>
+  </div>
+
+  <div id="printFerroport">
+    <div class="report-grid">
+      <div class="report-box">
+        <div class="box-title">Ranking — Dias trabalhados</div>
+        <table class="report-table">
+          <thead>
+            <tr><th>#</th><th>Técnico</th><th>Dias</th></tr>
+          </thead>
+          <tbody id="printRanking"></tbody>
+        </table>
+      </div>
+
+      <div class="report-box">
+        <div class="box-title">Registros do mês</div>
+        <table class="report-table">
+          <thead>
+            <tr><th>Data</th><th>Pessoas</th></tr>
+          </thead>
+          <tbody id="printMes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    DIGITAL • EMIVE — Tecnologia e Segurança
+  </div>
+</section>
+
+<!-- ===========================================================
+     ✅ SCRIPT FINAL (com FAILSAFE + seu código)
+=========================================================== -->
 <script>
 (function(){
-  // ====== FAILSAFE: nunca mais tela branca sem mensagem ======
+  // ✅ nunca mais tela branca sem mostrar o erro
   function showFatal(err){
     console.error(err);
     document.body.innerHTML =
       '<div style="font-family:Arial;padding:20px">' +
-      '<h2 style="color:#CB3344">Erro no JavaScript (tela branca)</h2>' +
+      '<h2 style="color:#CB3344">Erro no JavaScript</h2>' +
       '<pre style="background:#111;color:#0f0;padding:12px;border-radius:8px;white-space:pre-wrap">' +
       (err && (err.stack || err.message) ? (err.stack || err.message) : String(err)) +
       '</pre>' +
@@ -15,14 +348,10 @@
   window.addEventListener("error", (e)=> showFatal(e.error || e.message));
   window.addEventListener("unhandledrejection", (e)=> showFatal(e.reason));
 
-  // ====== Rode só depois do DOM existir ======
-  document.addEventListener("DOMContentLoaded", main);
-
-  function main(){
+  document.addEventListener("DOMContentLoaded", () => {
     try{
-      // ====== Confere se Firebase carregou ======
       if(typeof firebase === "undefined"){
-        throw new Error("firebase is not defined. Verifique se os 3 scripts compat do Firebase estão acima deste script.");
+        throw new Error("firebase is not defined. Os scripts compat precisam estar carregados antes deste script.");
       }
 
       // ===================== CONFIG =====================
@@ -41,13 +370,12 @@
         { value: "pta-inveco", label: "PTA INVECO" }
       ];
 
-      // ✅ evita erro "already exists"
-      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      // ✅ evita erro de "already exists"
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
       const auth = firebase.auth();
       const db   = firebase.firestore();
 
-      // ===================== ESTADO =====================
       let LISTA = [];
       let NOMES = [];
       let selecaoDiaria = [];
@@ -76,9 +404,46 @@
       let unsubNomes = null;
       let unsubPTA = null;
 
-      // ===================== HELPERS =====================
-      const $ = (id)=> document.getElementById(id);
+      // ===================== TEMA =====================
+      const KEY_TEMA = "tema_site";
+      function aplicarTema(theme){
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem(KEY_TEMA, theme);
 
+        const txt = theme === "dark" ? "☀️ Tema" : "🌙 Tema";
+        const btn = document.getElementById("btnTema");
+        const btnLogin = document.getElementById("btnTemaLogin");
+        if(btn) btn.textContent = txt;
+        if(btnLogin) btnLogin.textContent = txt;
+
+        try{ setTimeout(() => atualizarPainel(), 10); }catch(_){}
+      }
+      function toggleTema(){
+        const atual = document.documentElement.getAttribute("data-theme") || "light";
+        aplicarTema(atual === "dark" ? "light" : "dark");
+      }
+      window.toggleTema = toggleTema;
+
+      const salvo = localStorage.getItem(KEY_TEMA) || "light";
+      aplicarTema(salvo);
+
+      function toggleSenha(inputId, btn){
+        const input = document.getElementById(inputId);
+        if(!input || !btn) return;
+
+        const mostrando = input.type === "text";
+        input.type = mostrando ? "password" : "text";
+
+        const closed = btn.querySelector(".cam-closed");
+        const open = btn.querySelector(".cam-open");
+        if(closed && open){
+          closed.style.display = mostrando ? "inline-flex" : "none";
+          open.style.display = mostrando ? "none" : "inline-flex";
+        }
+      }
+      window.toggleSenha = toggleSenha;
+
+      // ===================== HELPERS =====================
       function formatarDataBR(dataISO){
         if(!dataISO) return "";
         const [y,m,d] = dataISO.split("-");
@@ -95,7 +460,7 @@
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
       }
       function getMesAnoSelecionado(){
-        const v = $("mesAno")?.value;
+        const v = document.getElementById("mesAno")?.value;
         if(!v) return null;
         const [y,m] = v.split("-");
         return { y, m };
@@ -116,40 +481,7 @@
         return dataISO.startsWith(`${y}-${m}-`);
       }
 
-      // ===================== TEMA =====================
-      const KEY_TEMA = "tema_site";
-      function aplicarTema(theme){
-        document.documentElement.setAttribute("data-theme", theme);
-        localStorage.setItem(KEY_TEMA, theme);
-        const txt = theme === "dark" ? "☀️ Tema" : "🌙 Tema";
-        if($("btnTema")) $("btnTema").textContent = txt;
-        if($("btnTemaLogin")) $("btnTemaLogin").textContent = txt;
-        try{ setTimeout(() => atualizarPainel(), 10); }catch(_){}
-      }
-      function toggleTema(){
-        const atual = document.documentElement.getAttribute("data-theme") || "light";
-        aplicarTema(atual === "dark" ? "light" : "dark");
-      }
-      window.toggleTema = toggleTema;
-
-      aplicarTema(localStorage.getItem(KEY_TEMA) || "light");
-
-      // ===================== SENHA =====================
-      function toggleSenha(inputId, btn){
-        const input = $(inputId);
-        if(!input || !btn) return;
-        const mostrando = input.type === "text";
-        input.type = mostrando ? "password" : "text";
-        const closed = btn.querySelector(".cam-closed");
-        const open = btn.querySelector(".cam-open");
-        if(closed && open){
-          closed.style.display = mostrando ? "inline-flex" : "none";
-          open.style.display = mostrando ? "none" : "inline-flex";
-        }
-      }
-      window.toggleSenha = toggleSenha;
-
-      // ===================== GRÁFICO =====================
+      // ===================== RANKING + GRÁFICO (CANVAS) =====================
       function contarDiasPorTecnico(itensMes){
         const map = new Map();
         itensMes.forEach(item => {
@@ -163,7 +495,7 @@
       }
 
       function desenharGraficoTop10(canvasId, data){
-        const canvas = $(canvasId);
+        const canvas = document.getElementById(canvasId);
         if(!canvas) return;
 
         const w = canvas.clientWidth || 0;
@@ -237,7 +569,7 @@
       }
 
       function montarSelectContratos(){
-        const sel = $("contratoSelect");
+        const sel = document.getElementById("contratoSelect");
         if(!sel) return;
 
         sel.innerHTML = "";
@@ -287,21 +619,31 @@
       function ligarRealtime(){
         desligarRealtime();
 
+        // ⚠️ IMPORTANTE:
+        // orderBy("dataISO") só funciona se TODOS docs tiverem dataISO
+        // e se você criar o índice quando necessário.
+        // Se der erro, troque para onSnapshot sem orderBy.
         unsubDiarios = refDiarios.onSnapshot(
           (snap) => {
             LISTA = snap.docs.map(d => d.data());
             carregarDiario();
             atualizarPainel();
           },
-          (err) => alert("Erro diários: " + (err?.message || err))
+          (err) => {
+            console.error("Erro diários:", err);
+            alert("Erro diários:\n\n" + (err?.message || err));
+          }
         );
 
         unsubNomes = refNomes.onSnapshot(
           (snap) => {
-            NOMES = snap.docs.map(d => (d.data()||{}).nome).filter(Boolean).sort((a,b)=>a.localeCompare(b,"pt-BR"));
+            NOMES = snap.docs.map(d => (d.data()||{}).nome).filter(Boolean).sort((a,b) => a.localeCompare(b, "pt-BR"));
             renderChipsDiario();
           },
-          (err) => alert("Erro nomes: " + (err?.message || err))
+          (err) => {
+            console.error("Erro nomes:", err);
+            alert("Erro nomes:\n\n" + (err?.message || err));
+          }
         );
 
         unsubPTA = refPTA.onSnapshot(
@@ -317,18 +659,25 @@
 
       function mostrarBlocosContrato(){
         const isPTA = contratoAtual === "pta-inveco";
-        if($("blocoPTA")) $("blocoPTA").style.display = isPTA ? "block" : "none";
-        if($("blocoFerroport")) $("blocoFerroport").style.display = isPTA ? "none" : "block";
-        if($("cardPresenca")) $("cardPresenca").style.display = isPTA ? "none" : "block";
-        if($("cardListaFerroport")) $("cardListaFerroport").style.display = isPTA ? "none" : "block";
-        if($("printPTA")) $("printPTA").style.display = isPTA ? "block" : "none";
-        if($("printFerroport")) $("printFerroport").style.display = isPTA ? "none" : "block";
+        const a = document.getElementById("blocoPTA");
+        const b = document.getElementById("blocoFerroport");
+        const c = document.getElementById("cardPresenca");
+        const d = document.getElementById("cardListaFerroport");
+        const e = document.getElementById("printPTA");
+        const f = document.getElementById("printFerroport");
+        if(a) a.style.display = isPTA ? "block" : "none";
+        if(b) b.style.display = isPTA ? "none" : "block";
+        if(c) c.style.display = isPTA ? "none" : "block";
+        if(d) d.style.display = isPTA ? "none" : "block";
+        if(e) e.style.display = isPTA ? "block" : "none";
+        if(f) f.style.display = isPTA ? "none" : "block";
       }
 
       function setContrato(novo){
         if(!allowedContracts.includes(novo)){
           alert("Você não tem permissão para acessar este contrato.");
-          if($("contratoSelect")) $("contratoSelect").value = contratoAtual;
+          const sel = document.getElementById("contratoSelect");
+          if(sel) sel.value = contratoAtual;
           return;
         }
 
@@ -350,24 +699,74 @@
         atualizarPainel();
       }
 
-      // ===================== UI LOGIN/APP =====================
+      // ===================== AUTH =====================
+      async function login(){
+        const email = document.getElementById("loginEmail").value.trim();
+        const senha = document.getElementById("loginSenha").value.trim();
+        const msg = document.getElementById("loginMsg");
+        const status = document.getElementById("loginStatus");
+        const btn = document.getElementById("btnEntrar");
+
+        if(msg) msg.textContent = "";
+        if(status) status.style.display = "flex";
+        if(btn) btn.disabled = true;
+
+        try{
+          await auth.signInWithEmailAndPassword(email, senha);
+        }catch(e){
+          if(msg) msg.textContent = "Falha no login: " + (e?.code || e?.message || e);
+          if(status) status.style.display = "none";
+          if(btn) btn.disabled = false;
+        }
+      }
+      window.login = login;
+
+      async function esqueciSenha(){
+        const email = document.getElementById("loginEmail").value.trim();
+        const msg = document.getElementById("loginMsg");
+        if(msg) msg.textContent = "";
+
+        if(!email){
+          if(msg) msg.textContent = "Digite seu e-mail para receber o link de redefinição.";
+          return;
+        }
+
+        try{
+          await auth.sendPasswordResetEmail(email);
+          if(msg) msg.textContent = "Pronto! Enviamos um e-mail para redefinir sua senha.";
+        }catch(e){
+          if(msg) msg.textContent = "Não foi possível enviar: " + (e?.code || e?.message || e);
+        }
+      }
+      window.esqueciSenha = esqueciSenha;
+
+      async function logout(){ await auth.signOut(); }
+      window.logout = logout;
+
       function mostrarApp(logado){
-        if($("loginBox")) $("loginBox").style.display = logado ? "none" : "flex";
-        if($("appRoot")) $("appRoot").style.display = logado ? "block" : "none";
+        const a = document.getElementById("loginBox");
+        const b = document.getElementById("appRoot");
+        if(a) a.style.display = logado ? "none" : "flex";
+        if(b) b.style.display = logado ? "block" : "none";
       }
 
       function aplicarPermissoesUI(){
-        if($("rolePill")){
-          $("rolePill").textContent = isAdmin ? "Gestor" : "Técnico";
-          $("rolePill").classList.toggle("admin", isAdmin);
+        const pill = document.getElementById("rolePill");
+        const permMsg = document.getElementById("permMsg");
+        const btnApagarTudo = document.getElementById("btnApagarTudo");
+
+        if(pill){
+          pill.textContent = isAdmin ? "Gestor" : "Técnico";
+          pill.classList.toggle("admin", isAdmin);
         }
-        if($("btnApagarTudo")) $("btnApagarTudo").style.display = isAdmin ? "inline-block" : "none";
-        if($("permMsg")) $("permMsg").style.display = isAdmin ? "none" : "block";
+
+        if(btnApagarTudo) btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
+        if(permMsg) permMsg.style.display = isAdmin ? "none" : "block";
       }
 
-      // ===================== CHIPS / NOMES =====================
+      // ===================== CHIPS =====================
       function renderChipsDiario(){
-        const wrap = $("chipsDiario");
+        const wrap = document.getElementById("chipsDiario");
         if(!wrap) return;
         wrap.innerHTML = "";
 
@@ -402,15 +801,20 @@
       window.renderChipsDiario = renderChipsDiario;
 
       async function adicionarNome(){
-        const input = $("novoNome");
-        const nome = input?.value.trim();
-        if(!nome) return alert("Digite um nome.");
+        try{
+          const input = document.getElementById("novoNome");
+          const nome = input.value.trim();
+          if(!nome) return alert("Digite um nome.");
 
-        const existe = NOMES.some(n => n.toLowerCase() === nome.toLowerCase());
-        if(existe) return alert("Esse nome já existe.");
+          const existe = NOMES.some(n => n.toLowerCase() === nome.toLowerCase());
+          if(existe) return alert("Esse nome já existe.");
 
-        await refNomes.doc(idSeguro(nome)).set({ nome });
-        input.value = "";
+          await refNomes.doc(idSeguro(nome)).set({ nome });
+          input.value = "";
+        }catch(e){
+          console.error(e);
+          alert("Erro ao adicionar nome:\n\n" + (e?.message || e));
+        }
       }
       window.adicionarNome = adicionarNome;
 
@@ -423,58 +827,82 @@
 
       // ===================== DIÁRIOS =====================
       async function salvarDiario(){
-        const data = $("dataDia")?.value;
-        if(!data) return alert("Selecione a data.");
-        if(selecaoDiaria.length === 0) return alert("Selecione pelo menos uma pessoa.");
+        try{
+          const data = document.getElementById("dataDia").value;
+          if(!data) return alert("Selecione a data.");
+          if(selecaoDiaria.length === 0) return alert("Selecione pelo menos uma pessoa.");
 
-        const item = { dataISO: data, dataBR: formatarDataBR(data), pessoas: [...selecaoDiaria] };
-        await refDiarios.doc(data).set(item);
-        limparDiario();
+          const item = { dataISO: data, dataBR: formatarDataBR(data), pessoas: [...selecaoDiaria] };
+          await refDiarios.doc(data).set(item);
+
+          limparDiario();
+        }catch(e){
+          console.error(e);
+          alert("Erro ao salvar o dia:\n\n" + (e?.message || e));
+        }
       }
       window.salvarDiario = salvarDiario;
 
       function limparDiario(silencioso=false){
-        if($("dataDia")) $("dataDia").value = hojeISO();
+        const dataDia = document.getElementById("dataDia");
+        if(dataDia) dataDia.value = hojeISO();
         selecaoDiaria = [];
         renderChipsDiario();
-        if(!silencioso && $("novoNome")) $("novoNome").value = "";
+        if(!silencioso){
+          const novoNome = document.getElementById("novoNome");
+          if(novoNome) novoNome.value = "";
+        }
       }
       window.limparDiario = limparDiario;
 
       function carregarDiario(){
-        const tbody = $("tabelaDiario");
+        const tbody = document.getElementById("tabelaDiario");
         if(!tbody) return;
 
         tbody.innerHTML = "";
+
         const dados = [...LISTA].sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||""));
         const visiveis = mostrarTodosRegistros ? dados : dados.slice(0, LIMITE_REGISTROS);
 
         visiveis.forEach(item => {
           const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.dataBR || formatarDataBR(item.dataISO)}</td>
-            <td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>
-            <td class="row-actions">
-              <button class="btn secondary small" type="button">Editar</button>
-              ${isAdmin ? '<button class="btn danger small" type="button">Excluir</button>' : ''}
-            </td>
-          `;
 
-          const btns = tr.querySelectorAll("button");
-          btns[0].onclick = () => {
-            if($("dataDia")) $("dataDia").value = item.dataISO || hojeISO();
+          const tdData = document.createElement("td");
+          tdData.textContent = item.dataBR || formatarDataBR(item.dataISO);
+
+          const tdPessoas = document.createElement("td");
+          tdPessoas.textContent = Array.isArray(item.pessoas) ? item.pessoas.join(", ") : "";
+
+          const tdAcoes = document.createElement("td");
+          tdAcoes.className = "row-actions";
+
+          const btnEditar = document.createElement("button");
+          btnEditar.className = "btn secondary small";
+          btnEditar.type = "button";
+          btnEditar.textContent = "Editar";
+          btnEditar.onclick = () => {
+            document.getElementById("dataDia").value = item.dataISO || hojeISO();
             selecaoDiaria = Array.isArray(item.pessoas) ? [...item.pessoas] : [];
             renderChipsDiario();
-            $("cardPresenca")?.scrollIntoView({ behavior:"smooth", block:"start" });
+            document.getElementById("cardPresenca")?.scrollIntoView({ behavior:"smooth", block:"start" });
           };
+          tdAcoes.appendChild(btnEditar);
 
-          if(isAdmin && btns[1]){
-            btns[1].onclick = async () => {
+          if(isAdmin){
+            const btnExcluir = document.createElement("button");
+            btnExcluir.className = "btn danger small";
+            btnExcluir.type = "button";
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.onclick = async () => {
               if(!confirm(`Excluir o dia ${item.dataBR || item.dataISO}?`)) return;
               await refDiarios.doc(item.dataISO).delete();
             };
+            tdAcoes.appendChild(btnExcluir);
           }
 
+          tr.appendChild(tdData);
+          tr.appendChild(tdPessoas);
+          tr.appendChild(tdAcoes);
           tbody.appendChild(tr);
         });
 
@@ -482,7 +910,7 @@
       }
 
       function atualizarBotaoVerMais(){
-        const btn = $("btnVerMais");
+        const btn = document.getElementById("btnVerMais");
         if(!btn) return;
         btn.style.display = LISTA.length > LIMITE_REGISTROS ? "inline-block" : "none";
         btn.textContent = mostrarTodosRegistros ? "Ver menos" : "Ver mais registros";
@@ -530,57 +958,57 @@
       }
       window.exportarDiarioCSV = exportarDiarioCSV;
 
-      // ===================== PTA (stubs para não quebrar) =====================
+      // ===================== PTA (mínimo) =====================
       function carregarPTA(){
-        const tbody = $("tabelaPTA");
+        const tbody = document.getElementById("tabelaPTA");
         if(!tbody) return;
         tbody.innerHTML = "";
       }
-      function toggleVerMaisPTA(){ mostrarTodosPTA = !mostrarTodosPTA; carregarPTA(); }
-      window.toggleVerMaisPTA = toggleVerMaisPTA;
+      window.toggleVerMaisPTA = function(){ mostrarTodosPTA = !mostrarTodosPTA; carregarPTA(); };
 
-      window.salvarPTA = ()=> alert("salvarPTA() ainda não implementado.");
-      window.limparPTA = ()=> {};
-      window.limparAssinatura = ()=> {};
+      window.salvarPTA = function(){ alert("Ainda falta implementar salvarPTA()."); };
+      window.limparPTA = function(){};
+      window.limparAssinatura = function(){};
 
-      // ===================== MÊS / PAINEL =====================
+      // ===================== PAINEL =====================
       function carregarMes(itensMes){
-        const tbody = $("tabelaMes");
-        if(!tbody) return;
+        const tbody = document.getElementById("tabelaMes");
+        if(tbody){
+          tbody.innerHTML = "";
+          const vis = mostrarTodosMes ? itensMes : itensMes.slice(0, LIMITE_MES);
 
-        tbody.innerHTML = "";
-        const vis = mostrarTodosMes ? itensMes : itensMes.slice(0, LIMITE_MES);
+          vis.forEach(item => {
+            const tr = document.createElement("tr");
+            tr.innerHTML =
+              `<td>${item.dataBR || formatarDataBR(item.dataISO)}</td>` +
+              `<td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>`;
+            tbody.appendChild(tr);
+          });
 
-        vis.forEach(item => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.dataBR || formatarDataBR(item.dataISO)}</td>
-            <td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        const btn = $("btnVerMaisMes");
-        if(btn){
-          btn.style.display = itensMes.length > LIMITE_MES ? "inline-block" : "none";
-          btn.textContent = mostrarTodosMes ? "Ver menos registros" : "Ver mais registros";
+          const btn = document.getElementById("btnVerMaisMes");
+          if(btn){
+            btn.style.display = itensMes.length > LIMITE_MES ? "inline-block" : "none";
+            btn.textContent = mostrarTodosMes ? "Ver menos registros" : "Ver mais registros";
+          }
         }
 
-        const pMes = $("printMes");
+        const pMes = document.getElementById("printMes");
         if(pMes){
           pMes.innerHTML = "";
           itensMes.forEach(item => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${item.dataBR || formatarDataBR(item.dataISO)}</td>
-              <td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>
-            `;
+            tr.innerHTML =
+              `<td>${item.dataBR || formatarDataBR(item.dataISO)}</td>` +
+              `<td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>`;
             pMes.appendChild(tr);
           });
         }
       }
 
-      function toggleVerMaisMes(){ mostrarTodosMes = !mostrarTodosMes; atualizarPainel(); }
+      function toggleVerMaisMes(){
+        mostrarTodosMes = !mostrarTodosMes;
+        atualizarPainel();
+      }
       window.toggleVerMaisMes = toggleVerMaisMes;
 
       function atualizarPainel(){
@@ -588,13 +1016,13 @@
         if(!sel){
           const hoje = new Date();
           const pad = (n)=> String(n).padStart(2,"0");
-          if($("mesAno")) $("mesAno").value = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
+          document.getElementById("mesAno").value = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
           return;
         }
 
-        if($("reportContrato")) $("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-        if($("reportPeriodo")) $("reportPeriodo").innerText = `Período: ${sel.m}/${sel.y}`;
-        if($("reportGeradoEm")) $("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
+        document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
+        document.getElementById("reportPeriodo").innerText = `Período: ${sel.m}/${sel.y}`;
+        document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
 
         if(contratoAtual !== "ferroport") return;
 
@@ -604,18 +1032,19 @@
 
         const dias = itensMes.length;
         const presencas = itensMes.reduce((acc, x)=> acc + (Array.isArray(x.pessoas) ? x.pessoas.length : 0), 0);
+
         const setTec = new Set();
         itensMes.forEach(x => (x.pessoas||[]).forEach(p => setTec.add(p)));
 
-        if($("kpiDias")) $("kpiDias").textContent = String(dias);
-        if($("kpiPresencas")) $("kpiPresencas").textContent = String(presencas);
-        if($("kpiTecnicos")) $("kpiTecnicos").textContent = String(setTec.size);
+        document.getElementById("kpiDias").textContent = String(dias);
+        document.getElementById("kpiPresencas").textContent = String(presencas);
+        document.getElementById("kpiTecnicos").textContent = String(setTec.size);
 
         carregarMes(itensMes);
 
         const ranking = contarDiasPorTecnico(itensMes);
 
-        const tbodyRank = $("tabelaRanking");
+        const tbodyRank = document.getElementById("tabelaRanking");
         if(tbodyRank){
           tbodyRank.innerHTML = "";
           const top10 = ranking.slice(0,10);
@@ -623,99 +1052,77 @@
 
           top10.forEach((r, idx) => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${idx+1}</td>
-              <td>${r.nome}</td>
-              <td>${r.dias}</td>
-              <td><div class="bar"><div class="bar-fill" style="width:${Math.round((r.dias/maxDias)*100)}%"></div></div></td>
-            `;
+            tr.innerHTML =
+              `<td>${idx+1}</td>` +
+              `<td>${r.nome}</td>` +
+              `<td>${r.dias}</td>` +
+              `<td><div class="bar"><div class="bar-fill" style="width:${Math.round((r.dias/maxDias)*100)}%"></div></div></td>`;
             tbodyRank.appendChild(tr);
           });
         }
 
-        if($("insightTopNome")) $("insightTopNome").textContent = (ranking[0]?.nome || "—");
-        if($("insightTopDias")) $("insightTopDias").textContent = String(ranking[0]?.dias || 0);
-        if($("insightMediaDia")) $("insightMediaDia").textContent = String(dias ? (presencas/dias).toFixed(1) : 0);
-        if($("insightMediaTec")) $("insightMediaTec").textContent = String(ranking.length ? (dias/ranking.length).toFixed(1) : 0);
+        const pRank = document.getElementById("printRanking");
+        if(pRank){
+          pRank.innerHTML = "";
+          ranking.slice(0, 40).forEach((r, idx) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${idx+1}</td><td>${r.nome}</td><td>${r.dias}</td>`;
+            pRank.appendChild(tr);
+          });
+        }
 
-        desenharGraficoTop10("chartRanking", ranking);
+        const top1 = ranking[0] || { nome:"—", dias:0 };
+        document.getElementById("insightTopNome").textContent = top1.nome;
+        document.getElementById("insightTopDias").textContent = String(top1.dias);
+        document.getElementById("insightMediaDia").textContent = String(dias ? (presencas / dias).toFixed(1) : 0);
+        document.getElementById("insightMediaTec").textContent = String(ranking.length ? (dias / ranking.length).toFixed(1) : 0);
+
+        // ✅ desenha depois que layout existe
+        setTimeout(() => desenharGraficoTop10("chartRanking", ranking), 0);
       }
       window.atualizarPainel = atualizarPainel;
 
-      function gerarPDF(){ atualizarPainel(); setTimeout(()=> window.print(), 50); }
+      function gerarPDF(){
+        atualizarPainel();
+        setTimeout(()=> window.print(), 50);
+      }
       window.gerarPDF = gerarPDF;
 
-      // ===================== LOGIN =====================
-      async function login(){
-        const email = $("loginEmail")?.value.trim();
-        const senha = $("loginSenha")?.value.trim();
-        const msg = $("loginMsg");
-        const status = $("loginStatus");
-        const btn = $("btnEntrar");
-
-        if(msg) msg.textContent = "";
-        if(status) status.style.display = "flex";
-        if(btn) btn.disabled = true;
-
-        try{
-          await auth.signInWithEmailAndPassword(email, senha);
-        }catch(e){
-          if(msg) msg.textContent = "Falha no login: " + (e?.code || e?.message || e);
-          if(status) status.style.display = "none";
-          if(btn) btn.disabled = false;
-        }
-      }
-      window.login = login;
-
-      async function esqueciSenha(){
-        const email = $("loginEmail")?.value.trim();
-        const msg = $("loginMsg");
-        if(msg) msg.textContent = "";
-
-        if(!email){
-          if(msg) msg.textContent = "Digite seu e-mail para receber o link de redefinição.";
-          return;
-        }
-        try{
-          await auth.sendPasswordResetEmail(email);
-          if(msg) msg.textContent = "Pronto! Enviamos um e-mail para redefinir sua senha.";
-        }catch(e){
-          if(msg) msg.textContent = "Não foi possível enviar: " + (e?.code || e?.message || e);
-        }
-      }
-      window.esqueciSenha = esqueciSenha;
-
-      window.logout = async ()=> auth.signOut();
-
-      // ===================== INIT UI =====================
+      // ===================== INIT =====================
       function initUI(){
-        if($("contratoSelect")){
-          $("contratoSelect").addEventListener("change", ()=> setContrato($("contratoSelect").value));
+        const selContrato = document.getElementById("contratoSelect");
+        if(selContrato){
+          selContrato.addEventListener("change", ()=> setContrato(selContrato.value));
         }
-        if($("dataDia")) $("dataDia").value = hojeISO();
+
+        const dataDia = document.getElementById("dataDia");
+        if(dataDia) dataDia.value = hojeISO();
 
         const d = new Date();
         const pad = (n)=> String(n).padStart(2,"0");
-        if($("mesAno")){
-          $("mesAno").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
-          $("mesAno").addEventListener("change", atualizarPainel);
+        const mesAno = document.getElementById("mesAno");
+        if(mesAno){
+          mesAno.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+          mesAno.addEventListener("change", atualizarPainel);
         }
 
         mostrarBlocosContrato();
-        window.addEventListener("resize", ()=> { try{ atualizarPainel(); }catch(_){} });
+
+        window.addEventListener("resize", () => {
+          try{ atualizarPainel(); }catch(_){}
+        });
       }
 
-      // ===================== AUTH STATE =====================
-      setRefsContrato();
-
       auth.onAuthStateChanged(async (user) => {
-        const msg = $("loginMsg");
+        const msg = document.getElementById("loginMsg");
 
         if(!user){
           mostrarApp(false);
           desligarRealtime();
-          if($("loginStatus")) $("loginStatus").style.display = "none";
-          if($("btnEntrar")) $("btnEntrar").disabled = false;
+          const status = document.getElementById("loginStatus");
+          if(status) status.style.display = "none";
+          const btn = document.getElementById("btnEntrar");
+          if(btn) btn.disabled = false;
           return;
         }
 
@@ -730,7 +1137,8 @@
           }
 
           montarSelectContratos();
-          if($("userBadge")) $("userBadge").textContent = `Logado como: ${user.email || "—"}`;
+
+          document.getElementById("userBadge").textContent = `Logado como: ${user.email || "—"}`;
           aplicarPermissoesUI();
           mostrarApp(true);
 
@@ -738,16 +1146,22 @@
           ligarRealtime();
           initUI();
 
-          setTimeout(()=> atualizarPainel(), 120);
+          setTimeout(() => atualizarPainel(), 120);
         }catch(e){
           showFatal(e);
           await auth.signOut();
         }
       });
 
+      // ✅ refs inicial
+      setRefsContrato();
+
     }catch(err){
       showFatal(err);
     }
-  }
+  });
 })();
 </script>
+
+</body>
+</html>
