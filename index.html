@@ -98,7 +98,7 @@
         <label>Contrato</label>
         <select id="contratoSelect">
           <option value="ferroport">Ferroport</option>
-          <option value="PTA Inveco">PTA Inveco</option>
+          <option value="pta-inveco">PTA Inveco</option>
         </select>
       </div>
 
@@ -617,7 +617,12 @@
       .replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"").slice(0,80);
   }
   function nomeContratoBonito(slug){
-    return ({ "ferroport":"Ferroport", "porto-sudeste":"Porto Sudeste", "vale":"Vale" }[slug] || slug);
+    return ({
+      "ferroport":"Ferroport",
+      "pta-inveco":"PTA Inveco",
+      "porto-sudeste":"Porto Sudeste",
+      "vale":"Vale"
+    }[slug] || slug);
   }
 
   function desligarRealtime(){
