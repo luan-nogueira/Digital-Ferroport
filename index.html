@@ -9,7 +9,7 @@
 
 <body>
 
-<!-- ✅ fallback: se Firebase/JS falhar, pelo menos o login aparece -->
+<!-- ✅ fallback: se o Firebase/JS falhar, pelo menos o login aparece -->
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const login = document.getElementById("loginBox");
@@ -46,6 +46,7 @@
             onclick="toggleSenha('loginSenha', this)"
             aria-label="Mostrar/ocultar senha"
             title="Mostrar/ocultar senha">
+
             <span class="cam-icon cam-closed">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
@@ -60,6 +61,7 @@
                 <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
               </svg>
             </span>
+
           </button>
         </div>
       </div>
@@ -112,7 +114,7 @@
 
 <main class="container">
 
-  <!-- ===================== PAINEL ===================== -->
+  <!-- ===================== PAINEL (MÊS) ===================== -->
   <section class="card">
     <div class="card-head">
       <h2>Painel</h2>
@@ -153,7 +155,7 @@
       </div>
     </div>
 
-    <!-- FERROPORT -->
+    <!-- ✅ Ferroport -->
     <div id="blocoFerroport">
       <div class="split">
         <div>
@@ -223,7 +225,7 @@
       </div>
     </div>
 
-    <!-- PTA -->
+    <!-- ✅ PTA -->
     <div id="blocoPTA" style="display:none;">
       <h3 class="h3">Controle de Uso — PTA INVECO</h3>
       <p class="muted small">Preencha os campos e assine com o dedo/mouse. O registro fica salvo no banco.</p>
@@ -233,10 +235,12 @@
           <label>Data</label>
           <input id="ptaData" type="date" />
         </div>
+
         <div class="field">
           <label>Nome do Condutor</label>
           <input id="ptaCondutor" type="text" placeholder="Ex: Alex" />
         </div>
+
         <div class="field">
           <label>Local da Atividade</label>
           <input id="ptaLocal" type="text" placeholder="Ex: Vast / Ferroport / GNA" />
@@ -248,10 +252,12 @@
           <label>Km Inicial</label>
           <input id="ptaKmIni" type="number" inputmode="numeric" placeholder="Ex: 79754" />
         </div>
+
         <div class="field">
           <label>Km Final</label>
           <input id="ptaKmFim" type="number" inputmode="numeric" placeholder="Ex: 79779" />
         </div>
+
         <div class="field">
           <label>Descrição da Atividade</label>
           <input id="ptaDesc" type="text" placeholder="Ex: Instalação de Radar" />
@@ -304,7 +310,7 @@
     </div>
   </section>
 
-  <!-- FERROPORT: FORM DIÁRIO -->
+  <!-- ===================== FERROPORT: FORM DIÁRIO ===================== -->
   <section class="card" id="cardPresenca">
     <div class="card-head">
       <h2>Presença por dia (Ferroport)</h2>
@@ -368,6 +374,7 @@
   </footer>
 
 </main>
+
 </div>
 
 <!-- ===================== PDF ===================== -->
@@ -482,7 +489,6 @@
   const KEY_CONTRATO = "contrato_atual";
   let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
 
-  // ✅ permissões (users/{uid})
   let allowedContracts = [];
   let isAdmin = false;
 
@@ -537,17 +543,17 @@
   function formatarDataBR(dataISO){
     if(!dataISO) return "";
     const [y,m,d] = dataISO.split("-");
-    return `${d}/${m}/${y}`;
+    return \`\${d}/\${m}/\${y}\`;
   }
   function hojeISO(){
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    return \`\${d.getFullYear()}-\${pad(d.getMonth()+1)}-\${pad(d.getDate())}\`;
   }
   function agoraBR(){
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
-    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return \`\${pad(d.getDate())}/\${pad(d.getMonth()+1)}/\${d.getFullYear()} \${pad(d.getHours())}:\${pad(d.getMinutes())}\`;
   }
   function getMesAnoSelecionado(){
     const v = document.getElementById("mesAno").value;
@@ -558,9 +564,9 @@
   function idSeguro(str){
     return String(str || "")
       .toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .replace(/\s+/g,"-")
-      .replace(/[^a-z0-9\-]/g,"")
+      .normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")
+      .replace(/\\s+/g,"-")
+      .replace(/[^a-z0-9\\-]/g,"")
       .slice(0,80);
   }
   function nomeContratoBonito(slug){
@@ -569,8 +575,12 @@
 
   // ===================== PERMISSÕES =====================
   async function carregarPermissoesUsuario(user){
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
+    // tenta "users" e "Users" (pra não travar)
+    const refLower = doc(db, "users", user.uid);
+    const refUpper = doc(db, "Users", user.uid);
+
+    let snap = await getDoc(refLower);
+    if(!snap.exists()) snap = await getDoc(refUpper);
 
     if(!snap.exists()){
       allowedContracts = [];
@@ -580,11 +590,9 @@
 
     const data = snap.data();
 
-    // ✅ aceita allowedContracts (correto) e allowedContract (se estiver errado no Firestore)
-    const arr =
-      Array.isArray(data.allowedContracts) ? data.allowedContracts :
-      Array.isArray(data.allowedContract)  ? data.allowedContract  :
-      [];
+    const arr = Array.isArray(data.allowedContracts) ? data.allowedContracts
+              : Array.isArray(data.allowedContract) ? data.allowedContract
+              : [];
 
     allowedContracts = arr.map(s => String(s).trim().toLowerCase());
     isAdmin = String(data.role || "").toLowerCase() === "gestor";
@@ -624,7 +632,7 @@
     sel.value = contratoAtual;
   }
 
-  // ===================== CANVAS / CHART =====================
+  // ===================== CANVAS / CHART (Ferroport) =====================
   function cssVar(name, fallback){
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
@@ -727,7 +735,7 @@
     });
   }
 
-  // ===================== SIGNATURE PAD =====================
+  // ===================== SIGNATURE PAD (PTA) =====================
   const sig = { canvas:null, ctx:null, drawing:false, dirty:false, lastX:0, lastY:0 };
 
   function initSignaturePad(){
@@ -1005,7 +1013,7 @@
 
   async function excluirNome(nome){
     if(!isAdmin) return alert("Somente gestor pode excluir nomes.");
-    if(!confirm(`Deseja excluir "${nome}"?`)) return;
+    if(!confirm(\`Deseja excluir "\${nome}"?\`)) return;
     await deleteDoc(doc(db, "contratos", contratoAtual, "nomes", idSeguro(nome)));
     selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
   }
@@ -1060,15 +1068,15 @@
     if(LISTA.length === 0) return alert("Não há registros para exportar.");
 
     const ordenado = [...LISTA].sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
-    let csv = "Contrato;Data;Pessoas\n";
+    let csv = "Contrato;Data;Pessoas\\n";
     ordenado.forEach(r => {
-      csv += `${nomeContratoBonito(contratoAtual)};${r.dataBR};"${(r.pessoas || []).join(", ")}"\n`;
+      csv += \`\${nomeContratoBonito(contratoAtual)};\${r.dataBR};"\${(r.pessoas || []).join(", ")}"\\n\`;
     });
 
     const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `presencas_${contratoAtual}.csv`;
+    link.download = \`presencas_\${contratoAtual}.csv\`;
     link.click();
   };
 
@@ -1105,18 +1113,18 @@
     const exibida = mostrarTodosRegistros ? lista : lista.slice(0, LIMITE_REGISTROS);
 
     exibida.forEach(r => {
-      tbody.innerHTML += `
+      tbody.innerHTML += \`
         <tr>
-          <td><strong>${r.dataBR}</strong></td>
-          <td>${(r.pessoas || []).join("<br>")}</td>
+          <td><strong>\${r.dataBR}</strong></td>
+          <td>\${(r.pessoas || []).join("<br>")}</td>
           <td>
             <div class="row-actions">
-              <button class="btn small secondary" type="button" onclick="editarRegistro('${r.dataISO}')">✏ Editar</button>
-              <button class="btn small danger" type="button" onclick="apagarRegistro('${r.dataISO}')" ${isAdmin ? "" : "disabled"}>🗑 Apagar</button>
+              <button class="btn small secondary" type="button" onclick="editarRegistro('\${r.dataISO}')">✏ Editar</button>
+              <button class="btn small danger" type="button" onclick="apagarRegistro('\${r.dataISO}')" \${isAdmin ? "" : "disabled"}>🗑 Apagar</button>
             </div>
           </td>
         </tr>
-      `;
+      \`;
     });
 
     atualizarBotaoVerMais(lista.length);
@@ -1197,21 +1205,21 @@
     const exibida = mostrarTodosPTA ? lista : lista.slice(0, LIMITE_PTA);
 
     exibida.forEach(r => {
-      const sigImg = r.assinatura ? `<img class="sig-preview" src="${r.assinatura}" alt="Assinatura">` : "—";
-      tbody.innerHTML += `
+      const sigImg = r.assinatura ? \`<img class="sig-preview" src="\${r.assinatura}" alt="Assinatura">\` : "—";
+      tbody.innerHTML += \`
         <tr>
-          <td><strong>${r.dataBR || formatarDataBR(r.dataISO)}</strong></td>
-          <td>${r.condutor || ""}</td>
-          <td>${(r.kmIni ?? "")}</td>
-          <td>${(r.kmFim ?? "")}</td>
-          <td>${r.local || ""}</td>
-          <td style="text-align:left;">${r.descricao || ""}</td>
-          <td>${sigImg}</td>
+          <td><strong>\${r.dataBR || formatarDataBR(r.dataISO)}</strong></td>
+          <td>\${r.condutor || ""}</td>
+          <td>\${(r.kmIni ?? "")}</td>
+          <td>\${(r.kmFim ?? "")}</td>
+          <td>\${r.local || ""}</td>
+          <td style="text-align:left;">\${r.descricao || ""}</td>
+          <td>\${sigImg}</td>
           <td>
-            <button class="btn small danger" type="button" onclick="apagarPTA('${r.id}')" ${isAdmin ? "" : "disabled"}>🗑</button>
+            <button class="btn small danger" type="button" onclick="apagarPTA('\${r.id}')" \${isAdmin ? "" : "disabled"}>🗑</button>
           </td>
         </tr>
-      `;
+      \`;
     });
 
     atualizarBotaoVerMaisPTA(lista.length);
@@ -1223,17 +1231,17 @@
     if(!sel){
       const hoje = new Date();
       const pad = (n)=> String(n).padStart(2,"0");
-      document.getElementById("mesAno").value = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
+      document.getElementById("mesAno").value = \`\${hoje.getFullYear()}-\${pad(hoje.getMonth()+1)}\`;
       return atualizarPainel();
     }
 
     document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-    const mesBR = `${sel.m}/${sel.y}`;
-    document.getElementById("reportPeriodo").innerText = `Período: ${mesBR}`;
-    document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
+    const mesBR = \`\${sel.m}/\${sel.y}\`;
+    document.getElementById("reportPeriodo").innerText = \`Período: \${mesBR}\`;
+    document.getElementById("reportGeradoEm").innerText = \`Gerado em: \${agoraBR()}\`;
 
     if(contratoAtual === "pta-inveco"){
-      const prefixo = `${sel.y}-${sel.m}`;
+      const prefixo = \`\${sel.y}-\${sel.m}\`;
       const registrosMes = PTA_LISTA.filter(r => (r.dataISO || "").startsWith(prefixo));
 
       document.getElementById("kpiDias").innerText = registrosMes.length;
@@ -1245,24 +1253,25 @@
         pbody.innerHTML = registrosMes.length
           ? registrosMes
               .sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||""))
-              .map(r => `
+              .map(r => \`
                 <tr>
-                  <td><strong>${r.dataBR || formatarDataBR(r.dataISO)}</strong></td>
-                  <td>${r.condutor || ""}</td>
-                  <td>${(r.kmIni ?? "")}</td>
-                  <td>${(r.kmFim ?? "")}</td>
-                  <td>${r.local || ""}</td>
-                  <td>${r.descricao || ""}</td>
-                  <td>${r.assinatura ? `<img class="sig-print" src="${r.assinatura}" alt="Assinatura">` : ""}</td>
+                  <td><strong>\${r.dataBR || formatarDataBR(r.dataISO)}</strong></td>
+                  <td>\${r.condutor || ""}</td>
+                  <td>\${(r.kmIni ?? "")}</td>
+                  <td>\${(r.kmFim ?? "")}</td>
+                  <td>\${r.local || ""}</td>
+                  <td>\${r.descricao || ""}</td>
+                  <td>\${r.assinatura ? \`<img class="sig-print" src="\${r.assinatura}" alt="Assinatura">\` : ""}</td>
                 </tr>
-              `).join("")
-          : `<tr><td colspan="7">Sem registros neste mês.</td></tr>`;
+              \`).join("")
+          : \`<tr><td colspan="7">Sem registros neste mês.</td></tr>\`;
       }
+
       return;
     }
 
-    const prefixo = `${sel.y}-${sel.m}`;
-    const registrosMes = LISTA.filter(r => (r.dataISO||"").startsWith(prefixo));
+    const prefixo = \`\${sel.y}-\${sel.m}\`;
+    const registrosMes = LISTA.filter(r => r.dataISO.startsWith(prefixo));
 
     const diasRegistrados = registrosMes.length;
     const totalPresencas = registrosMes.reduce((acc,r)=> acc + ((r.pessoas||[]).length), 0);
@@ -1279,39 +1288,39 @@
     const maxDias = ranking.length ? Math.max(...ranking.map(x=>x.dias)) : 0;
 
     document.getElementById("tabelaRanking").innerHTML = ranking.length
-      ? ranking.map((x,i)=>`
+      ? ranking.map((x,i)=>\`
           <tr>
-            <td>${i+1}</td>
-            <td>${x.nome}</td>
-            <td><strong>${x.dias}</strong></td>
-            <td><div class="bar"><div class="bar-fill" style="width:${maxDias ? (x.dias/maxDias*100).toFixed(0) : 0}%;"></div></div></td>
+            <td>\${i+1}</td>
+            <td>\${x.nome}</td>
+            <td><strong>\${x.dias}</strong></td>
+            <td><div class="bar"><div class="bar-fill" style="width:\${maxDias ? (x.dias/maxDias*100).toFixed(0) : 0}%;"></div></div></td>
           </tr>
-        `).join("")
-      : `<tr><td colspan="4" class="muted">Sem registros neste mês.</td></tr>`;
+        \`).join("")
+      : \`<tr><td colspan="4" class="muted">Sem registros neste mês.</td></tr>\`;
 
     const ordenados = [...registrosMes].sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
     const exibidaMes = mostrarTodosMes ? ordenados : ordenados.slice(0, LIMITE_MES);
 
     document.getElementById("tabelaMes").innerHTML = exibidaMes.length
-      ? exibidaMes.map(r=>`
+      ? exibidaMes.map(r=>\`
           <tr>
-            <td><strong>${r.dataBR}</strong></td>
-            <td>${(r.pessoas||[]).join("<br>")}</td>
+            <td><strong>\${r.dataBR}</strong></td>
+            <td>\${(r.pessoas||[]).join("<br>")}</td>
           </tr>
-        `).join("")
-      : `<tr><td colspan="2" class="muted">Sem registros neste mês.</td></tr>`;
+        \`).join("")
+      : \`<tr><td colspan="2" class="muted">Sem registros neste mês.</td></tr>\`;
 
     atualizarBotaoVerMaisMes(registrosMes.length);
 
     document.getElementById("printRanking").innerHTML = ranking.length
-      ? ranking.map((x,i)=>`<tr><td>${i+1}</td><td>${x.nome}</td><td><strong>${x.dias}</strong></td></tr>`).join("")
-      : `<tr><td colspan="3">Sem registros neste mês.</td></tr>`;
+      ? ranking.map((x,i)=>\`<tr><td>\${i+1}</td><td>\${x.nome}</td><td><strong>\${x.dias}</strong></td></tr>\`).join("")
+      : \`<tr><td colspan="3">Sem registros neste mês.</td></tr>\`;
 
     document.getElementById("printMes").innerHTML = registrosMes.length
-      ? [...registrosMes].sort((a,b)=>a.dataISO.localeCompare(b.dataISO)).map(r=>`
-          <tr><td><strong>${r.dataBR}</strong></td><td>${(r.pessoas||[]).join(", ")}</td></tr>
-        `).join("")
-      : `<tr><td colspan="2">Sem registros neste mês.</td></tr>`;
+      ? [...registrosMes].sort((a,b)=>a.dataISO.localeCompare(b.dataISO)).map(r=>\`
+          <tr><td><strong>\${r.dataBR}</strong></td><td>\${(r.pessoas||[]).join(", ")}</td></tr>
+        \`).join("")
+      : \`<tr><td colspan="2">Sem registros neste mês.</td></tr>\`;
 
     const top10 = ranking.slice(0, 10).map(x => ({ label: x.nome, value: x.dias }));
     drawBarChart("chartRanking", top10);
@@ -1341,7 +1350,7 @@
 
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
-    document.getElementById("mesAno").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+    document.getElementById("mesAno").value = \`\${d.getFullYear()}-\${pad(d.getMonth()+1)}\`;
     document.getElementById("mesAno").addEventListener("change", atualizarPainel);
 
     mostrarBlocosContrato();
@@ -1354,8 +1363,7 @@
     if(!user){
       mostrarApp(false);
       desligarRealtime();
-      const status = document.getElementById("loginStatus");
-      if(status) status.style.display = "none";
+      document.getElementById("loginStatus").style.display = "none";
       const btn = document.getElementById("btnEntrar");
       if(btn) btn.disabled = false;
       return;
@@ -1364,16 +1372,17 @@
     await carregarPermissoesUsuario(user);
 
     if(!allowedContracts.length){
-      mostrarApp(false);
-      const msg = document.getElementById("loginMsg");
-      if(msg) msg.textContent = "Seu usuário não tem acesso a nenhum contrato. Peça liberação ao gestor.";
-      await signOut(auth);
+      // mantém no app (pra ver "Sem acesso"), mas desabilita
+      montarSelectContratos();
+      document.getElementById("userBadge").textContent = \`Logado como: \${user.email || "—"}\`;
+      aplicarPermissoesUI();
+      mostrarApp(true);
       return;
     }
 
     montarSelectContratos();
 
-    document.getElementById("userBadge").textContent = `Logado como: ${user.email || "—"}`;
+    document.getElementById("userBadge").textContent = \`Logado como: \${user.email || "—"}\`;
     aplicarPermissoesUI();
     mostrarApp(true);
 
@@ -1383,6 +1392,7 @@
     atualizarPainel();
   });
 
+  // boot
   setRefsContrato();
 </script>
 
