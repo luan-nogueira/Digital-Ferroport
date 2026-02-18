@@ -137,11 +137,11 @@ body{
   align-items:center;
 }
 .input-icon input{
+  padding-right:48px;
   width:100%;
-  padding-right:48px; /* espaço do ícone */
 }
 
-/* ✅ FIX: centraliza o botão do ícone verticalmente */
+/* ✅ fix centralização do botão */
 .icon-btn{
   position:absolute;
   right:8px;
@@ -178,29 +178,17 @@ body{
   stroke-linecap:round;
 }
 
-/* ===================== UX: estados desabilitados ===================== */
+/* ===================== UX: desabilitados ===================== */
 select:disabled,
 input:disabled,
 button:disabled{
   opacity:.65;
   cursor:not-allowed;
 }
-
-/* deixa bem claro quando o select de contrato está travado */
 #contratoSelect:disabled{
   background:var(--card-2);
   border-color:var(--border);
   filter:grayscale(.15);
-}
-
-/* mensagem de login */
-#loginMsg{
-  margin-top:10px;
-  line-height:1.35;
-}
-#loginMsg.error{
-  color:#dc3545;
-  font-weight:700;
 }
 
 /* ===================== TOPO ===================== */
@@ -307,8 +295,6 @@ button:disabled{
   gap:14px;
   margin-top:12px;
 }
-
-/* PTA: grids menores (ficam melhores) */
 .pta-grid{
   grid-template-columns: 1fr 1fr 1fr;
 }
@@ -544,7 +530,7 @@ th{
   width:100%;
   height:180px;
   display:block;
-  touch-action:none; /* importante para desenhar no mobile */
+  touch-action:none;
   cursor:crosshair;
 }
 .sig-actions{
@@ -666,7 +652,7 @@ th{
   .split{ grid-template-columns: 1fr; }
   .dash{ grid-template-columns: 1fr; }
   .dash-box{ min-height:auto; }
-  .dash-canvas{ min-height:380px; } /* evita cortar no mobile */
+  .dash-canvas{ min-height:380px; }
 }
 
 @media (max-width: 800px){
