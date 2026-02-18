@@ -29,7 +29,6 @@
       <div class="field">
         <label>Senha</label>
 
-        <!-- ✅ senha + ícone ao lado -->
         <div class="input-icon">
           <input id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password">
 
@@ -39,7 +38,6 @@
             title="Mostrar/ocultar senha">
 
             <span class="cam-icon cam-closed">
-              <!-- câmera fechada -->
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
                 <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
@@ -48,7 +46,6 @@
             </span>
 
             <span class="cam-icon cam-open" style="display:none;">
-              <!-- câmera aberta -->
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
                 <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
@@ -187,7 +184,6 @@
       </div>
     </div>
 
-    <!-- ✅ DASHBOARD VISUAL -->
     <div class="dash">
       <div class="dash-box">
         <div class="dash-title">📊 Dias por técnico/condutor (Top 10)</div>
@@ -228,7 +224,7 @@
       <p class="muted" id="subtituloPresenca">Selecione a data e marque quem esteve no contrato.</p>
     </div>
 
-    <!-- ✅ FORM PADRÃO (presença) -->
+    <!-- ✅ FORM PADRÃO -->
     <div id="formPadrao">
       <div class="grid-2">
         <div class="field">
@@ -258,7 +254,7 @@
       </div>
     </div>
 
-    <!-- ✅ FORM PTA INVECO -->
+    <!-- ✅ FORM PTA INVECO (COM ASSINATURA DESENHADA) -->
     <div id="formPTA" style="display:none;">
       <div class="grid-3">
         <div class="field">
@@ -295,9 +291,18 @@
       </div>
 
       <div class="field" style="margin-top:12px;">
-        <label>Assinatura</label>
-        <input id="ptaAssinatura" type="text" placeholder="Nome / rubrica (texto)" />
-        <p class="muted small">Assinatura por enquanto em texto (se quiser, depois faço assinatura desenhada).</p>
+        <label>Assinatura (desenhe com o dedo)</label>
+
+        <div class="sig-wrap">
+          <canvas id="sigCanvas"></canvas>
+        </div>
+
+        <div class="sig-actions">
+          <button class="btn secondary small" type="button" onclick="limparAssinatura()">🧽 Limpar assinatura</button>
+          <span class="muted small" id="sigHint">Dica: se estiver difícil no celular, vire a tela na horizontal.</span>
+        </div>
+
+        <input id="ptaAssinaturaNome" type="text" placeholder="Opcional: Nome do assinante (texto)" style="margin-top:10px;">
       </div>
 
       <div class="actions">
@@ -347,7 +352,22 @@
 
 </div>
 
-<!-- ====== PDF ====== -->
+<!-- ====== MODAL ASSINATURA (PTA) ====== -->
+<div class="modal" id="sigModal" style="display:none;">
+  <div class="modal-backdrop" onclick="fecharAssinaturaModal()"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">Assinatura</div>
+      <button class="btn secondary small" type="button" onclick="fecharAssinaturaModal()">Fechar</button>
+    </div>
+    <div class="modal-body">
+      <img id="sigModalImg" alt="Assinatura" />
+      <div class="muted small" id="sigModalText"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== PDF (mantido) ====== -->
 <section class="print-only report">
   <div class="report-head">
     <div class="report-logos">
@@ -436,9 +456,8 @@
   let unsubDiarios = null;
   let unsubNomes = null;
 
-  // ===================== TEMA (CLARO / ESCURO) =====================
+  // ===================== TEMA =====================
   const KEY_TEMA = "tema_site";
-
   function aplicarTema(theme){
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem(KEY_TEMA, theme);
@@ -451,18 +470,16 @@
 
     setTimeout(() => atualizarPainel(), 10);
   }
-
   window.toggleTema = function(){
     const atual = document.documentElement.getAttribute("data-theme") || "light";
     aplicarTema(atual === "dark" ? "light" : "dark");
   };
-
   window.addEventListener("DOMContentLoaded", () => {
     const salvo = localStorage.getItem(KEY_TEMA) || "light";
     aplicarTema(salvo);
   });
 
-  // ===================== MOSTRAR/OCULTAR SENHA (CÂMERA) =====================
+  // ===================== MOSTRAR/OCULTAR SENHA =====================
   window.toggleSenha = function(inputId, btn){
     const input = document.getElementById(inputId);
     if(!input || !btn) return;
@@ -478,10 +495,142 @@
     }
   };
 
-  // ===================== CONTRATO / MODO PTA =====================
-  function isPTA(){
-    return contratoAtual === "pta-inveco";
+  // ===================== ASSINATURA DESENHADA =====================
+  let sig = {
+    canvas: null,
+    ctx: null,
+    drawing: false,
+    lastX: 0,
+    lastY: 0
+  };
+
+  function setupSignatureCanvas(){
+    const c = document.getElementById("sigCanvas");
+    if(!c) return;
+
+    sig.canvas = c;
+    sig.ctx = c.getContext("2d", { willReadFrequently: false });
+
+    // tamanho responsivo
+    const parent = c.parentElement;
+    const w = Math.max(280, parent.clientWidth);
+    const h = 160;
+
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = w + "px";
+    c.style.height = h + "px";
+    c.width = Math.floor(w * dpr);
+    c.height = Math.floor(h * dpr);
+
+    sig.ctx.setTransform(dpr,0,0,dpr,0,0);
+    sig.ctx.lineCap = "round";
+    sig.ctx.lineJoin = "round";
+    sig.ctx.lineWidth = 2.2;
+    sig.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#111";
+
+    // evita scroll ao desenhar no mobile
+    c.style.touchAction = "none";
   }
+
+  function getPos(evt){
+    const rect = sig.canvas.getBoundingClientRect();
+    const x = (evt.clientX - rect.left);
+    const y = (evt.clientY - rect.top);
+    return { x, y };
+  }
+
+  function startDraw(evt){
+    if(!sig.canvas) return;
+    sig.drawing = true;
+    const p = getPos(evt);
+    sig.lastX = p.x; sig.lastY = p.y;
+    sig.ctx.beginPath();
+    sig.ctx.moveTo(sig.lastX, sig.lastY);
+  }
+
+  function moveDraw(evt){
+    if(!sig.drawing || !sig.canvas) return;
+    const p = getPos(evt);
+    sig.ctx.lineTo(p.x, p.y);
+    sig.ctx.stroke();
+    sig.lastX = p.x; sig.lastY = p.y;
+  }
+
+  function endDraw(){
+    sig.drawing = false;
+  }
+
+  function clearSignature(){
+    if(!sig.canvas) return;
+    const rect = sig.canvas.getBoundingClientRect();
+    sig.ctx.clearRect(0, 0, rect.width, rect.height);
+  }
+
+  function signatureIsEmpty(){
+    if(!sig.canvas) return true;
+    const ctx = sig.ctx;
+    const w = sig.canvas.width, h = sig.canvas.height;
+    const pixels = ctx.getImageData(0,0,w,h).data;
+    for(let i=3; i<pixels.length; i+=4){
+      if(pixels[i] !== 0) return false; // alpha
+    }
+    return true;
+  }
+
+  function getSignatureDataURL(){
+    if(!sig.canvas) return "";
+    if(signatureIsEmpty()) return "";
+
+    // export reduzido (para não ficar enorme no Firestore)
+    const maxW = 700;
+    const rect = sig.canvas.getBoundingClientRect();
+    const scale = Math.min(1, maxW / rect.width);
+
+    const out = document.createElement("canvas");
+    out.width = Math.floor(rect.width * scale);
+    out.height = Math.floor(rect.height * scale);
+
+    const octx = out.getContext("2d");
+    octx.clearRect(0,0,out.width,out.height);
+    octx.drawImage(sig.canvas, 0,0, out.width, out.height);
+
+    return out.toDataURL("image/png");
+  }
+
+  window.limparAssinatura = function(){
+    clearSignature();
+  };
+
+  function bindSignatureEvents(){
+    const c = document.getElementById("sigCanvas");
+    if(!c) return;
+
+    // pointer events (funciona mouse + touch)
+    c.addEventListener("pointerdown", (e)=>{ c.setPointerCapture(e.pointerId); startDraw(e); });
+    c.addEventListener("pointermove", (e)=> moveDraw(e));
+    c.addEventListener("pointerup", ()=> endDraw());
+    c.addEventListener("pointercancel", ()=> endDraw());
+    c.addEventListener("pointerleave", ()=> endDraw());
+  }
+
+  // modal assinatura
+  window.abrirAssinaturaModal = function(dataUrl, nomeTexto){
+    const modal = document.getElementById("sigModal");
+    const img = document.getElementById("sigModalImg");
+    const txt = document.getElementById("sigModalText");
+    if(!modal || !img) return;
+
+    img.src = dataUrl || "";
+    txt.textContent = nomeTexto ? `Assinante: ${nomeTexto}` : "";
+    modal.style.display = "block";
+  };
+  window.fecharAssinaturaModal = function(){
+    const modal = document.getElementById("sigModal");
+    if(modal) modal.style.display = "none";
+  };
+
+  // ===================== CONTRATO / UI =====================
+  function isPTA(){ return contratoAtual === "pta-inveco"; }
 
   function aplicarModoContratoUI(){
     const formPadrao = document.getElementById("formPadrao");
@@ -497,38 +646,40 @@
     const thCol7 = document.getElementById("thCol7");
 
     if(isPTA()){
-      if(formPadrao) formPadrao.style.display = "none";
-      if(formPTA) formPTA.style.display = "block";
-      if(titulo) titulo.textContent = "Controle de Uso — PTA INVECO";
-      if(subtitulo) subtitulo.textContent = "Preencha os dados do veículo por dia (condutor, km, local, descrição e assinatura).";
+      formPadrao.style.display = "none";
+      formPTA.style.display = "block";
+      titulo.textContent = "Controle de Uso — PTA INVECO";
+      subtitulo.textContent = "Preencha os dados do veículo por dia (condutor, km, local, descrição e assinatura).";
 
-      if(thCol2) thCol2.textContent = "Condutor";
-      if(thCol3) thCol3.style.display = "";
-      if(thCol4) thCol4.style.display = "";
-      if(thCol5) thCol5.style.display = "";
-      if(thCol6) thCol6.style.display = "";
-      if(thCol7) thCol7.style.display = "";
+      thCol2.textContent = "Condutor";
+      thCol3.style.display = "";
+      thCol4.style.display = "";
+      thCol5.style.display = "";
+      thCol6.style.display = "";
+      thCol7.style.display = "";
+
+      // prepara assinatura
+      setupSignatureCanvas();
     } else {
-      if(formPadrao) formPadrao.style.display = "block";
-      if(formPTA) formPTA.style.display = "none";
-      if(titulo) titulo.textContent = "Presença por dia";
-      if(subtitulo) subtitulo.textContent = "Selecione a data e marque quem esteve no contrato.";
+      formPadrao.style.display = "block";
+      formPTA.style.display = "none";
+      titulo.textContent = "Presença por dia";
+      subtitulo.textContent = "Selecione a data e marque quem esteve no contrato.";
 
-      if(thCol2) thCol2.textContent = "Pessoas";
-      if(thCol3) thCol3.style.display = "none";
-      if(thCol4) thCol4.style.display = "none";
-      if(thCol5) thCol5.style.display = "none";
-      if(thCol6) thCol6.style.display = "none";
-      if(thCol7) thCol7.style.display = "none";
+      thCol2.textContent = "Pessoas";
+      thCol3.style.display = "none";
+      thCol4.style.display = "none";
+      thCol5.style.display = "none";
+      thCol6.style.display = "none";
+      thCol7.style.display = "none";
     }
   }
 
-  /* ===================== CANVAS / CHART ===================== */
+  /* ===================== CHART ===================== */
   function cssVar(name, fallback){
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
   }
-
   function fitCanvasToCSS(canvas){
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
@@ -542,7 +693,6 @@
     ctx.setTransform(dpr,0,0,dpr,0,0);
     return { ctx, w: cssW, h: cssH };
   }
-
   function roundRect(ctx, x, y, w, h, r){
     const rr = Math.min(r, h/2, w/2);
     ctx.beginPath();
@@ -553,7 +703,6 @@
     ctx.arcTo(x, y, x+w, y, rr);
     ctx.closePath();
   }
-
   function drawBarChart(canvasId, items){
     const canvas = document.getElementById(canvasId);
     if(!canvas) return;
@@ -586,7 +735,6 @@
     const maxV = Math.max(...items.map(x=>x.value), 1);
     const rowH = Math.max(30, Math.floor(innerH / items.length));
     const barH = Math.max(14, rowH - 14);
-
     const labelW = Math.max(110, Math.min(190, Math.floor(innerW * 0.42)));
 
     ctx.font = "12px Arial";
@@ -597,7 +745,6 @@
 
       ctx.fillStyle = textColor;
       ctx.textAlign = "left";
-
       const maxChars = (w < 420) ? 18 : 26;
       const label = it.label.length > maxChars ? it.label.slice(0,maxChars) + "…" : it.label;
       ctx.fillText(label, padL, y);
@@ -736,7 +883,7 @@
     desligarRealtime();
 
     unsubDiarios = onSnapshot(refDiarios, (snap) => {
-      LISTA = snap.docs.map(d => d.data()).sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
+      LISTA = snap.docs.map(d => d.data()).sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||""));
       carregarDiario();
       atualizarPainel();
     });
@@ -755,12 +902,7 @@
 
     document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
 
-    // ✅ aplica modo PTA/padrão
     aplicarModoContratoUI();
-
-    // reseta
-    selecaoDiaria = [];
-    renderChipsDiario();
     limparDiario(true);
 
     mostrarTodosMes = false;
@@ -788,15 +930,7 @@
         renderChipsDiario();
       };
 
-      const remover = document.createElement("span");
-      remover.className = "remove";
-      remover.title = "Excluir nome (gestor)";
-      remover.innerText = "✖";
-      remover.style.display = isAdmin ? "inline-flex" : "none";
-      remover.onclick = (e) => { e.stopPropagation(); excluirNome(nome); };
-
       box.appendChild(btn);
-      box.appendChild(remover);
       wrap.appendChild(box);
     });
   };
@@ -813,13 +947,6 @@
     input.value = "";
   };
 
-  async function excluirNome(nome){
-    if(!isAdmin) return alert("Somente gestor pode excluir nomes.");
-    if(!confirm(`Deseja excluir "${nome}"?`)) return;
-    await deleteDoc(doc(db, "contratos", contratoAtual, "nomes", idSeguro(nome)));
-    selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
-  }
-
   window.salvarDiario = async function(){
     if(isPTA()){
       const data = document.getElementById("ptaData").value;
@@ -828,16 +955,24 @@
       const kmFinal = document.getElementById("ptaKmFinal").value.trim();
       const local = document.getElementById("ptaLocal").value.trim();
       const descricao = document.getElementById("ptaDescricao").value.trim();
-      const assinatura = document.getElementById("ptaAssinatura").value.trim();
+      const assinaturaNome = document.getElementById("ptaAssinaturaNome").value.trim();
+      const assinaturaImg = getSignatureDataURL();
 
       if(!data) return alert("Selecione a data.");
       if(!condutor) return alert("Informe o nome do condutor.");
+      if(!assinaturaImg) return alert("Desenhe a assinatura antes de salvar.");
 
       const item = {
         tipo: "pta",
         dataISO: data,
         dataBR: formatarDataBR(data),
-        condutor, kmInicial, kmFinal, local, descricao, assinatura
+        condutor,
+        kmInicial,
+        kmFinal,
+        local,
+        descricao,
+        assinaturaNome,
+        assinaturaImg
       };
 
       await setDoc(doc(db, "contratos", contratoAtual, "diarios", data), item);
@@ -854,50 +989,23 @@
     limparDiario();
   };
 
-  window.editarRegistro = function(dataISO){
-    const reg = LISTA.find(x => x.dataISO === dataISO);
-    if(!reg) return alert("Registro não encontrado.");
-
+  window.limparDiario = function(){
     if(isPTA()){
-      document.getElementById("ptaData").value = reg.dataISO || "";
-      document.getElementById("ptaCondutor").value = reg.condutor || "";
-      document.getElementById("ptaKmInicial").value = reg.kmInicial || "";
-      document.getElementById("ptaKmFinal").value = reg.kmFinal || "";
-      document.getElementById("ptaLocal").value = reg.local || "";
-      document.getElementById("ptaDescricao").value = reg.descricao || "";
-      document.getElementById("ptaAssinatura").value = reg.assinatura || "";
-    } else {
-      document.getElementById("dataDia").value = reg.dataISO;
-      selecaoDiaria = [...(reg.pessoas || [])];
-      renderChipsDiario();
-    }
-
-    document.getElementById("cardPresenca").scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  window.apagarRegistro = async function(dataISO){
-    if(!isAdmin) return alert("Somente gestor pode apagar registros.");
-    if(!confirm("Deseja apagar somente este dia registrado?")) return;
-    await deleteDoc(doc(db, "contratos", contratoAtual, "diarios", dataISO));
-    limparDiario();
-  };
-
-  window.limparDiario = function(silencioso=false){
-    if(isPTA()){
-      document.getElementById("ptaData").value = "";
+      document.getElementById("ptaData").value = hojeISO();
       document.getElementById("ptaCondutor").value = "";
       document.getElementById("ptaKmInicial").value = "";
       document.getElementById("ptaKmFinal").value = "";
       document.getElementById("ptaLocal").value = "";
       document.getElementById("ptaDescricao").value = "";
-      document.getElementById("ptaAssinatura").value = "";
+      document.getElementById("ptaAssinaturaNome").value = "";
+      clearSignature();
       return;
     }
 
-    document.getElementById("dataDia").value = "";
+    document.getElementById("dataDia").value = hojeISO();
     selecaoDiaria = [];
     renderChipsDiario();
-    if(!silencioso) document.getElementById("novoNome").value = "";
+    document.getElementById("novoNome").value = "";
   };
 
   window.apagarDiarios = async function(){
@@ -910,13 +1018,13 @@
 
   window.exportarDiarioCSV = function(){
     if(LISTA.length === 0) return alert("Não há registros para exportar.");
-    const ordenado = [...LISTA].sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
+    const ordenado = [...LISTA].sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||""));
 
     if(isPTA()){
-      let csv = "Contrato;Data;Nome do Condutor;Km Inicial;Km Final;Local da Atividade;Descrição da Atividade;Assinatura\n";
+      let csv = "Contrato;Data;Nome do Condutor;Km Inicial;Km Final;Local da Atividade;Descrição da Atividade;Assinatura (texto)\n";
       ordenado.forEach(r => {
         const desc = (r.descricao || "").replaceAll('"','""');
-        csv += `${nomeContratoBonito(contratoAtual)};${r.dataBR || ""};${r.condutor || ""};${r.kmInicial || ""};${r.kmFinal || ""};${r.local || ""};"${desc}";${r.assinatura || ""}\n`;
+        csv += `${nomeContratoBonito(contratoAtual)};${r.dataBR || ""};${r.condutor || ""};${r.kmInicial || ""};${r.kmFinal || ""};${r.local || ""};"${desc}";${r.assinaturaNome || ""}\n`;
       });
 
       const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
@@ -951,29 +1059,18 @@
     carregarDiario();
   };
 
-  function atualizarBotaoVerMaisMes(total){
-    const btn = document.getElementById("btnVerMaisMes");
-    if(!btn) return;
-    if(total <= LIMITE_MES){ btn.style.display="none"; return; }
-    btn.style.display="inline-block";
-    btn.innerText = mostrarTodosMes ? "Ver menos" : "Ver mais registros";
-  }
-  window.toggleVerMaisMes = function(){
-    mostrarTodosMes = !mostrarTodosMes;
-    atualizarPainel();
-  };
-
   function carregarDiario(){
     aplicarModoContratoUI();
 
     const tbody = document.getElementById("tabelaDiario");
     tbody.innerHTML = "";
 
-    const lista = [...LISTA].sort((a,b)=> b.dataISO.localeCompare(a.dataISO));
+    const lista = [...LISTA].sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||""));
     const exibida = mostrarTodosRegistros ? lista : lista.slice(0, LIMITE_REGISTROS);
 
     exibida.forEach(r => {
       if(isPTA()){
+        const temAss = !!r.assinaturaImg;
         tbody.innerHTML += `
           <tr>
             <td><strong>${r.dataBR || ""}</strong></td>
@@ -982,7 +1079,15 @@
             <td>${r.kmFinal || ""}</td>
             <td>${r.local || ""}</td>
             <td>${r.descricao || ""}</td>
-            <td>${r.assinatura || ""}</td>
+            <td>
+              ${temAss
+                ? `<button class="btn secondary small" type="button"
+                    onclick="abrirAssinaturaModal('${r.assinaturaImg}', '${(r.assinaturaNome||"").replaceAll("'","\\'")}')">
+                    Ver assinatura
+                   </button>`
+                : `<span class="muted small">—</span>`
+              }
+            </td>
             <td>
               <div class="row-actions">
                 <button class="btn small secondary" type="button" onclick="editarRegistro('${r.dataISO}')">✏ Editar</button>
@@ -1011,6 +1116,47 @@
     atualizarBotaoVerMais(lista.length);
   }
 
+  window.editarRegistro = function(dataISO){
+    const reg = LISTA.find(x => x.dataISO === dataISO);
+    if(!reg) return alert("Registro não encontrado.");
+
+    if(isPTA()){
+      document.getElementById("ptaData").value = reg.dataISO || hojeISO();
+      document.getElementById("ptaCondutor").value = reg.condutor || "";
+      document.getElementById("ptaKmInicial").value = reg.kmInicial || "";
+      document.getElementById("ptaKmFinal").value = reg.kmFinal || "";
+      document.getElementById("ptaLocal").value = reg.local || "";
+      document.getElementById("ptaDescricao").value = reg.descricao || "";
+      document.getElementById("ptaAssinaturaNome").value = reg.assinaturaNome || "";
+
+      setupSignatureCanvas();
+      clearSignature();
+      // desenha assinatura existente no canvas (se tiver)
+      if(reg.assinaturaImg){
+        const img = new Image();
+        img.onload = () => {
+          const rect = sig.canvas.getBoundingClientRect();
+          sig.ctx.drawImage(img, 0,0, rect.width, rect.height);
+        };
+        img.src = reg.assinaturaImg;
+      }
+    } else {
+      document.getElementById("dataDia").value = reg.dataISO || hojeISO();
+      selecaoDiaria = [...(reg.pessoas || [])];
+      renderChipsDiario();
+    }
+
+    document.getElementById("cardPresenca").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  window.apagarRegistro = async function(dataISO){
+    if(!isAdmin) return alert("Somente gestor pode apagar registros.");
+    if(!confirm("Deseja apagar somente este dia registrado?")) return;
+    await deleteDoc(doc(db, "contratos", contratoAtual, "diarios", dataISO));
+    limparDiario();
+  };
+
+  // painel (mantido do seu)
   window.atualizarPainel = function(){
     const sel = getMesAnoSelecionado();
     if(!sel){
@@ -1024,8 +1170,6 @@
     const registrosMes = LISTA.filter(r => (r.dataISO || "").startsWith(prefixo));
 
     const diasRegistrados = registrosMes.length;
-
-    // ✅ totalPresencas: no PTA conta 1 por dia; no padrão soma pessoas
     const totalPresencas = isPTA()
       ? diasRegistrados
       : registrosMes.reduce((acc,r)=> acc + ((r.pessoas||[]).length), 0);
@@ -1033,7 +1177,6 @@
     document.getElementById("kpiDias").innerText = diasRegistrados;
     document.getElementById("kpiPresencas").innerText = totalPresencas;
 
-    // ✅ contagem: no PTA por condutor; no padrão por pessoas
     const contagem = new Map();
     if(isPTA()){
       registrosMes.forEach(r => {
@@ -1044,7 +1187,6 @@
     } else {
       registrosMes.forEach(r => Array.from(new Set(r.pessoas||[])).forEach(p => contagem.set(p,(contagem.get(p)||0)+1)));
     }
-
     document.getElementById("kpiTecnicos").innerText = contagem.size;
 
     const ranking = Array.from(contagem.entries()).map(([nome,dias])=>({nome,dias}))
@@ -1062,7 +1204,6 @@
         `).join("")
       : `<tr><td colspan="4" class="muted">Sem registros neste mês.</td></tr>`;
 
-    // tabela mês (padrão simples)
     const ordenados = [...registrosMes].sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||""));
     const exibidaMes = mostrarTodosMes ? ordenados : ordenados.slice(0, LIMITE_MES);
 
@@ -1074,24 +1215,6 @@
           </tr>
         `).join("")
       : `<tr><td colspan="2" class="muted">Sem registros neste mês.</td></tr>`;
-
-    atualizarBotaoVerMaisMes(registrosMes.length);
-
-    // print
-    document.getElementById("printRanking").innerHTML = ranking.length
-      ? ranking.map((x,i)=>`<tr><td>${i+1}</td><td>${x.nome}</td><td><strong>${x.dias}</strong></td></tr>`).join("")
-      : `<tr><td colspan="3">Sem registros neste mês.</td></tr>`;
-
-    document.getElementById("printMes").innerHTML = registrosMes.length
-      ? [...registrosMes].sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||"")).map(r=>`
-          <tr><td><strong>${r.dataBR || ""}</strong></td><td>${isPTA() ? (r.condutor || "") : (r.pessoas||[]).join(", ")}</td></tr>
-        `).join("")
-      : `<tr><td colspan="2">Sem registros neste mês.</td></tr>`;
-
-    const mesBR = `${sel.m}/${sel.y}`;
-    document.getElementById("reportPeriodo").innerText = `Período: ${mesBR}`;
-    document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
-    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
 
     // gráfico
     const top10 = ranking.slice(0, 10).map(x => ({ label: x.nome, value: x.dias }));
@@ -1107,6 +1230,11 @@
     document.getElementById("insightTopDias").textContent = String(topDias);
     document.getElementById("insightMediaDia").textContent = mediaDia.toFixed(1);
     document.getElementById("insightMediaTec").textContent = mediaTec.toFixed(1);
+
+    // print
+    document.getElementById("reportPeriodo").innerText = `Período: ${sel.m}/${sel.y}`;
+    document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
+    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
   };
 
   window.gerarPDF = function(){
@@ -1120,18 +1248,36 @@
     selContrato.addEventListener("change", ()=> setContrato(selContrato.value));
 
     document.getElementById("dataDia").value = hojeISO();
-    const ptaData = document.getElementById("ptaData");
-    if(ptaData) ptaData.value = hojeISO();
+    document.getElementById("ptaData").value = hojeISO();
 
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
     document.getElementById("mesAno").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
     document.getElementById("mesAno").addEventListener("change", atualizarPainel);
 
-    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-
     aplicarModoContratoUI();
-    window.addEventListener("resize", () => atualizarPainel());
+
+    // assinatura
+    setupSignatureCanvas();
+    bindSignatureEvents();
+
+    window.addEventListener("resize", () => {
+      // reconfigura assinatura (mantém melhor no mobile)
+      if(isPTA()){
+        const img = getSignatureDataURL(); // salva "snap"
+        setupSignatureCanvas();
+        clearSignature();
+        if(img){
+          const im = new Image();
+          im.onload = () => {
+            const rect = sig.canvas.getBoundingClientRect();
+            sig.ctx.drawImage(im, 0,0, rect.width, rect.height);
+          };
+          im.src = img;
+        }
+      }
+      atualizarPainel();
+    });
   }
 
   onAuthStateChanged(auth, (user) => {
