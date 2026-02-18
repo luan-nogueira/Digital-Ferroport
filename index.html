@@ -1,24 +1,461 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presença diária — Contratos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<!-- ✅ fallback: se o Firebase/JS falhar, pelo menos o login aparece -->
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const login = document.getElementById("loginBox");
+    const app = document.getElementById("appRoot");
+    if (login) login.style.display = "flex";
+    if (app) app.style.display = "none";
+  });
+</script>
+
+<!-- ===================== LOGIN ===================== -->
+<!-- ✅ REMOVIDO display:none (evita tela branca) -->
+<section class="login-page" id="loginBox">
+  <div class="login-card">
+    <div class="login-logos">
+      <img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
+    </div>
+
+    <h2>Acesso restrito</h2>
+    <p class="muted">Entre com seu e-mail e senha para acessar o controle.</p>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>E-mail</label>
+        <input id="loginEmail" type="email" placeholder="seuemail@empresa.com" autocomplete="username">
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+
+        <div class="input-icon">
+          <input id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password">
+
+          <button class="icon-btn" type="button"
+            onclick="toggleSenha('loginSenha', this)"
+            aria-label="Mostrar/ocultar senha"
+            title="Mostrar/ocultar senha">
+
+            <span class="cam-icon cam-closed">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
+                <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
+                <path d="M3 3l18 18" class="stroke"></path>
+              </svg>
+            </span>
+
+            <span class="cam-icon cam-open" style="display:none;">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
+                <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
+              </svg>
+            </span>
+
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions center">
+      <button class="btn" id="btnEntrar" type="button" onclick="login()">Entrar</button>
+      <button class="btn secondary" type="button" onclick="esqueciSenha()">Esqueci minha senha</button>
+      <button class="btn secondary small" type="button" id="btnTemaLogin" onclick="toggleTema()">🌙 Tema</button>
+    </div>
+
+    <div class="login-status" id="loginStatus" style="display:none;">
+      <span class="spinner"></span>
+      <span>Entrando...</span>
+    </div>
+
+    <p class="muted small center" id="loginMsg"></p>
+    <p class="muted tiny center">DIGITAL • EMIVE — Tecnologia e Segurança</p>
+  </div>
+</section>
+
+<!-- ===================== APP ===================== -->
+<div id="appRoot" style="display:none;">
+
+<header class="topbar no-print">
+  <div class="brand">
+    <div class="logos">
+      <img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
+    </div>
+
+    <div>
+      <div class="brand-title">Controle — Contratos</div>
+      <div class="brand-subtitle" id="userBadge">Logado como: —</div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn secondary small" type="button" id="btnTema" onclick="toggleTema()">🌙 Tema</button>
+
+      <div class="field inline">
+        <label>Contrato</label>
+        <select id="contratoSelect"></select>
+      </div>
+
+      <span class="role-pill" id="rolePill">—</span>
+      <button class="btn secondary small" type="button" onclick="logout()">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ===================== PAINEL (MÊS) ===================== -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Painel</h2>
+      <p class="muted">Selecione o mês para gerar relatório em PDF e visualizar dados do contrato.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Mês/Ano</label>
+        <input id="mesAno" type="month" />
+      </div>
+
+      <div class="field">
+        <label>Resumo</label>
+        <div class="kpi-wrap">
+          <div class="kpi">
+            <div class="kpi-label">Dias registrados</div>
+            <div class="kpi-value" id="kpiDias">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Técnicos/Condutores</div>
+            <div class="kpi-value" id="kpiTecnicos">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Presenças/Registros</div>
+            <div class="kpi-value" id="kpiPresencas">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Ações</label>
+        <div class="actions">
+          <button class="btn" type="button" onclick="atualizarPainel()">🔄 Atualizar</button>
+          <button class="btn secondary" type="button" onclick="gerarPDF()">📄 Gerar PDF</button>
+        </div>
+        <p class="muted small">O PDF é gerado via impressão do navegador (Ctrl+P).</p>
+      </div>
+    </div>
+
+    <!-- ✅ Ferroport (presença) -->
+    <div id="blocoFerroport">
+      <div class="split">
+        <div>
+          <h3 class="h3">Ranking (dias trabalhados no mês)</h3>
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Técnico</th>
+                <th>Dias</th>
+                <th style="width:38%;">Progresso</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaRanking"></tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 class="h3">Registros do mês</h3>
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Pessoas</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaMes"></tbody>
+          </table>
+
+          <div class="ver-mais-wrap">
+            <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
+              Ver mais registros
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash">
+        <div class="dash-box">
+          <div class="dash-title">📊 Dias por técnico (Top 10)</div>
+          <canvas id="chartRanking" class="dash-canvas"></canvas>
+          <p class="muted small">Mostra quem trabalhou mais dias no mês selecionado.</p>
+        </div>
+
+        <div class="dash-box">
+          <div class="dash-title">📌 Insights rápidos</div>
+          <div class="insights">
+            <div class="insight">
+              <div class="insight-label">Maior frequência</div>
+              <div class="insight-value" id="insightTopNome">—</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Dias do Top 1</div>
+              <div class="insight-value" id="insightTopDias">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média presenças/dia</div>
+              <div class="insight-value" id="insightMediaDia">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média dias/técnico</div>
+              <div class="insight-value" id="insightMediaTec">0</div>
+            </div>
+          </div>
+          <p class="muted small">Resumo automático com base no mês selecionado.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ PTA INVECO (controle de uso) -->
+    <div id="blocoPTA" style="display:none;">
+      <h3 class="h3">Controle de Uso — PTA INVECO</h3>
+      <p class="muted small">Preencha os campos e assine com o dedo/mouse. O registro fica salvo no banco.</p>
+
+      <div class="grid-3 pta-grid">
+        <div class="field">
+          <label>Data</label>
+          <input id="ptaData" type="date" />
+        </div>
+
+        <div class="field">
+          <label>Nome do Condutor</label>
+          <input id="ptaCondutor" type="text" placeholder="Ex: Alex" />
+        </div>
+
+        <div class="field">
+          <label>Local da Atividade</label>
+          <input id="ptaLocal" type="text" placeholder="Ex: Vast / Ferroport / GNA" />
+        </div>
+      </div>
+
+      <div class="grid-3 pta-grid">
+        <div class="field">
+          <label>Km Inicial</label>
+          <input id="ptaKmIni" type="number" inputmode="numeric" placeholder="Ex: 79754" />
+        </div>
+
+        <div class="field">
+          <label>Km Final</label>
+          <input id="ptaKmFim" type="number" inputmode="numeric" placeholder="Ex: 79779" />
+        </div>
+
+        <div class="field">
+          <label>Descrição da Atividade</label>
+          <input id="ptaDesc" type="text" placeholder="Ex: Instalação de Radar" />
+        </div>
+      </div>
+
+      <div class="pta-sign">
+        <div class="field">
+          <label>Assinatura (feita à mão)</label>
+          <div class="sig-wrap">
+            <canvas id="sigCanvas" class="sig-canvas"></canvas>
+          </div>
+
+          <div class="sig-actions">
+            <button class="btn secondary small" type="button" onclick="limparAssinatura()">🧽 Limpar assinatura</button>
+            <span class="muted small" id="sigHint">Assine dentro do quadro acima.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="button" onclick="salvarPTA()">💾 Salvar registro</button>
+        <button class="btn secondary" type="button" onclick="limparPTA()">🧹 Limpar</button>
+      </div>
+
+      <hr class="sep" />
+
+      <h3 class="h3">Registros (PTA INVECO)</h3>
+      <table class="table-compact">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome do Condutor</th>
+            <th>Km Inicial</th>
+            <th>Km Final</th>
+            <th>Local da Atividade</th>
+            <th>Descrição da Atividade</th>
+            <th>Assinatura</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaPTA"></tbody>
+      </table>
+
+      <div class="ver-mais-wrap">
+        <button class="btn secondary small" id="btnVerMaisPTA" type="button" onclick="toggleVerMaisPTA()">
+          Ver mais registros
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FERROPORT: FORM DIÁRIO ===================== -->
+  <section class="card" id="cardPresenca">
+    <div class="card-head">
+      <h2>Presença por dia (Ferroport)</h2>
+      <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Data</label>
+        <input id="dataDia" type="date" />
+      </div>
+
+      <div class="field">
+        <label>Pessoas</label>
+        <div class="chips" id="chipsDiario"></div>
+
+        <div class="add-nome">
+          <input type="text" id="novoNome" placeholder="Adicionar técnico (ex: João Silva)">
+          <button class="btn" type="button" onclick="adicionarNome()">+ Adicionar</button>
+        </div>
+
+        <p class="muted small">Os nomes ficam salvos no banco (tempo real).</p>
+        <p class="muted small" id="permMsg" style="display:none;">Você está como Técnico: algumas ações ficam bloqueadas.</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="button" onclick="salvarDiario()">💾 Salvar dia</button>
+      <button class="btn secondary" type="button" onclick="limparDiario()">🧹 Limpar</button>
+      <button class="btn danger" id="btnApagarTudo" type="button" onclick="apagarDiarios()">🗑 Apagar tudo</button>
+      <button class="btn" type="button" onclick="exportarDiarioCSV()">⬇ Exportar Excel</button>
+    </div>
+  </section>
+
+  <section class="card no-print" id="cardListaFerroport">
+    <div class="card-head">
+      <h2>Presenças registradas (Ferroport)</h2>
+      <p class="muted">Se salvar a mesma data novamente, o sistema atualiza. Use “Editar” para carregar um registro.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Pessoas</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaDiario"></tbody>
+    </table>
+
+    <div class="ver-mais-wrap">
+      <button class="btn secondary small" id="btnVerMais" type="button" onclick="toggleVerMais()">
+        Ver mais registros
+      </button>
+    </div>
+  </section>
+
+  <footer class="footer no-print">
+    DIGITAL • EMIVE • Tecnologia e Segurança
+  </footer>
+
+</main>
+
+</div>
+
+<!-- ===================== PDF ===================== -->
+<section class="print-only report">
+  <div class="report-head">
+    <div class="report-logos">
+      <img src="logo-digital.png" alt="Logo Digital" class="logo">
+      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
+    </div>
+
+    <div class="report-titles">
+      <div class="report-title">Relatório — <span id="reportContrato">—</span></div>
+      <div class="report-subtitle" id="reportPeriodo">Período: —</div>
+      <div class="report-subtitle" id="reportGeradoEm">Gerado em: —</div>
+    </div>
+  </div>
+
+  <!-- Ferroport (presença) -->
+  <div id="printFerroport">
+    <div class="report-grid">
+      <div class="report-box">
+        <div class="box-title">Ranking — Dias trabalhados</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Técnico</th>
+              <th>Dias</th>
+            </tr>
+          </thead>
+          <tbody id="printRanking"></tbody>
+        </table>
+      </div>
+
+      <div class="report-box">
+        <div class="box-title">Registros do mês</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Pessoas</th>
+            </tr>
+          </thead>
+          <tbody id="printMes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PTA (uso + assinatura) -->
+  <div id="printPTA" style="display:none;">
+    <div class="report-box" style="margin-top:14px;">
+      <div class="box-title">Controle de Uso — PTA INVECO</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome do Condutor</th>
+            <th>Km Inicial</th>
+            <th>Km Final</th>
+            <th>Local</th>
+            <th>Descrição</th>
+            <th>Assinatura</th>
+          </tr>
+        </thead>
+        <tbody id="printPTATbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    DIGITAL • EMIVE — Tecnologia e Segurança
+  </div>
+</section>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import {
-    getAuth,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    signOut,
-    sendPasswordResetEmail
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    doc,
-    setDoc,
-    deleteDoc,
-    onSnapshot,
-    getDocs,
-    getDoc
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  // ===================== FIREBASE CONFIG =====================
   const firebaseConfig = {
     apiKey: "AIzaSyBzgChouE4W25XnD-vFybJrKVN9yl3R0IQ",
     authDomain: "ferroportluannogueira.firebaseapp.com",
@@ -29,7 +466,7 @@
     measurementId: "G-61BRVCSHD7"
   };
 
-  // ✅ Lista completa de contratos possíveis no sistema
+  // ✅ contratos existentes no sistema
   const CONTRATOS = [
     { value: "ferroport",  label: "Ferroport" },
     { value: "pta-inveco", label: "PTA INVECO" }
@@ -39,7 +476,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // ===================== STATE =====================
   let LISTA = [];
   let NOMES = [];
   let selecaoDiaria = [];
@@ -58,9 +494,9 @@
   const KEY_CONTRATO = "contrato_atual";
   let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
 
-  // ✅ permissões vindas do Firestore users/{uid}
-  let allowedContracts = []; // ex: ["ferroport","pta-inveco"]
-  let isAdmin = false;       // role == gestor
+  // ✅ permissões por usuário (users/{uid})
+  let allowedContracts = [];
+  let isAdmin = false;
 
   let refDiarios = null;
   let refNomes = null;
@@ -141,6 +577,56 @@
   }
   function nomeContratoBonito(slug){
     return ({ "ferroport":"Ferroport", "pta-inveco":"PTA INVECO" }[slug] || slug);
+  }
+
+  // ===================== PERMISSÕES (users/{uid}) =====================
+  async function carregarPermissoesUsuario(user){
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()){
+      allowedContracts = [];
+      isAdmin = false;
+      return;
+    }
+
+    const data = snap.data();
+    allowedContracts = Array.isArray(data.allowedContracts) ? data.allowedContracts : [];
+    isAdmin = String(data.role || "").toLowerCase() === "gestor";
+  }
+
+  function montarSelectContratos(){
+    const sel = document.getElementById("contratoSelect");
+    if(!sel) return;
+
+    sel.innerHTML = "";
+
+    if(!allowedContracts.length){
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Sem acesso";
+      sel.appendChild(opt);
+      sel.disabled = true;
+      return;
+    }
+
+    sel.disabled = false;
+
+    CONTRATOS
+      .filter(c => allowedContracts.includes(c.value))
+      .forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.value;
+        opt.textContent = c.label;
+        sel.appendChild(opt);
+      });
+
+    if(!allowedContracts.includes(contratoAtual)){
+      contratoAtual = allowedContracts[0];
+      localStorage.setItem(KEY_CONTRATO, contratoAtual);
+    }
+
+    sel.value = contratoAtual;
   }
 
   // ===================== CANVAS / CHART (Ferroport) =====================
@@ -247,7 +733,14 @@
   }
 
   // ===================== SIGNATURE PAD (PTA) =====================
-  const sig = { canvas:null, ctx:null, drawing:false, dirty:false, lastX:0, lastY:0 };
+  const sig = {
+    canvas: null,
+    ctx: null,
+    drawing: false,
+    dirty: false,
+    lastX: 0,
+    lastY: 0
+  };
 
   function initSignaturePad(){
     const c = document.getElementById("sigCanvas");
@@ -270,6 +763,7 @@
 
       sig.ctx.fillStyle = cssVar("--card", "#fff");
       sig.ctx.fillRect(0,0,rect.width,rect.height);
+
       sig.dirty = false;
     }
 
@@ -335,57 +829,6 @@
     return sig.canvas.toDataURL("image/png");
   }
 
-  // ===================== PERMISSÕES (users/{uid}) =====================
-  async function carregarPermissoesUsuario(user){
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
-
-    if(!snap.exists()){
-      allowedContracts = [];
-      isAdmin = false;
-      return;
-    }
-
-    const data = snap.data();
-    allowedContracts = Array.isArray(data.allowedContracts) ? data.allowedContracts : [];
-    isAdmin = String(data.role || "").toLowerCase() === "gestor";
-  }
-
-  function montarSelectContratos(){
-    const sel = document.getElementById("contratoSelect");
-    if(!sel) return;
-
-    sel.innerHTML = "";
-
-    if(!allowedContracts.length){
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "Sem acesso";
-      sel.appendChild(opt);
-      sel.disabled = true;
-      return;
-    }
-
-    sel.disabled = false;
-
-    CONTRATOS
-      .filter(c => allowedContracts.includes(c.value))
-      .forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c.value;
-        opt.textContent = c.label;
-        sel.appendChild(opt);
-      });
-
-    // garante contratoAtual válido
-    if(!allowedContracts.includes(contratoAtual)){
-      contratoAtual = allowedContracts[0];
-      localStorage.setItem(KEY_CONTRATO, contratoAtual);
-    }
-
-    sel.value = contratoAtual;
-  }
-
   // ===================== FIREBASE / REFS =====================
   function setRefsContrato(){
     refDiarios = collection(db, "contratos", contratoAtual, "diarios");
@@ -440,7 +883,7 @@
   }
 
   function setContrato(novo){
-    // ✅ trava troca manual
+    // ✅ trava contrato não permitido
     if(!allowedContracts.includes(novo)){
       alert("Você não tem permissão para acessar este contrato.");
       const sel = document.getElementById("contratoSelect");
@@ -692,7 +1135,7 @@
     atualizarBotaoVerMais(lista.length);
   }
 
-  // ===================== PTA =====================
+  // ===================== PTA (salvar + listar + ver mais) =====================
   window.salvarPTA = async function(){
     if(contratoAtual !== "pta-inveco") return;
 
@@ -723,7 +1166,7 @@
       createdAt: Date.now()
     };
 
-    const novoDoc = doc(refPTA); // auto-id
+    const novoDoc = doc(refPTA);
     await setDoc(novoDoc, item);
 
     limparPTA();
@@ -787,7 +1230,7 @@
     atualizarBotaoVerMaisPTA(lista.length);
   }
 
-  // ===================== PAINEL =====================
+  // ===================== PAINEL (mês) =====================
   window.atualizarPainel = function(){
     const sel = getMesAnoSelecionado();
     if(!sel){
@@ -905,7 +1348,6 @@
 
   function initUI(){
     const selContrato = document.getElementById("contratoSelect");
-    selContrato.value = contratoAtual;
     selContrato.addEventListener("change", ()=> setContrato(selContrato.value));
 
     document.getElementById("dataDia").value = hojeISO();
@@ -932,16 +1374,9 @@
       return;
     }
 
-    // ✅ carrega permissão por UID
     await carregarPermissoesUsuario(user);
 
-    document.getElementById("userBadge").textContent = `Logado como: ${user.email || "—"}`;
-
-    // ✅ monta o select só com contratos liberados
-    montarSelectContratos();
-    aplicarPermissoesUI();
-
-    // se não tiver acesso a nada, não deixa usar o app
+    // sem permissão => sai e mostra msg
     if(!allowedContracts.length){
       mostrarApp(false);
       const msg = document.getElementById("loginMsg");
@@ -950,9 +1385,13 @@
       return;
     }
 
+    // ✅ monta contratos liberados e garante contratoAtual válido
+    montarSelectContratos();
+
+    document.getElementById("userBadge").textContent = `Logado como: ${user.email || "—"}`;
+    aplicarPermissoesUI();
     mostrarApp(true);
 
-    // agora sim inicia tudo baseado no contrato permitido
     setRefsContrato();
     ligarRealtime();
     initUI();
@@ -962,3 +1401,6 @@
   // boot
   setRefsContrato();
 </script>
+
+</body>
+</html>
