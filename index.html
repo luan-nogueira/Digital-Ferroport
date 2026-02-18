@@ -18,7 +18,7 @@
     </div>
 
     <h2>Acesso restrito</h2>
-    <p class="muted">Entre com seu e-mail e senha para acessar o controle de presença.</p>
+    <p class="muted">Entre com seu e-mail e senha para acessar o controle.</p>
 
     <div class="grid-2">
       <div class="field">
@@ -87,7 +87,7 @@
     </div>
 
     <div>
-      <div class="brand-title">Presença diária — Contratos</div>
+      <div class="brand-title">Controle — Contratos</div>
       <div class="brand-subtitle" id="userBadge">Logado como: —</div>
     </div>
 
@@ -110,11 +110,11 @@
 
 <main class="container">
 
-  <!-- ====== PAINEL DO GESTOR ====== -->
+  <!-- ===================== PAINEL (MÊS) ===================== -->
   <section class="card">
     <div class="card-head">
-      <h2>Painel do gestor</h2>
-      <p class="muted">Selecione o mês para ver o ranking, resumo e gerar o relatório em PDF.</p>
+      <h2>Painel</h2>
+      <p class="muted">Selecione o mês para gerar relatório em PDF e visualizar dados do contrato.</p>
     </div>
 
     <div class="grid-3">
@@ -131,11 +131,11 @@
             <div class="kpi-value" id="kpiDias">0</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">Técnicos no mês</div>
+            <div class="kpi-label">Técnicos/Condutores</div>
             <div class="kpi-value" id="kpiTecnicos">0</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">Presenças (total)</div>
+            <div class="kpi-label">Presenças/Registros</div>
             <div class="kpi-value" id="kpiPresencas">0</div>
           </div>
         </div>
@@ -151,80 +151,165 @@
       </div>
     </div>
 
-    <div class="split">
-      <div>
-        <h3 class="h3">Ranking (dias trabalhados no mês)</h3>
-        <table class="table-compact">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Técnico</th>
-              <th>Dias</th>
-              <th style="width:38%;">Progresso</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaRanking"></tbody>
-        </table>
+    <!-- ✅ Ferroport (presença) -->
+    <div id="blocoFerroport">
+      <div class="split">
+        <div>
+          <h3 class="h3">Ranking (dias trabalhados no mês)</h3>
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Técnico</th>
+                <th>Dias</th>
+                <th style="width:38%;">Progresso</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaRanking"></tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 class="h3">Registros do mês</h3>
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Pessoas</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaMes"></tbody>
+          </table>
+
+          <div class="ver-mais-wrap">
+            <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
+              Ver mais registros
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <h3 class="h3">Registros do mês (para o relatório)</h3>
-        <table class="table-compact">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Pessoas</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaMes"></tbody>
-        </table>
+      <div class="dash">
+        <div class="dash-box">
+          <div class="dash-title">📊 Dias por técnico (Top 10)</div>
+          <canvas id="chartRanking" class="dash-canvas"></canvas>
+          <p class="muted small">Mostra quem trabalhou mais dias no mês selecionado.</p>
+        </div>
 
-        <div class="ver-mais-wrap">
-          <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
-            Ver mais registros
-          </button>
+        <div class="dash-box">
+          <div class="dash-title">📌 Insights rápidos</div>
+          <div class="insights">
+            <div class="insight">
+              <div class="insight-label">Maior frequência</div>
+              <div class="insight-value" id="insightTopNome">—</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Dias do Top 1</div>
+              <div class="insight-value" id="insightTopDias">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média presenças/dia</div>
+              <div class="insight-value" id="insightMediaDia">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média dias/técnico</div>
+              <div class="insight-value" id="insightMediaTec">0</div>
+            </div>
+          </div>
+          <p class="muted small">Resumo automático com base no mês selecionado.</p>
         </div>
       </div>
     </div>
 
-    <!-- ✅ DASHBOARD VISUAL -->
-    <div class="dash">
-      <div class="dash-box">
-        <div class="dash-title">📊 Dias por técnico (Top 10)</div>
-        <canvas id="chartRanking" class="dash-canvas"></canvas>
-        <p class="muted small">Mostra quem trabalhou mais dias no mês selecionado.</p>
-      </div>
+    <!-- ✅ PTA INVECO (controle de uso) -->
+    <div id="blocoPTA" style="display:none;">
+      <h3 class="h3">Controle de Uso — PTA INVECO</h3>
+      <p class="muted small">Preencha os campos e assine com o dedo/mouse. O registro fica salvo no banco.</p>
 
-      <div class="dash-box">
-        <div class="dash-title">📌 Insights rápidos</div>
-        <div class="insights">
-          <div class="insight">
-            <div class="insight-label">Maior frequência</div>
-            <div class="insight-value" id="insightTopNome">—</div>
-          </div>
-          <div class="insight">
-            <div class="insight-label">Dias do Top 1</div>
-            <div class="insight-value" id="insightTopDias">0</div>
-          </div>
-          <div class="insight">
-            <div class="insight-label">Média presenças/dia</div>
-            <div class="insight-value" id="insightMediaDia">0</div>
-          </div>
-          <div class="insight">
-            <div class="insight-label">Média dias/técnico</div>
-            <div class="insight-value" id="insightMediaTec">0</div>
-          </div>
+      <div class="grid-3 pta-grid">
+        <div class="field">
+          <label>Data</label>
+          <input id="ptaData" type="date" />
         </div>
 
-        <p class="muted small">Resumo automático com base no mês selecionado.</p>
+        <div class="field">
+          <label>Nome do Condutor</label>
+          <input id="ptaCondutor" type="text" placeholder="Ex: Alex" />
+        </div>
+
+        <div class="field">
+          <label>Local da Atividade</label>
+          <input id="ptaLocal" type="text" placeholder="Ex: Vast / Ferroport / GNA" />
+        </div>
+      </div>
+
+      <div class="grid-3 pta-grid">
+        <div class="field">
+          <label>Km Inicial</label>
+          <input id="ptaKmIni" type="number" inputmode="numeric" placeholder="Ex: 79754" />
+        </div>
+
+        <div class="field">
+          <label>Km Final</label>
+          <input id="ptaKmFim" type="number" inputmode="numeric" placeholder="Ex: 79779" />
+        </div>
+
+        <div class="field">
+          <label>Descrição da Atividade</label>
+          <input id="ptaDesc" type="text" placeholder="Ex: Chave deixada com Luan no fim do dia" />
+        </div>
+      </div>
+
+      <div class="pta-sign">
+        <div class="field">
+          <label>Assinatura (feita à mão)</label>
+          <div class="sig-wrap">
+            <canvas id="sigCanvas" class="sig-canvas"></canvas>
+          </div>
+
+          <div class="sig-actions">
+            <button class="btn secondary small" type="button" onclick="limparAssinatura()">🧽 Limpar assinatura</button>
+            <span class="muted small" id="sigHint">Assine dentro do quadro acima.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="button" onclick="salvarPTA()">💾 Salvar registro</button>
+        <button class="btn secondary" type="button" onclick="limparPTA()">🧹 Limpar</button>
+      </div>
+
+      <hr class="sep" />
+
+      <h3 class="h3">Registros (PTA INVECO)</h3>
+      <table class="table-compact">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome do Condutor</th>
+            <th>Km Inicial</th>
+            <th>Km Final</th>
+            <th>Local da Atividade</th>
+            <th>Descrição da Atividade</th>
+            <th>Assinatura</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaPTA"></tbody>
+      </table>
+
+      <div class="ver-mais-wrap">
+        <button class="btn secondary small" id="btnVerMaisPTA" type="button" onclick="toggleVerMaisPTA()">
+          Ver mais registros
+        </button>
       </div>
     </div>
   </section>
 
-  <!-- ====== FORMULÁRIO DIÁRIO ====== -->
+  <!-- ===================== FERROPORT: FORM DIÁRIO ===================== -->
   <section class="card" id="cardPresenca">
     <div class="card-head">
-      <h2>Presença por dia</h2>
+      <h2>Presença por dia (Ferroport)</h2>
       <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
     </div>
 
@@ -256,10 +341,9 @@
     </div>
   </section>
 
-  <!-- ====== LISTA DE REGISTROS ====== -->
-  <section class="card no-print">
+  <section class="card no-print" id="cardListaFerroport">
     <div class="card-head">
-      <h2>Presenças registradas</h2>
+      <h2>Presenças registradas (Ferroport)</h2>
       <p class="muted">Se salvar a mesma data novamente, o sistema atualiza. Use “Editar” para carregar um registro.</p>
     </div>
 
@@ -289,7 +373,7 @@
 
 </div>
 
-<!-- ====== PDF ====== -->
+<!-- ===================== PDF ===================== -->
 <section class="print-only report">
   <div class="report-head">
     <div class="report-logos">
@@ -298,37 +382,61 @@
     </div>
 
     <div class="report-titles">
-      <div class="report-title">Relatório de Presença — <span id="reportContrato">—</span></div>
+      <div class="report-title">Relatório — <span id="reportContrato">—</span></div>
       <div class="report-subtitle" id="reportPeriodo">Período: —</div>
       <div class="report-subtitle" id="reportGeradoEm">Gerado em: —</div>
     </div>
   </div>
 
-  <div class="report-grid">
-    <div class="report-box">
-      <div class="box-title">Ranking — Dias trabalhados</div>
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Técnico</th>
-            <th>Dias</th>
-          </tr>
-        </thead>
-        <tbody id="printRanking"></tbody>
-      </table>
-    </div>
+  <!-- Ferroport (presença) -->
+  <div id="printFerroport">
+    <div class="report-grid">
+      <div class="report-box">
+        <div class="box-title">Ranking — Dias trabalhados</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Técnico</th>
+              <th>Dias</th>
+            </tr>
+          </thead>
+          <tbody id="printRanking"></tbody>
+        </table>
+      </div>
 
-    <div class="report-box">
-      <div class="box-title">Registros do mês</div>
+      <div class="report-box">
+        <div class="box-title">Registros do mês</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Pessoas</th>
+            </tr>
+          </thead>
+          <tbody id="printMes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PTA (uso + assinatura) -->
+  <div id="printPTA" style="display:none;">
+    <div class="report-box" style="margin-top:14px;">
+      <div class="box-title">Controle de Uso — PTA INVECO</div>
       <table class="report-table">
         <thead>
           <tr>
             <th>Data</th>
-            <th>Pessoas</th>
+            <th>Nome do Condutor</th>
+            <th>Km Inicial</th>
+            <th>Km Final</th>
+            <th>Local</th>
+            <th>Descrição</th>
+            <th>Assinatura</th>
           </tr>
         </thead>
-        <tbody id="printMes"></tbody>
+        <tbody id="printPTATbody"></tbody>
       </table>
     </div>
   </div>
@@ -353,18 +461,7 @@
     measurementId: "G-61BRVCSHD7"
   };
 
-  // ✅ Quem é gestor (pode apagar tudo, excluir nomes etc.)
   const ADMIN_EMAILS = ["luan.nogueira@digitaltecnologia.com.br"];
-
-  // ✅ Quem pode acessar cada contrato
-  const ACESSO_POR_CONTRATO = {
-    "ferroport": [
-      "luan.nogueira@digitaltecnologia.com.br"
-    ],
-    "pta-inveco": [
-      "luan.nogueira@digitaltecnologia.com.br"
-    ]
-  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -375,6 +472,11 @@
   let selecaoDiaria = [];
   let isAdmin = false;
 
+  // PTA
+  let PTA_LISTA = [];
+  let mostrarTodosPTA = false;
+  const LIMITE_PTA = 6;
+
   let mostrarTodosRegistros = false;
   const LIMITE_REGISTROS = 5;
 
@@ -384,25 +486,16 @@
   const KEY_CONTRATO = "contrato_atual";
   let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
 
-  // ✅ compatibilidade: se alguém salvou "PTA Inveco" antes, converte
-  if(contratoAtual.toLowerCase() === "pta inveco" || contratoAtual.toLowerCase() === "pta-inveco"){
-    contratoAtual = "pta-inveco";
-    localStorage.setItem(KEY_CONTRATO, contratoAtual);
-  }
-
   let refDiarios = null;
   let refNomes = null;
+  let refPTA = null;
+
   let unsubDiarios = null;
   let unsubNomes = null;
-
-  function usuarioTemAcessoAoContrato(contratoSlug, userEmail){
-    const lista = (ACESSO_POR_CONTRATO[contratoSlug] || []).map(e => String(e).toLowerCase());
-    return lista.includes(String(userEmail || "").toLowerCase());
-  }
+  let unsubPTA = null;
 
   // ===================== TEMA (CLARO / ESCURO) =====================
   const KEY_TEMA = "tema_site";
-
   function aplicarTema(theme){
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem(KEY_TEMA, theme);
@@ -415,12 +508,10 @@
 
     setTimeout(() => atualizarPainel(), 10);
   }
-
   window.toggleTema = function(){
     const atual = document.documentElement.getAttribute("data-theme") || "light";
     aplicarTema(atual === "dark" ? "light" : "dark");
   };
-
   window.addEventListener("DOMContentLoaded", () => {
     const salvo = localStorage.getItem(KEY_TEMA) || "light";
     aplicarTema(salvo);
@@ -442,12 +533,45 @@
     }
   };
 
-  /* ===================== CANVAS / CHART ===================== */
+  // ===================== UTIL =====================
+  function formatarDataBR(dataISO){
+    if(!dataISO) return "";
+    const [y,m,d] = dataISO.split("-");
+    return `${d}/${m}/${y}`;
+  }
+  function hojeISO(){
+    const d = new Date();
+    const pad = (n)=> String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  function agoraBR(){
+    const d = new Date();
+    const pad = (n)=> String(n).padStart(2,"0");
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function getMesAnoSelecionado(){
+    const v = document.getElementById("mesAno").value;
+    if(!v) return null;
+    const [y,m] = v.split("-");
+    return { y, m };
+  }
+  function idSeguro(str){
+    return String(str || "")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/\s+/g,"-")
+      .replace(/[^a-z0-9\-]/g,"")
+      .slice(0,80);
+  }
+  function nomeContratoBonito(slug){
+    return ({ "ferroport":"Ferroport", "pta-inveco":"PTA INVECO" }[slug] || slug);
+  }
+
+  // ===================== CANVAS / CHART (Ferroport) =====================
   function cssVar(name, fallback){
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
   }
-
   function fitCanvasToCSS(canvas){
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
@@ -461,7 +585,6 @@
     ctx.setTransform(dpr,0,0,dpr,0,0);
     return { ctx, w: cssW, h: cssH };
   }
-
   function roundRect(ctx, x, y, w, h, r){
     const rr = Math.min(r, h/2, w/2);
     ctx.beginPath();
@@ -472,7 +595,6 @@
     ctx.arcTo(x, y, x+w, y, rr);
     ctx.closePath();
   }
-
   function drawBarChart(canvasId, items){
     const canvas = document.getElementById(canvasId);
     if(!canvas) return;
@@ -548,12 +670,185 @@
     });
   }
 
-  /* ===================== FIREBASE / DADOS ===================== */
+  // ===================== SIGNATURE PAD (PTA) =====================
+  const sig = {
+    canvas: null,
+    ctx: null,
+    drawing: false,
+    dirty: false,
+    lastX: 0,
+    lastY: 0
+  };
+
+  function initSignaturePad(){
+    const c = document.getElementById("sigCanvas");
+    if(!c) return;
+
+    sig.canvas = c;
+    sig.ctx = c.getContext("2d");
+
+    function resize(){
+      const dpr = window.devicePixelRatio || 1;
+      const rect = c.getBoundingClientRect();
+      c.width = Math.max(320, Math.floor(rect.width * dpr));
+      c.height = Math.max(160, Math.floor(rect.height * dpr));
+      sig.ctx.setTransform(dpr,0,0,dpr,0,0);
+
+      sig.ctx.lineWidth = 2.4;
+      sig.ctx.lineCap = "round";
+      sig.ctx.lineJoin = "round";
+      sig.ctx.strokeStyle = cssVar("--text", "#1E2328");
+
+      // fundo “papel”
+      sig.ctx.fillStyle = cssVar("--card", "#fff");
+      sig.ctx.fillRect(0,0,rect.width,rect.height);
+
+      // se já tinha assinatura, manter não dá (canvas reseta), então só deixa limpo
+      sig.dirty = false;
+    }
+
+    resize();
+    window.addEventListener("resize", () => {
+      // só se estiver na PTA visível
+      if(document.getElementById("blocoPTA")?.style.display !== "none") resize();
+    });
+
+    function getPos(e){
+      const rect = c.getBoundingClientRect();
+      const touch = e.touches && e.touches[0];
+      const clientX = touch ? touch.clientX : e.clientX;
+      const clientY = touch ? touch.clientY : e.clientY;
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    function start(e){
+      e.preventDefault();
+      const p = getPos(e);
+      sig.drawing = true;
+      sig.dirty = true;
+      sig.lastX = p.x;
+      sig.lastY = p.y;
+    }
+
+    function move(e){
+      if(!sig.drawing) return;
+      e.preventDefault();
+      const p = getPos(e);
+      sig.ctx.beginPath();
+      sig.ctx.moveTo(sig.lastX, sig.lastY);
+      sig.ctx.lineTo(p.x, p.y);
+      sig.ctx.stroke();
+      sig.lastX = p.x;
+      sig.lastY = p.y;
+    }
+
+    function end(e){
+      if(!sig.drawing) return;
+      e.preventDefault();
+      sig.drawing = false;
+    }
+
+    c.addEventListener("mousedown", start);
+    c.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+
+    c.addEventListener("touchstart", start, { passive:false });
+    c.addEventListener("touchmove", move, { passive:false });
+    window.addEventListener("touchend", end, { passive:false });
+  }
+
+  window.limparAssinatura = function(){
+    if(!sig.canvas || !sig.ctx) return;
+    const rect = sig.canvas.getBoundingClientRect();
+    sig.ctx.fillStyle = cssVar("--card", "#fff");
+    sig.ctx.fillRect(0,0,rect.width,rect.height);
+    sig.dirty = false;
+  };
+
+  function assinaturaDataURL(){
+    if(!sig.canvas) return "";
+    // pega a imagem atual (inclui o fundo)
+    return sig.canvas.toDataURL("image/png");
+  }
+
+  // ===================== FIREBASE / REFS =====================
   function setRefsContrato(){
     refDiarios = collection(db, "contratos", contratoAtual, "diarios");
     refNomes   = collection(db, "contratos", contratoAtual, "nomes");
+    refPTA     = collection(db, "contratos", contratoAtual, "ptauso"); // ✅ PTA
   }
 
+  function desligarRealtime(){
+    if(typeof unsubDiarios === "function") unsubDiarios();
+    if(typeof unsubNomes === "function") unsubNomes();
+    if(typeof unsubPTA === "function") unsubPTA();
+  }
+
+  function ligarRealtime(){
+    desligarRealtime();
+
+    // Ferroport
+    unsubDiarios = onSnapshot(refDiarios, (snap) => {
+      LISTA = snap.docs.map(d => d.data()).sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
+      carregarDiario();
+      atualizarPainel();
+    });
+
+    unsubNomes = onSnapshot(refNomes, (snap) => {
+      NOMES = snap.docs.map(d => d.data().nome).sort((a,b) => a.localeCompare(b, "pt-BR"));
+      renderChipsDiario();
+    });
+
+    // PTA
+    unsubPTA = onSnapshot(refPTA, (snap) => {
+      PTA_LISTA = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||"") || (b.createdAt||0)-(a.createdAt||0));
+      carregarPTA();
+      atualizarPainel();
+    });
+  }
+
+  function mostrarBlocosContrato(){
+    const isPTA = contratoAtual === "pta-inveco";
+
+    document.getElementById("blocoPTA").style.display = isPTA ? "block" : "none";
+    document.getElementById("blocoFerroport").style.display = isPTA ? "none" : "block";
+
+    document.getElementById("cardPresenca").style.display = isPTA ? "none" : "block";
+    document.getElementById("cardListaFerroport").style.display = isPTA ? "none" : "block";
+
+    document.getElementById("printPTA").style.display = isPTA ? "block" : "none";
+    document.getElementById("printFerroport").style.display = isPTA ? "none" : "block";
+
+    // assinatura
+    if(isPTA){
+      setTimeout(()=> initSignaturePad(), 30);
+      document.getElementById("ptaData").value = hojeISO();
+    }
+  }
+
+  function setContrato(novo){
+    contratoAtual = novo;
+    localStorage.setItem(KEY_CONTRATO, contratoAtual);
+    setRefsContrato();
+    ligarRealtime();
+
+    selecaoDiaria = [];
+    renderChipsDiario();
+    limparDiario(true);
+
+    mostrarTodosMes = false;
+    mostrarTodosRegistros = false;
+    mostrarTodosPTA = false;
+
+    mostrarBlocosContrato();
+    atualizarPainel();
+  }
+
+  // ===================== AUTH =====================
   window.login = async function(){
     const email = document.getElementById("loginEmail").value.trim();
     const senha = document.getElementById("loginSenha").value.trim();
@@ -609,87 +904,14 @@
     pill.textContent = isAdmin ? "Gestor" : "Técnico";
     pill.classList.toggle("admin", isAdmin);
 
-    btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
-    permMsg.style.display = isAdmin ? "none" : "block";
+    if(btnApagarTudo) btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
+    if(permMsg) permMsg.style.display = isAdmin ? "none" : "block";
   }
 
-  function formatarDataBR(dataISO){
-    const [y,m,d] = dataISO.split("-");
-    return `${d}/${m}/${y}`;
-  }
-  function hojeISO(){
-    const d = new Date();
-    const pad = (n)=> String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-  function agoraBR(){
-    const d = new Date();
-    const pad = (n)=> String(n).padStart(2,"0");
-    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-  function getMesAnoSelecionado(){
-    const v = document.getElementById("mesAno").value;
-    if(!v) return null;
-    const [y,m] = v.split("-");
-    return { y, m };
-  }
-  function idSeguro(str){
-    return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"").slice(0,80);
-  }
-  function nomeContratoBonito(slug){
-    return ({
-      "ferroport":"Ferroport",
-      "pta-inveco":"PTA INVECO"
-    }[slug] || slug);
-  }
-
-  function desligarRealtime(){
-    if(typeof unsubDiarios === "function") unsubDiarios();
-    if(typeof unsubNomes === "function") unsubNomes();
-  }
-
-  function ligarRealtime(){
-    desligarRealtime();
-
-    unsubDiarios = onSnapshot(refDiarios, (snap) => {
-      LISTA = snap.docs.map(d => d.data()).sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
-      carregarDiario();
-      atualizarPainel();
-    });
-
-    unsubNomes = onSnapshot(refNomes, (snap) => {
-      NOMES = snap.docs.map(d => d.data().nome).sort((a,b) => a.localeCompare(b, "pt-BR"));
-      renderChipsDiario();
-    });
-  }
-
-  function setContrato(novo){
-    const emailAtual = (auth.currentUser?.email || "").toLowerCase();
-
-    // ✅ bloqueia troca para contrato sem permissão
-    if(emailAtual && !usuarioTemAcessoAoContrato(novo, emailAtual)){
-      alert("Você não tem acesso a este contrato.");
-      document.getElementById("contratoSelect").value = contratoAtual; // volta
-      return;
-    }
-
-    contratoAtual = novo;
-    localStorage.setItem("contrato_atual", contratoAtual);
-    setRefsContrato();
-    ligarRealtime();
-
-    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-    selecaoDiaria = [];
-    renderChipsDiario();
-    limparDiario(true);
-
-    mostrarTodosMes = false;
-    atualizarPainel();
-  }
-
+  // ===================== FERROPORT (chips + diário) =====================
   window.renderChipsDiario = function(){
     const wrap = document.getElementById("chipsDiario");
+    if(!wrap) return;
     wrap.innerHTML = "";
 
     NOMES.forEach(nome => {
@@ -768,10 +990,14 @@
   };
 
   window.limparDiario = function(silencioso=false){
-    document.getElementById("dataDia").value = "";
+    const dataDia = document.getElementById("dataDia");
+    if(dataDia) dataDia.value = "";
     selecaoDiaria = [];
     renderChipsDiario();
-    if(!silencioso) document.getElementById("novoNome").value = "";
+    if(!silencioso){
+      const novoNome = document.getElementById("novoNome");
+      if(novoNome) novoNome.value = "";
+    }
   };
 
   window.apagarDiarios = async function(){
@@ -824,8 +1050,9 @@
 
   function carregarDiario(){
     const tbody = document.getElementById("tabelaDiario");
-    tbody.innerHTML = "";
+    if(!tbody) return;
 
+    tbody.innerHTML = "";
     const lista = [...LISTA].sort((a,b)=> b.dataISO.localeCompare(a.dataISO));
     const exibida = mostrarTodosRegistros ? lista : lista.slice(0, LIMITE_REGISTROS);
 
@@ -847,6 +1074,102 @@
     atualizarBotaoVerMais(lista.length);
   }
 
+  // ===================== PTA (salvar + listar + ver mais) =====================
+  window.salvarPTA = async function(){
+    if(contratoAtual !== "pta-inveco") return;
+
+    const dataISO = document.getElementById("ptaData").value;
+    const condutor = document.getElementById("ptaCondutor").value.trim();
+    const kmIni = document.getElementById("ptaKmIni").value.trim();
+    const kmFim = document.getElementById("ptaKmFim").value.trim();
+    const local = document.getElementById("ptaLocal").value.trim();
+    const desc = document.getElementById("ptaDesc").value.trim();
+
+    if(!dataISO) return alert("Selecione a data.");
+    if(!condutor) return alert("Informe o nome do condutor.");
+    if(kmIni === "" || kmFim === "") return alert("Informe Km Inicial e Km Final.");
+    if(!local) return alert("Informe o local da atividade.");
+    if(!sig.dirty) return alert("Faça a assinatura no quadro.");
+
+    const assinatura = assinaturaDataURL();
+
+    const item = {
+      dataISO,
+      dataBR: formatarDataBR(dataISO),
+      condutor,
+      kmIni: Number(kmIni),
+      kmFim: Number(kmFim),
+      local,
+      descricao: desc,
+      assinatura, // ✅ imagem PNG (feita à mão)
+      createdAt: Date.now()
+    };
+
+    const novoDoc = doc(refPTA); // auto-id
+    await setDoc(novoDoc, item);
+
+    limparPTA();
+  };
+
+  window.limparPTA = function(){
+    document.getElementById("ptaData").value = hojeISO();
+    document.getElementById("ptaCondutor").value = "";
+    document.getElementById("ptaKmIni").value = "";
+    document.getElementById("ptaKmFim").value = "";
+    document.getElementById("ptaLocal").value = "";
+    document.getElementById("ptaDesc").value = "";
+    limparAssinatura();
+  };
+
+  window.apagarPTA = async function(id){
+    if(!isAdmin) return alert("Somente gestor pode apagar registros.");
+    if(!confirm("Deseja apagar este registro da PTA?")) return;
+    await deleteDoc(doc(db, "contratos", contratoAtual, "ptauso", id));
+  };
+
+  function atualizarBotaoVerMaisPTA(total){
+    const btn = document.getElementById("btnVerMaisPTA");
+    if(!btn) return;
+    if(total <= LIMITE_PTA){ btn.style.display="none"; return; }
+    btn.style.display="inline-block";
+    btn.innerText = mostrarTodosPTA ? "Ver menos" : "Ver mais registros";
+  }
+
+  window.toggleVerMaisPTA = function(){
+    mostrarTodosPTA = !mostrarTodosPTA;
+    carregarPTA();
+  };
+
+  function carregarPTA(){
+    const tbody = document.getElementById("tabelaPTA");
+    if(!tbody) return;
+
+    tbody.innerHTML = "";
+    const lista = [...PTA_LISTA].sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||"") || (b.createdAt||0)-(a.createdAt||0));
+    const exibida = mostrarTodosPTA ? lista : lista.slice(0, LIMITE_PTA);
+
+    exibida.forEach(r => {
+      const sigImg = r.assinatura ? `<img class="sig-preview" src="${r.assinatura}" alt="Assinatura">` : "—";
+      tbody.innerHTML += `
+        <tr>
+          <td><strong>${r.dataBR || formatarDataBR(r.dataISO)}</strong></td>
+          <td>${r.condutor || ""}</td>
+          <td>${(r.kmIni ?? "")}</td>
+          <td>${(r.kmFim ?? "")}</td>
+          <td>${r.local || ""}</td>
+          <td style="text-align:left;">${r.descricao || ""}</td>
+          <td>${sigImg}</td>
+          <td>
+            <button class="btn small danger" type="button" onclick="apagarPTA('${r.id}')" ${isAdmin ? "" : "disabled"}>🗑</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    atualizarBotaoVerMaisPTA(lista.length);
+  }
+
+  // ===================== PAINEL (mês) =====================
   window.atualizarPainel = function(){
     const sel = getMesAnoSelecionado();
     if(!sel){
@@ -856,6 +1179,44 @@
       return atualizarPainel();
     }
 
+    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
+    const mesBR = `${sel.m}/${sel.y}`;
+    document.getElementById("reportPeriodo").innerText = `Período: ${mesBR}`;
+    document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
+
+    // PTA: resumo + impressão
+    if(contratoAtual === "pta-inveco"){
+      const prefixo = `${sel.y}-${sel.m}`;
+      const registrosMes = PTA_LISTA.filter(r => (r.dataISO || "").startsWith(prefixo));
+
+      document.getElementById("kpiDias").innerText = registrosMes.length;
+      document.getElementById("kpiTecnicos").innerText = new Set(registrosMes.map(r=> (r.condutor||"").toLowerCase())).size;
+      document.getElementById("kpiPresencas").innerText = registrosMes.length;
+
+      // print PTA
+      const pbody = document.getElementById("printPTATbody");
+      if(pbody){
+        pbody.innerHTML = registrosMes.length
+          ? registrosMes
+              .sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||""))
+              .map(r => `
+                <tr>
+                  <td><strong>${r.dataBR || formatarDataBR(r.dataISO)}</strong></td>
+                  <td>${r.condutor || ""}</td>
+                  <td>${(r.kmIni ?? "")}</td>
+                  <td>${(r.kmFim ?? "")}</td>
+                  <td>${r.local || ""}</td>
+                  <td>${r.descricao || ""}</td>
+                  <td>${r.assinatura ? `<img class="sig-print" src="${r.assinatura}" alt="Assinatura">` : ""}</td>
+                </tr>
+              `).join("")
+          : `<tr><td colspan="7">Sem registros neste mês.</td></tr>`;
+      }
+
+      return; // ✅ PTA não usa ranking do ferroport
+    }
+
+    // Ferroport
     const prefixo = `${sel.y}-${sel.m}`;
     const registrosMes = LISTA.filter(r => r.dataISO.startsWith(prefixo));
 
@@ -908,11 +1269,6 @@
         `).join("")
       : `<tr><td colspan="2">Sem registros neste mês.</td></tr>`;
 
-    const mesBR = `${sel.m}/${sel.y}`;
-    document.getElementById("reportPeriodo").innerText = `Período: ${mesBR}`;
-    document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
-    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-
     const top10 = ranking.slice(0, 10).map(x => ({ label: x.nome, value: x.dias }));
     drawBarChart("chartRanking", top10);
 
@@ -938,17 +1294,21 @@
     selContrato.addEventListener("change", ()=> setContrato(selContrato.value));
 
     document.getElementById("dataDia").value = hojeISO();
+    document.getElementById("ptaData").value = hojeISO();
 
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
     document.getElementById("mesAno").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
     document.getElementById("mesAno").addEventListener("change", atualizarPainel);
 
-    document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
+    mostrarBlocosContrato();
     window.addEventListener("resize", () => atualizarPainel());
+
+    // assinatura
+    initSignaturePad();
   }
 
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, (user) => {
     if(!user){
       mostrarApp(false);
       desligarRealtime();
@@ -959,14 +1319,6 @@
     }
 
     const email = (user.email || "").toLowerCase();
-
-    // ✅ BLOQUEIA login se não tiver permissão no contrato atual
-    if(!usuarioTemAcessoAoContrato(contratoAtual, email)){
-      alert("Seu usuário não tem permissão para este contrato.");
-      await signOut(auth);
-      return;
-    }
-
     isAdmin = ADMIN_EMAILS.map(x=>String(x).toLowerCase()).includes(email);
 
     document.getElementById("userBadge").textContent = `Logado como: ${user.email || "—"}`;
@@ -979,7 +1331,11 @@
     atualizarPainel();
   });
 
+  // boot
   setRefsContrato();
+
+  // ===================== FIX MOBILE (não dar zoom ao digitar) =====================
+  // (o CSS já força 16px no login)
 </script>
 
 </body>
