@@ -141,7 +141,7 @@ body{
   width:100%;
 }
 
-/* ✅ fix centralização do botão */
+/* centraliza o botão do ícone */
 .icon-btn{
   position:absolute;
   right:8px;
@@ -178,7 +178,7 @@ body{
   stroke-linecap:round;
 }
 
-/* ===================== UX: desabilitados ===================== */
+/* UX: desabilitados */
 select:disabled,
 input:disabled,
 button:disabled{
