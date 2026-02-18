@@ -9,7 +9,7 @@
 
 <body>
 
-<!-- ✅ fallback: se o Firebase/JS falhar, pelo menos o login aparece -->
+<!-- ✅ fallback: se Firebase/JS falhar, pelo menos o login aparece -->
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const login = document.getElementById("loginBox");
@@ -46,7 +46,6 @@
             onclick="toggleSenha('loginSenha', this)"
             aria-label="Mostrar/ocultar senha"
             title="Mostrar/ocultar senha">
-
             <span class="cam-icon cam-closed">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 7a3 3 0 0 1 3-3h6l2 2h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7z"></path>
@@ -61,7 +60,6 @@
                 <path d="M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0z"></path>
               </svg>
             </span>
-
           </button>
         </div>
       </div>
@@ -114,7 +112,7 @@
 
 <main class="container">
 
-  <!-- ===================== PAINEL (MÊS) ===================== -->
+  <!-- ===================== PAINEL ===================== -->
   <section class="card">
     <div class="card-head">
       <h2>Painel</h2>
@@ -155,7 +153,7 @@
       </div>
     </div>
 
-    <!-- ✅ Ferroport -->
+    <!-- FERROPORT -->
     <div id="blocoFerroport">
       <div class="split">
         <div>
@@ -225,7 +223,7 @@
       </div>
     </div>
 
-    <!-- ✅ PTA INVECO -->
+    <!-- PTA -->
     <div id="blocoPTA" style="display:none;">
       <h3 class="h3">Controle de Uso — PTA INVECO</h3>
       <p class="muted small">Preencha os campos e assine com o dedo/mouse. O registro fica salvo no banco.</p>
@@ -235,12 +233,10 @@
           <label>Data</label>
           <input id="ptaData" type="date" />
         </div>
-
         <div class="field">
           <label>Nome do Condutor</label>
           <input id="ptaCondutor" type="text" placeholder="Ex: Alex" />
         </div>
-
         <div class="field">
           <label>Local da Atividade</label>
           <input id="ptaLocal" type="text" placeholder="Ex: Vast / Ferroport / GNA" />
@@ -252,12 +248,10 @@
           <label>Km Inicial</label>
           <input id="ptaKmIni" type="number" inputmode="numeric" placeholder="Ex: 79754" />
         </div>
-
         <div class="field">
           <label>Km Final</label>
           <input id="ptaKmFim" type="number" inputmode="numeric" placeholder="Ex: 79779" />
         </div>
-
         <div class="field">
           <label>Descrição da Atividade</label>
           <input id="ptaDesc" type="text" placeholder="Ex: Instalação de Radar" />
@@ -310,7 +304,7 @@
     </div>
   </section>
 
-  <!-- ===================== FERROPORT: FORM DIÁRIO ===================== -->
+  <!-- FERROPORT: FORM DIÁRIO -->
   <section class="card" id="cardPresenca">
     <div class="card-head">
       <h2>Presença por dia (Ferroport)</h2>
@@ -374,7 +368,6 @@
   </footer>
 
 </main>
-
 </div>
 
 <!-- ===================== PDF ===================== -->
@@ -476,7 +469,6 @@
   let NOMES = [];
   let selecaoDiaria = [];
 
-  // PTA
   let PTA_LISTA = [];
   let mostrarTodosPTA = false;
   const LIMITE_PTA = 6;
@@ -490,7 +482,7 @@
   const KEY_CONTRATO = "contrato_atual";
   let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
 
-  // permissões (users/{uid})
+  // ✅ permissões (users/{uid})
   let allowedContracts = [];
   let isAdmin = false;
 
@@ -575,19 +567,7 @@
     return ({ "ferroport":"Ferroport", "pta-inveco":"PTA INVECO" }[slug] || slug);
   }
 
-  // ✅ normaliza doc de diário: usa doc.id como dataISO se faltar
-  function normalizarDiario(docSnap){
-    const data = docSnap.data() || {};
-    const dataISO = data.dataISO || docSnap.id || "";
-    return {
-      ...data,
-      dataISO,
-      dataBR: data.dataBR || formatarDataBR(dataISO),
-      pessoas: Array.isArray(data.pessoas) ? data.pessoas : []
-    };
-  }
-
-  // ===================== PERMISSÕES (users/{uid}) =====================
+  // ===================== PERMISSÕES =====================
   async function carregarPermissoesUsuario(user){
     const ref = doc(db, "users", user.uid);
     const snap = await getDoc(ref);
@@ -599,7 +579,14 @@
     }
 
     const data = snap.data();
-    allowedContracts = Array.isArray(data.allowedContracts) ? data.allowedContracts : [];
+
+    // ✅ aceita allowedContracts (correto) e allowedContract (se estiver errado no Firestore)
+    const arr =
+      Array.isArray(data.allowedContracts) ? data.allowedContracts :
+      Array.isArray(data.allowedContract)  ? data.allowedContract  :
+      [];
+
+    allowedContracts = arr.map(s => String(s).trim().toLowerCase());
     isAdmin = String(data.role || "").toLowerCase() === "gestor";
   }
 
@@ -609,7 +596,9 @@
 
     sel.innerHTML = "";
 
-    if(!allowedContracts.length){
+    const liberados = CONTRATOS.filter(c => allowedContracts.includes(c.value));
+
+    if(!liberados.length){
       const opt = document.createElement("option");
       opt.value = "";
       opt.textContent = "Sem acesso";
@@ -620,24 +609,22 @@
 
     sel.disabled = false;
 
-    CONTRATOS
-      .filter(c => allowedContracts.includes(c.value))
-      .forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c.value;
-        opt.textContent = c.label;
-        sel.appendChild(opt);
-      });
+    liberados.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.value;
+      opt.textContent = c.label;
+      sel.appendChild(opt);
+    });
 
     if(!allowedContracts.includes(contratoAtual)){
-      contratoAtual = allowedContracts[0];
+      contratoAtual = liberados[0].value;
       localStorage.setItem(KEY_CONTRATO, contratoAtual);
     }
 
     sel.value = contratoAtual;
   }
 
-  // ===================== CANVAS / CHART (Ferroport) =====================
+  // ===================== CANVAS / CHART =====================
   function cssVar(name, fallback){
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
@@ -740,15 +727,8 @@
     });
   }
 
-  // ===================== SIGNATURE PAD (PTA) =====================
-  const sig = {
-    canvas: null,
-    ctx: null,
-    drawing: false,
-    dirty: false,
-    lastX: 0,
-    lastY: 0
-  };
+  // ===================== SIGNATURE PAD =====================
+  const sig = { canvas:null, ctx:null, drawing:false, dirty:false, lastX:0, lastY:0 };
 
   function initSignaturePad(){
     const c = document.getElementById("sigCanvas");
@@ -853,20 +833,14 @@
   function ligarRealtime(){
     desligarRealtime();
 
-    // ✅ AQUI está o fix principal (doc.id -> dataISO)
     unsubDiarios = onSnapshot(refDiarios, (snap) => {
-      LISTA = snap.docs
-        .map(d => normalizarDiario(d))
-        .sort((a,b)=> String(a.dataISO||"").localeCompare(String(b.dataISO||"")));
+      LISTA = snap.docs.map(d => d.data()).sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
       carregarDiario();
       atualizarPainel();
     });
 
     unsubNomes = onSnapshot(refNomes, (snap) => {
-      NOMES = snap.docs
-        .map(d => (d.data()?.nome || d.id || "").trim())
-        .filter(Boolean)
-        .sort((a,b) => a.localeCompare(b, "pt-BR"));
+      NOMES = snap.docs.map(d => d.data().nome).sort((a,b) => a.localeCompare(b, "pt-BR"));
       renderChipsDiario();
     });
 
@@ -982,7 +956,7 @@
     if(permMsg) permMsg.style.display = isAdmin ? "none" : "block";
   }
 
-  // ===================== FERROPORT (chips + diário) =====================
+  // ===================== FERROPORT =====================
   window.renderChipsDiario = function(){
     const wrap = document.getElementById("chipsDiario");
     if(!wrap) return;
@@ -1085,7 +1059,7 @@
   window.exportarDiarioCSV = function(){
     if(LISTA.length === 0) return alert("Não há registros para exportar.");
 
-    const ordenado = [...LISTA].sort((a,b)=> String(a.dataISO||"").localeCompare(String(b.dataISO||"")));
+    const ordenado = [...LISTA].sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
     let csv = "Contrato;Data;Pessoas\n";
     ordenado.forEach(r => {
       csv += `${nomeContratoBonito(contratoAtual)};${r.dataBR};"${(r.pessoas || []).join(", ")}"\n`;
@@ -1127,7 +1101,7 @@
     if(!tbody) return;
 
     tbody.innerHTML = "";
-    const lista = [...LISTA].sort((a,b)=> String(b.dataISO||"").localeCompare(String(a.dataISO||"")));
+    const lista = [...LISTA].sort((a,b)=> b.dataISO.localeCompare(a.dataISO));
     const exibida = mostrarTodosRegistros ? lista : lista.slice(0, LIMITE_REGISTROS);
 
     exibida.forEach(r => {
@@ -1243,7 +1217,7 @@
     atualizarBotaoVerMaisPTA(lista.length);
   }
 
-  // ===================== PAINEL (mês) =====================
+  // ===================== PAINEL =====================
   window.atualizarPainel = function(){
     const sel = getMesAnoSelecionado();
     if(!sel){
@@ -1284,12 +1258,11 @@
               `).join("")
           : `<tr><td colspan="7">Sem registros neste mês.</td></tr>`;
       }
-
       return;
     }
 
     const prefixo = `${sel.y}-${sel.m}`;
-    const registrosMes = LISTA.filter(r => String(r.dataISO||"").startsWith(prefixo));
+    const registrosMes = LISTA.filter(r => (r.dataISO||"").startsWith(prefixo));
 
     const diasRegistrados = registrosMes.length;
     const totalPresencas = registrosMes.reduce((acc,r)=> acc + ((r.pessoas||[]).length), 0);
@@ -1316,7 +1289,7 @@
         `).join("")
       : `<tr><td colspan="4" class="muted">Sem registros neste mês.</td></tr>`;
 
-    const ordenados = [...registrosMes].sort((a,b)=> String(a.dataISO||"").localeCompare(String(b.dataISO||"")));
+    const ordenados = [...registrosMes].sort((a,b)=> a.dataISO.localeCompare(b.dataISO));
     const exibidaMes = mostrarTodosMes ? ordenados : ordenados.slice(0, LIMITE_MES);
 
     document.getElementById("tabelaMes").innerHTML = exibidaMes.length
@@ -1335,7 +1308,7 @@
       : `<tr><td colspan="3">Sem registros neste mês.</td></tr>`;
 
     document.getElementById("printMes").innerHTML = registrosMes.length
-      ? [...registrosMes].sort((a,b)=>String(a.dataISO||"").localeCompare(String(b.dataISO||""))).map(r=>`
+      ? [...registrosMes].sort((a,b)=>a.dataISO.localeCompare(b.dataISO)).map(r=>`
           <tr><td><strong>${r.dataBR}</strong></td><td>${(r.pessoas||[]).join(", ")}</td></tr>
         `).join("")
       : `<tr><td colspan="2">Sem registros neste mês.</td></tr>`;
@@ -1381,7 +1354,8 @@
     if(!user){
       mostrarApp(false);
       desligarRealtime();
-      document.getElementById("loginStatus").style.display = "none";
+      const status = document.getElementById("loginStatus");
+      if(status) status.style.display = "none";
       const btn = document.getElementById("btnEntrar");
       if(btn) btn.disabled = false;
       return;
