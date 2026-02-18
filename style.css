@@ -21,7 +21,6 @@
   --chip-bg:#ffffff;
 }
 
-/* ===================== DARK MODE ===================== */
 :root[data-theme="dark"]{
   --bg:#0f1115;
   --card:#151923;
@@ -79,6 +78,8 @@ body{
   position:relative;
   overflow:hidden;
 }
+
+/* ✅ CORREÇÃO CRÍTICA: overlay não pode bloquear cliques */
 .login-card:before{
   content:"";
   position:absolute;
@@ -87,7 +88,9 @@ body{
   filter:blur(18px);
   opacity:.35;
   z-index:0;
+  pointer-events:none; /* 🔥 isso evita “botões não fazem nada” */
 }
+
 .login-card > *{ position:relative; z-index:1; }
 
 .login-logos{
@@ -101,7 +104,6 @@ body{
 .login-card h2{ margin:0 0 8px; font-size:22px; }
 .login-card .muted{ margin:0 0 18px; }
 
-/* evita zoom no iOS/Android ao focar */
 .login-card input,
 .login-card select,
 .login-card textarea,
@@ -130,7 +132,7 @@ body{
 .center{ text-align:center; }
 .tiny{ font-size:11px; }
 
-/* ===================== INPUT COM ÍCONE (senha) ===================== */
+/* ===================== INPUT COM ÍCONE ===================== */
 .input-icon{
   position:relative;
   display:flex;
@@ -141,13 +143,11 @@ body{
   width:100%;
 }
 
-/* centraliza o botão do ícone */
 .icon-btn{
   position:absolute;
   right:8px;
   top:50%;
   transform:translateY(-50%);
-
   height:34px;
   width:34px;
   border-radius:10px;
@@ -178,7 +178,7 @@ body{
   stroke-linecap:round;
 }
 
-/* UX: desabilitados */
+/* ===================== UX: desabilitados ===================== */
 select:disabled,
 input:disabled,
 button:disabled{
@@ -633,7 +633,6 @@ th{
   text-align:center;
 }
 
-/* Impressão */
 @media print{
   body{
     background:#fff !important;
@@ -645,7 +644,6 @@ th{
   .print-only{ display:block !important; }
 }
 
-/* ===================== RESPONSIVO ===================== */
 @media (max-width: 900px){
   .grid-3{ grid-template-columns: 1fr; }
   .pta-grid{ grid-template-columns: 1fr; }
