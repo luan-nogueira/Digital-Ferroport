@@ -6,7 +6,7 @@
   <title>Presença diária — Contratos</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- ✅ Firebase (COMPAT) - TEM que ficar ANTES do seu script -->
+  <!-- Firebase (COMPAT) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -334,7 +334,8 @@
     <div class="actions">
       <button class="btn" type="button" onclick="ptaSalvar()">💾 Salvar registro</button>
       <button class="btn secondary" type="button" onclick="ptaLimparFormulario()">🧹 Limpar</button>
-      <button class="btn danger" type="button" id="btnPTAApagarTudo" onclick="ptaApagarTudo()">🗑 Apagar tudo (PTA)</button>
+      <!-- ✅ Botão apagar PTA (só gestor) -->
+      <button class="btn danger" id="btnApagarPTA" type="button" onclick="ptaApagarTudo()" style="display:none;">🗑 Apagar tudo (PTA)</button>
     </div>
   </section>
 
@@ -368,8 +369,8 @@
 </main>
 </div>
 
-<!-- ===================== PDF FERROPORT ===================== -->
-<section class="print-only report" id="reportFerroport">
+<!-- ===================== PDF ===================== -->
+<section class="print-only report">
   <div class="report-head">
     <div class="report-logos">
       <img src="logo-digital.png" alt="Logo Digital" class="logo">
@@ -377,69 +378,58 @@
     </div>
 
     <div class="report-titles">
-      <div class="report-title">Relatório — <span id="reportContratoFP">—</span></div>
-      <div class="report-subtitle" id="reportPeriodoFP">Período: —</div>
-      <div class="report-subtitle" id="reportGeradoEmFP">Gerado em: —</div>
+      <div class="report-title">Relatório — <span id="reportContrato">—</span></div>
+      <div class="report-subtitle" id="reportPeriodo">Período: —</div>
+      <div class="report-subtitle" id="reportGeradoEm">Gerado em: —</div>
     </div>
   </div>
 
-  <div class="report-grid">
-    <div class="report-box">
-      <div class="box-title">Ranking — Dias trabalhados</div>
+  <!-- ✅ FERROPORT PDF -->
+  <div id="printFerroport">
+    <div class="report-grid">
+      <div class="report-box">
+        <div class="box-title">Ranking — Dias trabalhados</div>
+        <table class="report-table">
+          <thead>
+            <tr><th>#</th><th>Técnico</th><th>Dias</th></tr>
+          </thead>
+          <tbody id="printRanking"></tbody>
+        </table>
+      </div>
+
+      <div class="report-box">
+        <div class="box-title">Registros do mês</div>
+        <table class="report-table">
+          <thead>
+            <tr><th>Data</th><th>Pessoas</th></tr>
+          </thead>
+          <tbody id="printMes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ PTA PDF -->
+  <div id="printPTA" style="display:none;">
+    <div class="report-box" style="margin-top:12px;">
+      <div class="box-title">Registros do mês — PTA INVECO</div>
       <table class="report-table">
         <thead>
-          <tr><th>#</th><th>Técnico</th><th>Dias</th></tr>
+          <tr>
+            <th>Data</th>
+            <th>Condutor</th>
+            <th>Km Inicial</th>
+            <th>Km Final</th>
+            <th>Local</th>
+            <th>Atividade</th>
+          </tr>
         </thead>
-        <tbody id="printRanking"></tbody>
+        <tbody id="printPTATable"></tbody>
       </table>
+      <p class="muted small" style="margin-top:10px;">
+        Observação: Assinaturas são armazenadas no sistema e podem ser conferidas na tela do contrato.
+      </p>
     </div>
-
-    <div class="report-box">
-      <div class="box-title">Registros do mês</div>
-      <table class="report-table">
-        <thead>
-          <tr><th>Data</th><th>Pessoas</th></tr>
-        </thead>
-        <tbody id="printMes"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="report-footer">
-    DIGITAL • EMIVE — Tecnologia e Segurança
-  </div>
-</section>
-
-<!-- ===================== PDF PTA ===================== -->
-<section class="print-only report" id="reportPTA">
-  <div class="report-head">
-    <div class="report-logos">
-      <img src="logo-digital.png" alt="Logo Digital" class="logo">
-      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
-    </div>
-
-    <div class="report-titles">
-      <div class="report-title">Relatório — <span id="reportContratoPTA">PTA INVECO</span></div>
-      <div class="report-subtitle" id="reportPeriodoPTA">Período: —</div>
-      <div class="report-subtitle" id="reportGeradoEmPTA">Gerado em: —</div>
-    </div>
-  </div>
-
-  <div class="report-box">
-    <div class="box-title">Registros do mês — Controle de Uso</div>
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Condutor</th>
-          <th>Km Inicial</th>
-          <th>Km Final</th>
-          <th>Local</th>
-          <th>Atividade</th>
-        </tr>
-      </thead>
-      <tbody id="printPTA"></tbody>
-    </table>
   </div>
 
   <div class="report-footer">
@@ -448,7 +438,7 @@
 </section>
 
 <!-- ===========================================================
-     ✅ SCRIPT FINAL (com FAILSAFE + PTA + assinatura + apagar)
+     ✅ SCRIPT FINAL
 =========================================================== -->
 <script>
 (function(){
@@ -514,7 +504,7 @@
       // Firestore refs
       let refDiarios = null;
       let refNomes = null;
-      let refPTA = null; // contratos/{contrato}/ptauso
+      let refPTA = null; // /contratos/{contractId}/ptauso
 
       // Unsub realtime
       let unsubDiarios = null;
@@ -614,7 +604,7 @@
           .sort((a,b) => b.dias - a.dias || a.nome.localeCompare(b.nome, "pt-BR"));
       }
 
-      // ===================== ✅ GRÁFICO AJUSTADO =====================
+      // ===================== GRÁFICO =====================
       function desenharGraficoTop10(canvasId, data){
         const canvas = document.getElementById(canvasId);
         if(!canvas) return;
@@ -669,7 +659,6 @@
         const rowH  = Math.max(26, Math.floor((h - padT - padB) / top.length));
         const barH  = Math.floor(rowH * 0.55);
 
-        // grade suave
         ctx.strokeStyle = border;
         ctx.lineWidth = 1;
         ctx.globalAlpha = 0.35;
@@ -687,7 +676,6 @@
         top.forEach((item, i) => {
           const y = padT + i * rowH + rowH/2;
 
-          // nome com reticências
           ctx.font = fontLabel;
           ctx.fillStyle = muted;
 
@@ -699,7 +687,6 @@
           if(nome !== String(item.nome || "")) nome += "…";
           ctx.fillText(nome, 12, y);
 
-          // barra
           const bw = Math.max(2, (item.dias / max) * plotW);
           const x0 = padL;
           const y0 = Math.round(y - barH/2);
@@ -708,7 +695,6 @@
           ctx.fillStyle = bar;
           roundRectFill(ctx, x0, y0, bw, barH, r);
 
-          // valor
           const value = String(item.dias);
           ctx.font = fontValue;
           const valueW = ctx.measureText(value).width;
@@ -844,21 +830,21 @@
         const pill = document.getElementById("rolePill");
         const permMsg = document.getElementById("permMsg");
         const btnApagarTudo = document.getElementById("btnApagarTudo");
-        const btnPTAApagarTudo = document.getElementById("btnPTAApagarTudo");
+        const btnApagarPTA = document.getElementById("btnApagarPTA");
 
         if(pill){
           pill.textContent = isAdmin ? "Gestor" : "Técnico";
           pill.classList.toggle("admin", isAdmin);
         }
+
         if(btnApagarTudo) btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
-        if(btnPTAApagarTudo) btnPTAApagarTudo.style.display = isAdmin ? "inline-block" : "none";
+        if(btnApagarPTA) btnApagarPTA.style.display = isAdmin ? "inline-block" : "none";
         if(permMsg) permMsg.style.display = isAdmin ? "none" : "block";
       }
 
       function aplicarTelaPorContrato(){
         const isPTA = contratoAtual === "pta-inveco";
 
-        // Ferroport
         const blocoFerroport = document.getElementById("blocoFerroport");
         const cardPresenca = document.getElementById("cardPresenca");
         const cardListaFerroport = document.getElementById("cardListaFerroport");
@@ -867,11 +853,16 @@
         if(cardPresenca) cardPresenca.style.display = isPTA ? "none" : "block";
         if(cardListaFerroport) cardListaFerroport.style.display = isPTA ? "none" : "block";
 
-        // PTA
         const cardPTA = document.getElementById("cardPTA");
         const cardListaPTA = document.getElementById("cardListaPTA");
         if(cardPTA) cardPTA.style.display = isPTA ? "block" : "none";
         if(cardListaPTA) cardListaPTA.style.display = isPTA ? "block" : "none";
+
+        // alterna blocos do PDF
+        const printFerroport = document.getElementById("printFerroport");
+        const printPTA = document.getElementById("printPTA");
+        if(printFerroport) printFerroport.style.display = isPTA ? "none" : "block";
+        if(printPTA) printPTA.style.display = isPTA ? "block" : "none";
 
         if(isPTA){
           const ptaData = document.getElementById("ptaData");
@@ -880,7 +871,7 @@
         }
       }
 
-      // ===================== FERROPORT (CHIPS / CRUD) =====================
+      // ===================== FERROPORT =====================
       function renderChipsDiario(){
         const wrap = document.getElementById("chipsDiario");
         if(!wrap) return;
@@ -1052,7 +1043,7 @@
       async function apagarDiarios(){
         try{
           if(!isAdmin) return alert("Apenas Gestor pode apagar tudo.");
-          if(!confirm("Tem certeza que deseja apagar TODOS os registros deste contrato?")) return;
+          if(!confirm("Tem certeza que deseja apagar TODOS os registros deste contrato (Ferroport/diarios)?")) return;
 
           const snap = await refDiarios.get();
           const batch = db.batch();
@@ -1253,43 +1244,27 @@
       }
       window.ptaSalvar = ptaSalvar;
 
-      async function ptaApagar(docId){
-        try{
-          if(!isAdmin) return alert("Apenas Gestor pode apagar.");
-          if(contratoAtual !== "pta-inveco") return alert("Selecione PTA INVECO.");
-          if(!docId) return;
-
-          if(!confirm("Deseja apagar este registro?")) return;
-          await refPTA.doc(docId).delete();
-          alert("Registro apagado.");
-        }catch(e){
-          console.error(e);
-          alert("Erro ao apagar:\n\n" + (e?.message || e));
-        }
-      }
-      window.ptaApagar = ptaApagar;
-
-      // ✅ Apagar tudo PTA (batch em páginas, evita limite 500)
+      // ✅ Apagar tudo PTA (só gestor) - aqui está a correção principal
       async function ptaApagarTudo(){
         try{
-          if(!isAdmin) return alert("Apenas Gestor pode apagar tudo.");
-          if(contratoAtual !== "pta-inveco") return alert("Selecione PTA INVECO.");
-          if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA?")) return;
+          if(!isAdmin) return alert("Apenas Gestor pode apagar registros da PTA.");
+          if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA INVECO.");
+          if(!auth.currentUser) return alert("Sessão expirada. Faça login novamente.");
 
-          let total = 0;
-          while(true){
-            const snap = await refPTA.limit(450).get();
-            if(snap.empty) break;
+          if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA INVECO?")) return;
 
-            const batch = db.batch();
-            snap.docs.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-            total += snap.size;
-
-            if(snap.size < 450) break;
+          // pega docs direto do refPTA atual
+          const snap = await refPTA.get();
+          if(snap.empty){
+            alert("Não há registros para apagar.");
+            return;
           }
 
-          alert("Registros apagados: " + total);
+          const batch = db.batch();
+          snap.docs.forEach(d => batch.delete(d.ref));
+          await batch.commit();
+
+          alert("Registros da PTA apagados com sucesso!");
         }catch(e){
           console.error(e);
           alert("Erro ao apagar:\n\n" + (e?.message || e));
@@ -1344,22 +1319,13 @@
 
             document.getElementById("cardPTA")?.scrollIntoView({ behavior:"smooth", block:"start" });
           };
+
           tdAcoes.appendChild(btnEditar);
-
-          if(isAdmin){
-            const btnDel = document.createElement("button");
-            btnDel.className = "btn danger small";
-            btnDel.type = "button";
-            btnDel.textContent = "Apagar";
-            btnDel.onclick = () => ptaApagar(item.id);
-            tdAcoes.appendChild(btnDel);
-          }
-
           tbody.appendChild(tr);
         });
       }
 
-      // ===================== PAINEL / PDF =====================
+      // ===================== PAINEL =====================
       function setKpiLabelsFerroport(){
         const l1 = document.getElementById("kpiLabel1");
         const l2 = document.getElementById("kpiLabel2");
@@ -1386,15 +1352,11 @@
           return;
         }
 
+        document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
+        document.getElementById("reportPeriodo").innerText = `Período: ${sel.m}/${sel.y}`;
+        document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
+
         const isPTA = contratoAtual === "pta-inveco";
-
-        // Titles PDF
-        document.getElementById("reportContratoFP").textContent = nomeContratoBonito(contratoAtual);
-        document.getElementById("reportPeriodoFP").innerText = `Período: ${sel.m}/${sel.y}`;
-        document.getElementById("reportGeradoEmFP").innerText = `Gerado em: ${agoraBR()}`;
-
-        document.getElementById("reportPeriodoPTA").innerText = `Período: ${sel.m}/${sel.y}`;
-        document.getElementById("reportGeradoEmPTA").innerText = `Gerado em: ${agoraBR()}`;
 
         if(isPTA){
           setKpiLabelsPTA();
@@ -1411,10 +1373,10 @@
           document.getElementById("kpiTecnicos").textContent = String(condutoresSet.size);
           document.getElementById("kpiPresencas").textContent = String(kmTotal);
 
-          // Preenche PDF PTA
-          const tb = document.getElementById("printPTA");
-          if(tb){
-            tb.innerHTML = "";
+          // preencher tabela do PDF PTA
+          const printBody = document.getElementById("printPTATable");
+          if(printBody){
+            printBody.innerHTML = "";
             itensMesPTA.forEach(item => {
               const tr = document.createElement("tr");
               tr.innerHTML = `
@@ -1425,13 +1387,14 @@
                 <td>${item.local || ""}</td>
                 <td>${item.descricao || ""}</td>
               `;
-              tb.appendChild(tr);
+              printBody.appendChild(tr);
             });
           }
 
           return;
         }
 
+        // Ferroport
         setKpiLabelsFerroport();
 
         const itensMes = [...LISTA]
@@ -1491,14 +1454,7 @@
 
       function gerarPDF(){
         atualizarPainel();
-
-        // ✅ Mostra apenas o relatório do contrato selecionado
-        const isPTA = contratoAtual === "pta-inveco";
-        const rFP = document.getElementById("reportFerroport");
-        const rPTA = document.getElementById("reportPTA");
-        if(rFP) rFP.style.display = isPTA ? "none" : "block";
-        if(rPTA) rPTA.style.display = isPTA ? "block" : "none";
-
+        aplicarTelaPorContrato(); // garante o bloco correto do print visível
         setTimeout(()=> window.print(), 60);
       }
       window.gerarPDF = gerarPDF;
