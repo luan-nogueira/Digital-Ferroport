@@ -423,6 +423,31 @@ input:focus, select:focus{
   border-color:var(--digital-red);
 }
 
+/* ✅ Botão X para excluir nome (somente gestor aparece via JS) */
+.chip-del{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--muted);
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+.chip-del:hover{
+  border-color:rgba(203,51,68,.55);
+  color:var(--digital-red);
+  transform:translateY(-1px);
+}
+
 /* ===================== ADICIONAR NOME ===================== */
 .add-nome{
   display:flex;
