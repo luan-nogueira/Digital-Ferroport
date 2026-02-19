@@ -1,3 +1,4 @@
+/* style.css */
 :root{
   --bg:#f5f6f8;
   --card:#ffffff;
@@ -320,7 +321,7 @@ button:disabled{
   gap:8px;
 }
 
-/* ✅ canvas com fundo e borda (fica igual seu print) */
+/* ✅ canvas com fundo e borda */
 .dash-canvas{
   width:100%;
   flex:1;
@@ -614,4 +615,28 @@ th{
 
   .logo{ height:50px; }
   .logo.emive{ height:75px; }
+}
+
+/* ===================== ASSINATURA (PTA) ===================== */
+.signature-wrap{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card-2);
+  padding:12px;
+}
+
+.signature-canvas{
+  width:100%;
+  height:200px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card);
+  touch-action:none;
+}
+
+.signature-actions{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
 }
