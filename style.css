@@ -662,3 +662,79 @@ th{
   gap:10px;
   justify-content:flex-end;
 }
+/* ===================== AJUSTES MOBILE - PTA ===================== */
+@media (max-width: 600px) {
+  /* Card da PTA - reduzir padding */
+  #cardPTA .card-head {
+    margin-bottom: 8px;
+  }
+  
+  #cardPTA .card-head h2 {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  
+  #cardPTA .card-head p {
+    font-size: 11px;
+  }
+  
+  /* Reduzir gaps entre os campos */
+  #cardPTA .grid-2 {
+    gap: 10px;
+  }
+  
+  /* Campos menores */
+  #cardPTA input,
+  #cardPTA select {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  /* Assinatura menor */
+  .signature-canvas {
+    height: 140px;
+  }
+  
+  .signature-wrap {
+    padding: 8px;
+  }
+  
+  /* Lista PTA - tabela mais compacta */
+  #cardListaPTA table {
+    font-size: 11px;
+  }
+  
+  #cardListaPTA th,
+  #cardListaPTA td {
+    padding: 6px 4px;
+  }
+  
+  /* Reduzir ações dos botões */
+  #cardPTA .actions {
+    gap: 6px;
+  }
+  
+  #cardPTA .btn {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  
+  /* Insights menores no mobile */
+  .insight {
+    padding: 8px;
+  }
+  
+  .insight-value {
+    font-size: 16px;
+  }
+  
+  /* KPI menor */
+  .kpi {
+    min-width: 100px;
+    padding: 8px;
+  }
+  
+  .kpi-value {
+    font-size: 18px;
+  }
+}
