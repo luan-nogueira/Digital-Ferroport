@@ -277,7 +277,7 @@
     </div>
   </section>
 
-  <!-- ===================== PTA INVECO ===================== -->
+  <!-- ===================== PTA IVECO ===================== -->
   <section class="card" id="cardPTA" style="display:none;">
     <div class="card-head">
       <h2>Controle de Uso da PTA IVECO — Placa QRD-7698</h2>
@@ -341,7 +341,7 @@
 
   <section class="card no-print" id="cardListaPTA" style="display:none;">
     <div class="card-head">
-      <h2>Registros — PTA INVECO</h2>
+      <h2>Registros — PTA IVECO</h2>
       <p class="muted">Use “Editar” para carregar um registro e atualizar (a assinatura também).</p>
     </div>
 
@@ -412,7 +412,7 @@
   <!-- ✅ PTA PDF -->
   <div id="printPTA" style="display:none;">
     <div class="report-box" style="margin-top:12px;">
-      <div class="box-title">Registros do mês — PTA INVECO</div>
+      <div class="box-title">Registros do mês — PTA IVECO</div>
       <table class="report-table">
         <thead>
           <tr>
@@ -475,7 +475,7 @@
 
       const CONTRATOS = [
         { value: "ferroport",  label: "Ferroport" },
-        { value: "pta-inveco", label: "PTA INVECO" }
+        { value: "pta-IVECO", label: "PTA IVECO" }
       ];
 
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -584,7 +584,7 @@
           .slice(0,80);
       }
       function nomeContratoBonito(slug){
-        return ({ "ferroport":"Ferroport", "pta-inveco":"PTA INVECO" }[slug] || slug);
+        return ({ "ferroport":"Ferroport", "pta-IVECO":"PTA IVECO" }[slug] || slug);
       }
       function inMesAno(dataISO, y, m){
         if(!dataISO) return false;
@@ -843,7 +843,7 @@
       }
 
       function aplicarTelaPorContrato(){
-        const isPTA = contratoAtual === "pta-inveco";
+        const isPTA = contratoAtual === "pta-IVECO";
 
         const blocoFerroport = document.getElementById("blocoFerroport");
         const cardPresenca = document.getElementById("cardPresenca");
@@ -1285,8 +1285,8 @@
 
       async function ptaSalvar(){
         try{
-          if(contratoAtual !== "pta-inveco"){
-            return alert("Selecione o contrato PTA INVECO para salvar este tipo de registro.");
+          if(contratoAtual !== "pta-IVECO"){
+            return alert("Selecione o contrato PTA IVECO para salvar este tipo de registro.");
           }
 
           const dataISO = document.getElementById("ptaData")?.value || "";
@@ -1335,7 +1335,7 @@
       async function ptaExcluirRegistro(docId){
         try{
           if(!isAdmin) return alert("Apenas Gestor pode excluir registros da PTA.");
-          if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA INVECO.");
+          if(contratoAtual !== "pta-IVECO") return alert("Selecione o contrato PTA IVECO.");
           if(!docId) return;
 
           if(!confirm("Excluir este registro da PTA?")) return;
@@ -1353,10 +1353,10 @@
       async function ptaApagarTudo(){
         try{
           if(!isAdmin) return alert("Apenas Gestor pode apagar registros da PTA.");
-          if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA INVECO.");
+          if(contratoAtual !== "pta-IVECO") return alert("Selecione o contrato PTA IVECO.");
           if(!auth.currentUser) return alert("Sessão expirada. Faça login novamente.");
 
-          if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA INVECO?")) return;
+          if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA IVECO?")) return;
 
           const snap = await refPTA.get();
           if(snap.empty){
@@ -1471,7 +1471,7 @@
         document.getElementById("reportPeriodo").innerText = `Período: ${sel.m}/${sel.y}`;
         document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
 
-        const isPTA = contratoAtual === "pta-inveco";
+        const isPTA = contratoAtual === "pta-IVECO";
 
         if(isPTA){
           setKpiLabelsPTA();
@@ -1645,7 +1645,7 @@
 
         window.addEventListener("resize", () => {
           try{ atualizarPainel(); }catch(_){}
-          try{ if(contratoAtual === "pta-inveco") ptaInitAssinatura(); }catch(_){}
+          try{ if(contratoAtual === "pta-IVECO") ptaInitAssinatura(); }catch(_){}
         });
       }
 
@@ -1700,3 +1700,4 @@
 
 </body>
 </html>
+
