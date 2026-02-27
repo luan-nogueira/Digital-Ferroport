@@ -311,6 +311,12 @@ input:focus, select:focus, textarea:focus{
   background:var(--card);
 }
 
+/* ✅ Melhor UX para file input */
+input[type="file"]{
+  padding:10px;
+  background:var(--card);
+}
+
 /* ===================== KPI ===================== */
 .kpi-wrap{
   display:flex;
@@ -348,6 +354,13 @@ input:focus, select:focus, textarea:focus{
 }
 .btn:hover{ filter:brightness(.93); transform:translateY(-1px); }
 .btn:active{ transform:translateY(0px); }
+
+/* ✅ Botão desabilitado */
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none !important;
+}
 
 .btn.secondary{
   background:var(--btn-secondary);
@@ -387,9 +400,15 @@ th{
 .table-compact th, .table-compact td{ padding:8px; }
 
 .item-cell{ text-align:left; font-weight:700; }
-.center{ text-align:center; }
 .w-item{ width:64%; }
 .w-mini{ width:12%; }
+
+/* ✅ Tabela com muitas colunas: permite scroll horizontal */
+.card table{
+  display:block;
+  overflow:auto;
+  white-space:nowrap;
+}
 
 /* ===================== ROLE PILL ===================== */
 .role-pill{
