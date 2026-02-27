@@ -206,11 +206,21 @@ button:disabled{
 }
 
 /* ===================== TOPO ===================== */
-.topbar{
-  background:var(--card);
-  border-bottom:1px solid var(--border);
-  padding:16px 0;
+.topbar .brand{
+  max-width:900px;
+  margin:0 auto;
+  padding:0 16px;
+
   display:flex;
+  flex-direction:column;
+  align-items:center;   /* 🔥 tudo central */
+  justify-content:center;
+  gap:12px;
+  text-align:center;
+}
+
+.top-actions{
+  margin-left:0;
   justify-content:center;
 }
 
@@ -1099,4 +1109,5 @@ th{
 .brand > div{
   text-align:center;
 }
+
 
