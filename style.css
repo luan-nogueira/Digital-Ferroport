@@ -188,6 +188,19 @@ body{
   stroke-linecap:round;
 }
 
+/* ===================== UX: desabilitados ===================== */
+select:disabled,
+input:disabled,
+button:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+#contratoSelect:disabled{
+  background:var(--card-2);
+  border-color:var(--border);
+  filter:grayscale(.15);
+}
+
 /* ===================== TOPO ===================== */
 .topbar{
   background:var(--card);
@@ -277,6 +290,42 @@ body{
   gap:14px;
   align-items:start;
 }
+.split{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  margin-top:12px;
+}
+
+/* ===================== DIVIDER / SECTION ===================== */
+.divider{
+  height:1px;
+  background:var(--border);
+  margin:18px 0;
+}
+
+.section-title{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+}
+.section-title h3{ margin:0; font-size:16px; font-weight:900; }
+.section-title p{ margin:4px 0 0; }
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(203,51,68,.25);
+  background: rgba(203,51,68,.10);
+  color: var(--text);
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.3px;
+}
 
 /* ===================== CAMPOS ===================== */
 .field label{
@@ -295,7 +344,11 @@ input, select, textarea{
   color:var(--text);
   outline:none;
   transition: box-shadow .15s, border-color .15s, transform .05s;
+  text-align:left;
 }
+
+input[type="number"]{ text-align:center; }
+input[type="date"], input[type="month"]{ text-align:center; }
 
 textarea{ resize:vertical; }
 
@@ -304,16 +357,11 @@ input:focus, select:focus, textarea:focus{
   box-shadow: 0 0 0 4px var(--focus);
 }
 
+/* ===================== TABLE WRAP ===================== */
 .table-wrap{
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
-  background:var(--card);
-}
-
-/* ✅ Melhor UX para file input */
-input[type="file"]{
-  padding:10px;
   background:var(--card);
 }
 
@@ -355,13 +403,6 @@ input[type="file"]{
 .btn:hover{ filter:brightness(.93); transform:translateY(-1px); }
 .btn:active{ transform:translateY(0px); }
 
-/* ✅ Botão desabilitado */
-.btn:disabled{
-  opacity:.55;
-  cursor:not-allowed;
-  transform:none !important;
-}
-
 .btn.secondary{
   background:var(--btn-secondary);
   color:var(--btn-secondary-text);
@@ -399,15 +440,23 @@ th{
 }
 .table-compact th, .table-compact td{ padding:8px; }
 
-.item-cell{ text-align:left; font-weight:700; }
-.w-item{ width:64%; }
-.w-mini{ width:12%; }
+.ver-mais-wrap{
+  text-align:center;
+  margin-top:12px;
+}
 
-/* ✅ Tabela com muitas colunas: permite scroll horizontal */
-.card table{
-  display:block;
-  overflow:auto;
-  white-space:nowrap;
+/* ===================== BARRA (tabela ranking) ===================== */
+.bar{
+  height:10px;
+  border-radius:999px;
+  background:var(--bar-bg);
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+.bar-fill{
+  height:100%;
+  background: var(--digital-red);
+  width:0%;
 }
 
 /* ===================== ROLE PILL ===================== */
@@ -425,37 +474,116 @@ th{
 }
 .role-pill.admin{ border-color: rgba(203,51,68,.55); }
 
-/* ===================== SECTIONS ===================== */
-.divider{
-  height:1px;
-  background:var(--border);
-  margin:18px 0;
-}
-
-.section-title{
+/* ===================== CHIPS (Ferroport) ===================== */
+.chips{
   display:flex;
-  align-items:flex-start;
-  gap:12px;
-  margin-bottom:12px;
+  flex-wrap:wrap;
+  gap:10px;
 }
-.section-title h3{ margin:0; font-size:16px; font-weight:900; }
-.section-title p{ margin:4px 0 0; }
+.chip-box{ position:relative; display:inline-block; }
+.chip{
+  border:1px solid var(--border);
+  border-radius:30px;
+  padding:8px 14px;
+  cursor:pointer;
+  background:var(--chip-bg);
+  color:var(--text);
+  transition:.15s;
+  user-select:none;
+  font-weight:800;
+}
+.chip:hover{
+  transform:translateY(-1px);
+  border-color:rgba(203,51,68,.45);
+}
+.chip.active{
+  background:var(--digital-red);
+  color:#fff;
+  border-color:var(--digital-red);
+}
 
-.badge{
-  display:inline-flex;
+.chip-del{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--muted);
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
   align-items:center;
   justify-content:center;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(203,51,68,.25);
-  background: rgba(203,51,68,.10);
-  color: var(--text);
-  font-weight:900;
-  font-size:12px;
-  letter-spacing:.3px;
+  line-height:1;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+.chip-del:hover{
+  border-color:rgba(203,51,68,.55);
+  color:var(--digital-red);
+  transform:translateY(-1px);
 }
 
-/* ===================== CHECKBOX GRID ===================== */
+/* ===================== ADICIONAR NOME ===================== */
+.add-nome{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+.add-nome input{ flex:1; }
+
+/* ===================== DASHBOARD (Ferroport) ===================== */
+.dash{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  margin-top:14px;
+}
+.dash-box{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  background:var(--card-2);
+  min-height:360px;
+  display:flex;
+  flex-direction:column;
+}
+.dash-title{
+  font-weight:900;
+  font-size:14px;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dash-canvas{
+  width:100%;
+  flex:1;
+  min-height:260px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card-2);
+}
+
+.insights{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:6px;
+  flex:1;
+}
+.insight{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  background:var(--card);
+}
+.insight-label{ font-size:12px; color:var(--muted); font-weight:900; }
+.insight-value{ margin-top:6px; font-size:18px; font-weight:900; }
+
+/* ===================== CHECKBOX GRID (PTA) ===================== */
 .check-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -474,7 +602,13 @@ th{
 .check-item input{ width:auto; }
 .check-item:hover{ border-color: rgba(203,51,68,.45); }
 
-/* ===================== COMBUSTÍVEL ===================== */
+/* ===================== CHECK TABLE (PTA) ===================== */
+.check-table th, .check-table td{ padding:8px; }
+.item-cell{ text-align:left; font-weight:800; }
+.w-item{ width:64%; }
+.w-mini{ width:12%; }
+
+/* ===================== COMBUSTÍVEL (PTA) ===================== */
 .fuel-wrap{
   border:1px solid var(--border);
   border-radius:12px;
@@ -503,7 +637,7 @@ input[type="range"]{
   box-shadow:none;
 }
 
-/* ===================== ASSINATURA ===================== */
+/* ===================== ASSINATURA (PTA) ===================== */
 .signature-wrap{
   border:1px solid var(--border);
   border-radius:14px;
@@ -525,14 +659,13 @@ input[type="range"]{
   justify-content:flex-end;
 }
 
-/* ===================== FOTOS ===================== */
+/* ===================== FOTOS (PTA) ===================== */
 .photo-card{
   border:1px solid var(--border);
   border-radius:14px;
   padding:12px;
   background:var(--card-2);
 }
-
 .preview-img{
   width:100%;
   margin-top:10px;
@@ -689,10 +822,103 @@ input[type="range"]{
   margin-top:6px;
 }
 
+/* ===================== PDF / IMPRESSÃO ===================== */
+.print-only{ display:none; }
+.no-print{ display:block; }
+
+.report{ padding:22px; }
+
+.report-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  border-bottom:2px solid #111;
+  padding-bottom:12px;
+  margin-bottom:14px;
+}
+
+.report-logos{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.report-titles{ text-align:right; }
+
+.report-title{
+  font-size:18px;
+  font-weight:900;
+}
+.report-subtitle{
+  font-size:12px;
+  color:#333;
+  margin-top:3px;
+}
+
+.report-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+.report-box{
+  border:1px solid #111;
+  border-radius:10px;
+  padding:12px;
+}
+
+.box-title{
+  font-weight:900;
+  margin-bottom:10px;
+  font-size:13px;
+}
+
+.report-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.report-table th, .report-table td{
+  border:1px solid #111;
+  padding:8px;
+  text-align:left;
+  vertical-align:top;
+  font-size:12px;
+}
+.report-table th{
+  background:#f2f2f2;
+  text-align:left;
+}
+
+.report-footer{
+  margin-top:14px;
+  padding-top:10px;
+  border-top:1px solid #111;
+  font-size:11px;
+  color:#333;
+  text-align:center;
+}
+
+@media print{
+  body{
+    background:#fff !important;
+    color:#000 !important;
+    margin:0;
+    padding:0;
+  }
+  .no-print{ display:none !important; }
+  .print-only{ display:block !important; }
+}
+
 /* ===================== RESPONSIVO ===================== */
 @media (max-width: 900px){
   .grid-3{ grid-template-columns: 1fr; }
+  .split{ grid-template-columns: 1fr; }
+  .dash{ grid-template-columns: 1fr; }
+  .dash-box{ min-height:auto; }
+  .dash-canvas{ min-height:380px; }
 }
+
 @media (max-width: 800px){
   .grid-2{ grid-template-columns:1fr; }
 
@@ -712,4 +938,38 @@ input[type="range"]{
   .galeria-grid{ grid-template-columns: 1fr; }
   .galeria-img, .galeria-empty{ height:210px; }
   .signature-canvas{ height:150px; }
+}
+
+/* ===================== AJUSTES MOBILE - PTA ===================== */
+@media (max-width: 600px) {
+  #cardPTA .card-head { margin-bottom: 8px; }
+  #cardPTA .card-head h2 { font-size: 16px; line-height: 1.3; }
+  #cardPTA .card-head p { font-size: 11px; }
+
+  #cardPTA .grid-2 { gap: 10px; }
+
+  #cardPTA input,
+  #cardPTA select,
+  #cardPTA textarea{
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .signature-canvas { height: 140px; }
+  .signature-wrap { padding: 8px; }
+
+  #cardListaPTA table { font-size: 11px; }
+  #cardListaPTA th,
+  #cardListaPTA td { padding: 6px 4px; }
+
+  #cardPTA .actions { gap: 6px; }
+  #cardPTA .btn { padding: 8px 10px; font-size: 12px; }
+
+  .insight { padding: 8px; }
+  .insight-value { font-size: 16px; }
+
+  .kpi { min-width: 100px; padding: 8px; }
+  .kpi-value { font-size: 18px; }
+
+  .preview-img{ height:140px; }
 }
