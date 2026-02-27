@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Presença diária — Contratos</title>
+  <title>Controle — Contratos</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- Firebase (COMPAT) -->
@@ -70,7 +70,6 @@
 
     <p class="muted small center" id="loginMsg"></p>
 
-    <!-- Aviso automático (quando abre via file://) -->
     <div class="hint" id="hintFile" style="display:none;">
       <strong>Aviso:</strong> você abriu via <code>file://</code>.  
       Para funcionar com Firebase, rode em um servidor (ex.: Live Server / <code>http://localhost</code>) e autorize o domínio no Firebase Auth.
@@ -90,7 +89,7 @@
       <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
     </div>
 
-    <div>
+    <div class="brand-text">
       <div class="brand-title">Controle — Contratos</div>
       <div class="brand-subtitle" id="userBadge">Logado como: —</div>
     </div>
@@ -117,7 +116,7 @@
   <section class="card">
     <div class="card-head">
       <h2>Painel</h2>
-      <p class="muted">Selecione o mês para visualizar dados do contrato. PDF via impressão (Ctrl+P).</p>
+      <p class="muted">Selecione o mês para visualizar dados do contrato.</p>
     </div>
 
     <div class="grid-3">
@@ -130,15 +129,15 @@
         <label>Resumo</label>
         <div class="kpi-wrap">
           <div class="kpi">
-            <div class="kpi-label" id="kpiLabel1">Dias registrados</div>
+            <div class="kpi-label" id="kpiLabel1">Registros</div>
             <div class="kpi-value" id="kpiDias">0</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label" id="kpiLabel2">Técnicos/Condutores</div>
+            <div class="kpi-label" id="kpiLabel2">Pessoas</div>
             <div class="kpi-value" id="kpiTecnicos">0</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label" id="kpiLabel3">Presenças/Registros</div>
+            <div class="kpi-label" id="kpiLabel3">Indicador</div>
             <div class="kpi-value" id="kpiPresencas">0</div>
           </div>
         </div>
@@ -148,149 +147,20 @@
         <label>Ações</label>
         <div class="actions">
           <button class="btn" type="button" onclick="atualizarPainel()">🔄 Atualizar</button>
-          <button class="btn secondary" type="button" onclick="gerarPDF()">📄 Gerar PDF</button>
         </div>
-        <p class="muted small">O PDF é gerado via impressão do navegador (Ctrl+P).</p>
+        <p class="muted small">Relatórios e melhorias podem ser adicionados aqui.</p>
       </div>
-    </div>
-
-    <!-- ===================== BLOCO FERROPORT (painel) ===================== -->
-    <div id="blocoFerroport">
-      <div class="split">
-        <div>
-          <h3 class="h3">Ranking (dias trabalhados no mês)</h3>
-          <table class="table-compact">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Técnico</th>
-                <th>Dias</th>
-                <th style="width:38%;">Progresso</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaRanking"></tbody>
-          </table>
-        </div>
-
-        <div>
-          <h3 class="h3">Registros do mês</h3>
-          <table class="table-compact">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Pessoas</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaMes"></tbody>
-          </table>
-
-          <div class="ver-mais-wrap">
-            <button class="btn secondary small" id="btnVerMaisMes" type="button" onclick="toggleVerMaisMes()">
-              Ver mais registros
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash">
-        <div class="dash-box">
-          <div class="dash-title">📊 Dias por técnico (Top 10)</div>
-          <canvas id="chartRanking" class="dash-canvas"></canvas>
-          <p class="muted small">Mostra quem trabalhou mais dias no mês selecionado.</p>
-        </div>
-
-        <div class="dash-box">
-          <div class="dash-title">📌 Insights rápidos</div>
-          <div class="insights">
-            <div class="insight">
-              <div class="insight-label">Maior frequência</div>
-              <div class="insight-value" id="insightTopNome">—</div>
-            </div>
-            <div class="insight">
-              <div class="insight-label">Dias do Top 1</div>
-              <div class="insight-value" id="insightTopDias">0</div>
-            </div>
-            <div class="insight">
-              <div class="insight-label">Média presenças/dia</div>
-              <div class="insight-value" id="insightMediaDia">0</div>
-            </div>
-            <div class="insight">
-              <div class="insight-label">Média dias/técnico</div>
-              <div class="insight-value" id="insightMediaTec">0</div>
-            </div>
-          </div>
-          <p class="muted small">Resumo automático com base no mês selecionado.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== Ferroport form ===================== -->
-  <section class="card" id="cardPresenca">
-    <div class="card-head">
-      <h2>Presença por dia (Ferroport)</h2>
-      <p class="muted">Selecione a data e marque quem esteve no contrato.</p>
-    </div>
-
-    <div class="grid-2">
-      <div class="field">
-        <label>Data</label>
-        <input id="dataDia" type="date" />
-      </div>
-
-      <div class="field">
-        <label>Pessoas</label>
-        <div class="chips" id="chipsDiario"></div>
-
-        <div class="add-nome">
-          <input type="text" id="novoNome" placeholder="Adicionar técnico (ex: João Silva)">
-          <button class="btn" type="button" onclick="adicionarNome()">+ Adicionar</button>
-        </div>
-
-        <p class="muted small">Os nomes ficam salvos no banco (tempo real).</p>
-        <p class="muted small" id="permMsg" style="display:none;">Você está como Técnico: algumas ações ficam bloqueadas.</p>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn" type="button" onclick="salvarDiario()">💾 Salvar dia</button>
-      <button class="btn secondary" type="button" onclick="limparDiario()">🧹 Limpar</button>
-      <button class="btn danger" id="btnApagarTudo" type="button" onclick="apagarDiarios()">🗑 Apagar tudo</button>
-      <button class="btn" type="button" onclick="exportarDiarioCSV()">⬇ Exportar CSV</button>
-    </div>
-  </section>
-
-  <section class="card no-print" id="cardListaFerroport">
-    <div class="card-head">
-      <h2>Presenças registradas (Ferroport)</h2>
-      <p class="muted">Se salvar a mesma data novamente, o sistema atualiza. Use “Editar” para carregar um registro.</p>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Pessoas</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaDiario"></tbody>
-    </table>
-
-    <div class="ver-mais-wrap">
-      <button class="btn secondary small" id="btnVerMais" type="button" onclick="toggleVerMais()">
-        Ver mais registros
-      </button>
     </div>
   </section>
 
   <!-- ===================== PTA IVECO ===================== -->
   <section class="card" id="cardPTA" style="display:none;">
     <div class="card-head">
-      <h2>Controle de Uso da PTA IVECO — Placa QRD-7698</h2>
-      <p class="muted">Preencha os dados e colete a assinatura do condutor.</p>
+      <h2>PTA IVECO — Placa QRD-7698</h2>
+      <p class="muted">Registro profissional com checklist, assinatura e fotos do veículo.</p>
     </div>
 
+    <!-- Dados principais -->
     <div class="grid-2">
       <div class="field">
         <label>Data</label>
@@ -327,6 +197,105 @@
       </div>
     </div>
 
+    <!-- ===================== CHECKLIST (PROFISSIONAL) ===================== -->
+    <div class="divider"></div>
+
+    <div class="section-title">
+      <div class="badge">CHECKLIST</div>
+      <div>
+        <h3>Inspeção do Veículo</h3>
+        <p class="muted small">Preencha os campos abaixo antes de salvar o registro.</p>
+      </div>
+    </div>
+
+    <!-- Tipo + Horímetro + Combustível -->
+    <div class="grid-3">
+      <div class="field">
+        <label>Tipo de Checagem</label>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" id="chkRecebimento"> <span>Recebimento</span></label>
+          <label class="check-item"><input type="checkbox" id="chkDevolucao"> <span>Devolução</span></label>
+          <label class="check-item"><input type="checkbox" id="chkManutencao"> <span>Manutenção</span></label>
+          <label class="check-item"><input type="checkbox" id="chkPeriodico"> <span>Periódico</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Horímetro Atual</label>
+        <input id="ptaHorimetro" type="number" inputmode="numeric" placeholder="Ex: 1532" />
+        <p class="muted tiny">Se não possuir, deixe em branco.</p>
+      </div>
+
+      <div class="field">
+        <label>Combustível</label>
+        <div class="fuel-wrap">
+          <div class="fuel-labels"><span>E</span><span>F</span></div>
+          <input id="ptaCombustivel" type="range" min="0" max="100" value="50" />
+          <div class="fuel-value"><span id="fuelPct">50%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checagem das patolas -->
+    <div class="field">
+      <label>Checagem das Patolas (pneu / estado)</label>
+      <div class="table-wrap">
+        <table class="table-compact">
+          <thead>
+            <tr>
+              <th>Pneu</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Dianteiro Direito</td>
+              <td><input id="patolaDD" type="text" placeholder="Ex: OK / gasto / furo..." /></td>
+            </tr>
+            <tr>
+              <td>Dianteiro Esquerdo</td>
+              <td><input id="patolaDE" type="text" placeholder="Ex: OK / gasto / furo..." /></td>
+            </tr>
+            <tr>
+              <td>Traseiro Direito</td>
+              <td><input id="patolaTD" type="text" placeholder="Ex: OK / gasto / furo..." /></td>
+            </tr>
+            <tr>
+              <td>Traseiro Esquerdo</td>
+              <td><input id="patolaTE" type="text" placeholder="Ex: OK / gasto / furo..." /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Checagem rápida -->
+    <div class="field">
+      <label>Checagem Rápida</label>
+      <div class="table-wrap">
+        <table class="check-table" id="checkTable">
+          <thead>
+            <tr>
+              <th class="w-item">Item</th>
+              <th class="w-mini">OK</th>
+              <th class="w-mini">NÃO OK</th>
+              <th class="w-mini">N/A</th>
+            </tr>
+          </thead>
+          <tbody id="checkBody"></tbody>
+        </table>
+      </div>
+      <p class="muted tiny">Marque um status por item. Se não se aplica, use N/A.</p>
+    </div>
+
+    <div class="field">
+      <label>Observações</label>
+      <textarea id="ptaObs" rows="4" placeholder="Registre avarias, riscos, vazamentos, observações gerais..."></textarea>
+      <p class="muted tiny">Legenda comum: A (Amassado) • R (Riscado) • Q (Quebrado) • T (Trincado) • M (Manchado)</p>
+    </div>
+
+    <!-- Assinatura -->
+    <div class="divider"></div>
     <div class="field">
       <label>Assinatura (à mão)</label>
       <div class="signature-wrap">
@@ -338,6 +307,40 @@
       </div>
     </div>
 
+    <!-- Fotos -->
+    <div class="divider"></div>
+    <div class="field">
+      <label>Fotos do veículo (frente / trás / laterais) — obrigatório</label>
+
+      <div class="grid-2">
+        <div class="photo-card">
+          <label class="small">Frente</label>
+          <input type="file" id="ptaFotoFrente" accept="image/*" capture="environment">
+          <img id="previewFrente" class="preview-img" alt="Preview Frente">
+        </div>
+
+        <div class="photo-card">
+          <label class="small">Traseira</label>
+          <input type="file" id="ptaFotoTras" accept="image/*" capture="environment">
+          <img id="previewTras" class="preview-img" alt="Preview Traseira">
+        </div>
+
+        <div class="photo-card">
+          <label class="small">Lateral Esquerda</label>
+          <input type="file" id="ptaFotoLatEsq" accept="image/*" capture="environment">
+          <img id="previewLatEsq" class="preview-img" alt="Preview Lateral Esquerda">
+        </div>
+
+        <div class="photo-card">
+          <label class="small">Lateral Direita</label>
+          <input type="file" id="ptaFotoLatDir" accept="image/*" capture="environment">
+          <img id="previewLatDir" class="preview-img" alt="Preview Lateral Direita">
+        </div>
+      </div>
+
+      <p class="muted small">Clique na foto para abrir em tela cheia.</p>
+    </div>
+
     <div class="actions">
       <button class="btn" type="button" onclick="ptaSalvar()">💾 Salvar registro</button>
       <button class="btn secondary" type="button" onclick="ptaLimparFormulario()">🧹 Limpar</button>
@@ -345,10 +348,11 @@
     </div>
   </section>
 
+  <!-- Lista PTA -->
   <section class="card no-print" id="cardListaPTA" style="display:none;">
     <div class="card-head">
       <h2>Registros — PTA IVECO</h2>
-      <p class="muted">Use “Editar” para carregar um registro e atualizar (a assinatura também).</p>
+      <p class="muted">Use “Editar” para atualizar e “Fotos” para visualizar as imagens anexadas.</p>
     </div>
 
     <table>
@@ -375,77 +379,36 @@
 </main>
 </div>
 
-<!-- ===================== PDF ===================== -->
-<section class="print-only report">
-  <div class="report-head">
-    <div class="report-logos">
-      <img src="logo-digital.png" alt="Logo Digital" class="logo">
-      <img src="logo-emive.png" alt="Logo Emive" class="logo emive">
-    </div>
-
-    <div class="report-titles">
-      <div class="report-title">Relatório — <span id="reportContrato">—</span></div>
-      <div class="report-subtitle" id="reportPeriodo">Período: —</div>
-      <div class="report-subtitle" id="reportGeradoEm">Gerado em: —</div>
-    </div>
+<!-- ✅ MODAL DE IMAGEM (LIGHTBOX) -->
+<div id="imgModal" class="img-modal" style="display:none;" aria-hidden="true">
+  <div class="img-modal-backdrop" onclick="closeImgModal()"></div>
+  <div class="img-modal-content" role="dialog" aria-modal="true">
+    <button class="img-modal-close" type="button" onclick="closeImgModal()" aria-label="Fechar">×</button>
+    <img id="imgModalView" alt="Imagem ampliada">
   </div>
+</div>
 
-  <!-- ✅ FERROPORT PDF -->
-  <div id="printFerroport">
-    <div class="report-grid">
-      <div class="report-box">
-        <div class="box-title">Ranking — Dias trabalhados</div>
-        <table class="report-table">
-          <thead>
-            <tr><th>#</th><th>Técnico</th><th>Dias</th></tr>
-          </thead>
-          <tbody id="printRanking"></tbody>
-        </table>
+<!-- ✅ MODAL DE FOTOS (GALERIA PTA) -->
+<div id="galeriaModal" class="galeria-modal" style="display:none;" aria-hidden="true">
+  <div class="galeria-backdrop" onclick="closeGaleria()"></div>
+
+  <div class="galeria-content" role="dialog" aria-modal="true">
+    <div class="galeria-head">
+      <div>
+        <div class="galeria-title">Fotos do veículo</div>
+        <div class="galeria-sub" id="galeriaSub">—</div>
       </div>
-
-      <div class="report-box">
-        <div class="box-title">Registros do mês</div>
-        <table class="report-table">
-          <thead>
-            <tr><th>Data</th><th>Pessoas</th></tr>
-          </thead>
-          <tbody id="printMes"></tbody>
-        </table>
-      </div>
+      <button class="galeria-close" type="button" onclick="closeGaleria()" aria-label="Fechar">×</button>
     </div>
-  </div>
 
-  <!-- ✅ PTA PDF -->
-  <div id="printPTA" style="display:none;">
-    <div class="report-box" style="margin-top:12px;">
-      <div class="box-title">Registros do mês — PTA IVECO</div>
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Condutor</th>
-            <th>Km Inicial</th>
-            <th>Km Final</th>
-            <th>Local</th>
-            <th>Atividade</th>
-          </tr>
-        </thead>
-        <tbody id="printPTATable"></tbody>
-      </table>
-      <p class="muted small" style="margin-top:10px;">
-        Observação: Assinaturas são armazenadas no sistema e podem ser conferidas na tela do contrato.
-      </p>
-    </div>
-  </div>
+    <div class="galeria-grid" id="galeriaGrid"></div>
 
-  <div class="report-footer">
-    DIGITAL • EMIVE — Tecnologia e Segurança
+    <p class="muted small" style="margin:10px 0 0;">
+      Dica: clique em qualquer foto para abrir grande.
+    </p>
   </div>
-</section>
+</div>
 
-<!-- ===========================================================
-     ✅ SCRIPT FINAL
-=========================================================== -->
 <script>
 (function(){
   function showFatal(err){
@@ -464,13 +427,10 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     try{
-      // Aviso se abriu via file:// (muito comum causar “não consigo acessar”)
-      try{
-        if (location.protocol === "file:") {
-          const hint = document.getElementById("hintFile");
-          if (hint) hint.style.display = "block";
-        }
-      }catch(_){}
+      if (location.protocol === "file:") {
+        const hint = document.getElementById("hintFile");
+        if (hint) hint.style.display = "block";
+      }
 
       if(typeof firebase === "undefined"){
         throw new Error("firebase is not defined. Os scripts compat precisam estar carregados antes deste script.");
@@ -488,8 +448,7 @@
       };
 
       const CONTRATOS = [
-        { value: "ferroport",  label: "Ferroport" },
-        { value: "pta-inveco", label: "PTA IVECO" } // ✅ corrigido
+        { value: "pta-inveco", label: "PTA IVECO" }
       ];
 
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -497,37 +456,47 @@
       const auth = firebase.auth();
       const db   = firebase.firestore();
 
-      // Ferroport
-      let LISTA = [];
-      let NOMES = [];
-      let selecaoDiaria = [];
-
-      let mostrarTodosRegistros = false;
-      const LIMITE_REGISTROS = 5;
-
-      let mostrarTodosMes = false;
-      const LIMITE_MES = 6;
-
-      // Contratos / Permissões
-      const KEY_CONTRATO = "contrato_atual";
-      let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
-
+      // Permissões
       let allowedContracts = [];
       let isAdmin = false;
 
-      // Firestore refs
-      let refDiarios = null;
-      let refNomes = null;
-      let refPTA = null;
+      // Contrato
+      const KEY_CONTRATO = "contrato_atual";
+      let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "pta-inveco";
 
-      // Unsub realtime
-      let unsubDiarios = null;
-      let unsubNomes = null;
+      // Firestore refs
+      let refPTA = null;
       let unsubPTA = null;
 
       // PTA
       let LISTA_PTA = [];
       let ptaEditId = null;
+      let ptaEditFotos = null;
+
+      // Checklist rápido (itens do seu formulário)
+      const CHECK_ITEMS = [
+        "Fixação para Transporte",
+        "Giro do cesto",
+        "Comando do cesto",
+        "Estabilizadores",
+        "Comando das patolas",
+        "Lança",
+        "Elevação da plataforma",
+        "Vazamentos hidráulicos",
+        "Eletroválvulas lacradas",
+        "Anti-crash",
+        "Acion. Tomada de força",
+        "Óleo hidráulico",
+        "Comando da torre",
+        "Calços",
+        "Bomba de emergência",
+        "Chave de torre",
+        "Torre",
+        "Mangueiras",
+        "Giroled",
+        "Lanternas laterais",
+        "Sirene de movimentação"
+      ];
 
       // ===================== TEMA =====================
       const KEY_TEMA = "tema_site";
@@ -540,15 +509,12 @@
         const btnLogin = document.getElementById("btnTemaLogin");
         if(btn) btn.textContent = txt;
         if(btnLogin) btnLogin.textContent = txt;
-
-        try{ setTimeout(() => atualizarPainel(), 10); }catch(_){}
       }
       function toggleTema(){
         const atual = document.documentElement.getAttribute("data-theme") || "light";
         aplicarTema(atual === "dark" ? "light" : "dark");
       }
       window.toggleTema = toggleTema;
-
       aplicarTema(localStorage.getItem(KEY_TEMA) || "light");
 
       function toggleSenha(inputId, btn){
@@ -568,26 +534,25 @@
       window.toggleSenha = toggleSenha;
 
       // ===================== HELPERS =====================
-      function formatarDataBR(dataISO){
-        if(!dataISO) return "";
-        const [y,m,d] = dataISO.split("-");
-        return `${d}/${m}/${y}`;
-      }
       function hojeISO(){
         const d = new Date();
         const pad = (n)=> String(n).padStart(2,"0");
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
       }
-      function agoraBR(){
-        const d = new Date();
-        const pad = (n)=> String(n).padStart(2,"0");
-        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      function formatarDataBR(dataISO){
+        if(!dataISO) return "";
+        const [y,m,d] = dataISO.split("-");
+        return `${d}/${m}/${y}`;
       }
       function getMesAnoSelecionado(){
         const v = document.getElementById("mesAno")?.value;
         if(!v) return null;
         const [y,m] = v.split("-");
         return { y, m };
+      }
+      function inMesAno(dataISO, y, m){
+        if(!dataISO) return false;
+        return dataISO.startsWith(`${y}-${m}-`);
       }
       function idSeguro(str){
         return String(str || "")
@@ -597,590 +562,185 @@
           .replace(/[^a-z0-9\-]/g,"")
           .slice(0,80);
       }
-      function nomeContratoBonito(slug){
-        return ({ "ferroport":"Ferroport", "pta-inveco":"PTA IVECO" }[slug] || slug); // ✅ corrigido
-      }
-      function inMesAno(dataISO, y, m){
-        if(!dataISO) return false;
-        return dataISO.startsWith(`${y}-${m}-`);
-      }
 
-      // ===================== RANKING (Ferroport) =====================
-      function contarDiasPorTecnico(itensMes){
-        const map = new Map();
-        itensMes.forEach(item => {
-          (item.pessoas || []).forEach(nome => {
-            map.set(nome, (map.get(nome) || 0) + 1);
-          });
-        });
-        return [...map.entries()]
-          .map(([nome, dias]) => ({ nome, dias }))
-          .sort((a,b) => b.dias - a.dias || a.nome.localeCompare(b.nome, "pt-BR"));
-      }
+      // ===================== MODAIS (IMAGENS) =====================
+      function openImgModal(src){
+        if(!src) return;
+        const modal = document.getElementById("imgModal");
+        const view = document.getElementById("imgModalView");
+        if(!modal || !view) return;
+        view.src = src;
+        modal.style.display = "block";
+        modal.setAttribute("aria-hidden","false");
 
-      // ===================== GRÁFICO =====================
-      function desenharGraficoTop10(canvasId, data){
-        const canvas = document.getElementById(canvasId);
-        if(!canvas) return;
-
-        const w = canvas.clientWidth || 0;
-        const h = canvas.clientHeight || 0;
-        if(w < 50 || h < 50) return;
-
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width  = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
-
-        const ctx = canvas.getContext("2d");
-        ctx.setTransform(dpr,0,0,dpr,0,0);
-        ctx.clearRect(0,0,w,h);
-
-        const styles = getComputedStyle(document.documentElement);
-        const text   = styles.getPropertyValue("--text").trim() || "#111";
-        const muted  = styles.getPropertyValue("--muted").trim() || "#666";
-        const border = styles.getPropertyValue("--border").trim() || "#ddd";
-        const bar    = styles.getPropertyValue("--digital-red").trim() || "#CB3344";
-        const bg     = styles.getPropertyValue("--card-2").trim() || "#f7f7f7";
-
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        if(!data || data.length === 0){
-          ctx.font = "14px Arial";
-          ctx.fillStyle = muted;
-          ctx.fillText("Sem dados no mês selecionado.", 12, 24);
-          return;
+        function esc(e){
+          if(e.key === "Escape"){ closeImgModal(); window.removeEventListener("keydown", esc); }
         }
+        window.addEventListener("keydown", esc);
+      }
+      function closeImgModal(){
+        const modal = document.getElementById("imgModal");
+        const view = document.getElementById("imgModalView");
+        if(!modal || !view) return;
+        view.src = "";
+        modal.style.display = "none";
+        modal.setAttribute("aria-hidden","true");
+      }
+      window.openImgModal = openImgModal;
+      window.closeImgModal = closeImgModal;
 
-        const top = data.slice(0,10);
-        const max = Math.max(...top.map(x => x.dias), 1);
+      function openGaleria(payload){
+        const modal = document.getElementById("galeriaModal");
+        const grid = document.getElementById("galeriaGrid");
+        const sub = document.getElementById("galeriaSub");
+        if(!modal || !grid || !sub) return;
 
-        const fontLabel = "12px Arial";
-        const fontValue = "12px Arial";
+        const { dataBR, condutor, fotos } = payload || {};
+        sub.textContent = `${dataBR || "—"} • ${condutor || "—"}`;
 
-        ctx.font = fontLabel;
-        const maxNameW = Math.min(
-          240,
-          Math.max(...top.map(x => ctx.measureText(String(x.nome)).width)) + 18
-        );
+        grid.innerHTML = "";
+        const itens = [
+          { label:"Frente", src:fotos?.fotoFrente },
+          { label:"Traseira", src:fotos?.fotoTras },
+          { label:"Lateral Esquerda", src:fotos?.fotoLatEsq },
+          { label:"Lateral Direita", src:fotos?.fotoLatDir },
+        ];
 
-        const padL = Math.max(110, Math.min(maxNameW, Math.floor(w * 0.55)));
-        const padR = 26;
-        const padT = 18;
-        const padB = 18;
+        itens.forEach(it => {
+          const card = document.createElement("div");
+          card.className = "galeria-card";
 
-        const plotW = Math.max(60, w - padL - padR);
-        const rowH  = Math.max(26, Math.floor((h - padT - padB) / top.length));
-        const barH  = Math.floor(rowH * 0.55);
+          const lbl = document.createElement("div");
+          lbl.className = "galeria-label";
+          lbl.textContent = it.label;
 
-        ctx.strokeStyle = border;
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.35;
-        for(let i=0;i<=4;i++){
-          const x = padL + (plotW * (i/4));
-          ctx.beginPath();
-          ctx.moveTo(x, padT);
-          ctx.lineTo(x, h - padB);
-          ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
+          card.appendChild(lbl);
 
-        ctx.textBaseline = "middle";
-
-        top.forEach((item, i) => {
-          const y = padT + i * rowH + rowH/2;
-
-          ctx.font = fontLabel;
-          ctx.fillStyle = muted;
-
-          let nome = String(item.nome || "");
-          const maxAllowed = padL - 16;
-          while(nome.length > 1 && ctx.measureText(nome + "…").width > maxAllowed){
-            nome = nome.slice(0, -1);
-          }
-          if(nome !== String(item.nome || "")) nome += "…";
-          ctx.fillText(nome, 12, y);
-
-          const bw = Math.max(2, (item.dias / max) * plotW);
-          const x0 = padL;
-          const y0 = Math.round(y - barH/2);
-
-          const r = Math.min(8, Math.floor(barH/2));
-          ctx.fillStyle = bar;
-          roundRectFill(ctx, x0, y0, bw, barH, r);
-
-          const value = String(item.dias);
-          ctx.font = fontValue;
-          const valueW = ctx.measureText(value).width;
-
-          const inside = bw > (valueW + 14);
-          if(inside){
-            ctx.fillStyle = "#fff";
-            ctx.fillText(value, x0 + bw - valueW - 8, y);
+          if(it.src){
+            const img = document.createElement("img");
+            img.className = "galeria-img";
+            img.src = it.src;
+            img.alt = it.label;
+            img.onclick = ()=> openImgModal(it.src);
+            card.appendChild(img);
           }else{
-            ctx.fillStyle = text;
-            const xVal = Math.min(w - padR + 2, x0 + bw + 8);
-            ctx.fillText(value, xVal, y);
+            const empty = document.createElement("div");
+            empty.className = "galeria-empty";
+            empty.textContent = "Sem imagem";
+            card.appendChild(empty);
           }
+
+          grid.appendChild(card);
         });
 
-        function roundRectFill(ctx, x, y, width, height, radius){
-          const rr = Math.max(0, Math.min(radius, width/2, height/2));
-          ctx.beginPath();
-          ctx.moveTo(x + rr, y);
-          ctx.arcTo(x + width, y, x + width, y + height, rr);
-          ctx.arcTo(x + width, y + height, x, y + height, rr);
-          ctx.arcTo(x, y + height, x, y, rr);
-          ctx.arcTo(x, y, x + width, y, rr);
-          ctx.closePath();
-          ctx.fill();
+        modal.style.display = "block";
+        modal.setAttribute("aria-hidden","false");
+
+        function esc(e){
+          if(e.key === "Escape"){ closeGaleria(); window.removeEventListener("keydown", esc); }
         }
+        window.addEventListener("keydown", esc);
       }
-
-      // ===================== PERMISSÕES =====================
-      async function carregarPermissoesUsuario(user){
-        const snap = await db.collection("users").doc(user.uid).get();
-        const data = snap.exists ? (snap.data() || {}) : {};
-        allowedContracts = Array.isArray(data.allowedContracts) ? data.allowedContracts : [];
-        isAdmin = String(data.role || "").toLowerCase() === "gestor";
+      function closeGaleria(){
+        const modal = document.getElementById("galeriaModal");
+        const grid = document.getElementById("galeriaGrid");
+        if(!modal || !grid) return;
+        grid.innerHTML = "";
+        modal.style.display = "none";
+        modal.setAttribute("aria-hidden","true");
       }
+      window.openGaleria = openGaleria;
+      window.closeGaleria = closeGaleria;
 
-      function montarSelectContratos(){
-        const sel = document.getElementById("contratoSelect");
-        if(!sel) return;
-
-        sel.innerHTML = "";
-
-        if(!allowedContracts.length){
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "Sem acesso";
-          sel.appendChild(opt);
-          sel.disabled = true;
-          return;
-        }
-
-        sel.disabled = false;
-
-        CONTRATOS
-          .filter(c => allowedContracts.includes(c.value))
-          .forEach(c => {
-            const opt = document.createElement("option");
-            opt.value = c.value;
-            opt.textContent = c.label;
-            sel.appendChild(opt);
-          });
-
-        if(!allowedContracts.includes(contratoAtual)){
-          contratoAtual = allowedContracts[0];
-          localStorage.setItem(KEY_CONTRATO, contratoAtual);
-        }
-
-        sel.value = contratoAtual;
-      }
-
-      // ===================== REFS / REALTIME =====================
-      function setRefsContrato(){
-        refDiarios = db.collection("contratos").doc(contratoAtual).collection("diarios");
-        refNomes   = db.collection("contratos").doc(contratoAtual).collection("nomes");
-        refPTA     = db.collection("contratos").doc(contratoAtual).collection("ptauso");
-      }
-
-      function desligarRealtime(){
-        if(typeof unsubDiarios === "function") unsubDiarios();
-        if(typeof unsubNomes === "function") unsubNomes();
-        if(typeof unsubPTA === "function") unsubPTA();
-        unsubDiarios = unsubNomes = unsubPTA = null;
-      }
-
-      function ligarRealtime(){
-        desligarRealtime();
-
-        unsubDiarios = refDiarios.onSnapshot(
-          (snap) => {
-            LISTA = snap.docs.map(d => d.data());
-            carregarDiario();
-            atualizarPainel();
-          },
-          (err) => {
-            console.error("Erro diários:", err);
-            alert("Erro diários:\n\n" + (err?.message || err));
-          }
-        );
-
-        unsubNomes = refNomes.onSnapshot(
-          (snap) => {
-            NOMES = snap.docs.map(d => (d.data()||{}).nome).filter(Boolean).sort((a,b) => a.localeCompare(b, "pt-BR"));
-            renderChipsDiario();
-          },
-          (err) => {
-            console.error("Erro nomes:", err);
-            alert("Erro nomes:\n\n" + (err?.message || err));
-          }
-        );
-
-        unsubPTA = refPTA.onSnapshot(
-          (snap) => {
-            LISTA_PTA = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
-            carregarTabelaPTA();
-            atualizarPainel();
-          },
-          (err) => {
-            console.error("Erro PTA:", err);
-            alert("Erro PTA:\n\n" + (err?.message || err));
-          }
-        );
-      }
-
-      // ===================== UI =====================
-      function mostrarApp(logado){
-        const a = document.getElementById("loginBox");
-        const b = document.getElementById("appRoot");
-        if(a) a.style.display = logado ? "none" : "flex";
-        if(b) b.style.display = logado ? "block" : "none";
-      }
-
-      function aplicarPermissoesUI(){
-        const pill = document.getElementById("rolePill");
-        const permMsg = document.getElementById("permMsg");
-        const btnApagarTudo = document.getElementById("btnApagarTudo");
-        const btnApagarPTA = document.getElementById("btnApagarPTA");
-
-        if(pill){
-          pill.textContent = isAdmin ? "Gestor" : "Técnico";
-          pill.classList.toggle("admin", isAdmin);
-        }
-
-        if(btnApagarTudo) btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
-        if(btnApagarPTA) btnApagarPTA.style.display = isAdmin ? "inline-block" : "none";
-        if(permMsg) permMsg.style.display = isAdmin ? "none" : "block";
-      }
-
-      function aplicarTelaPorContrato(){
-        const isPTA = contratoAtual === "pta-inveco";
-
-        const blocoFerroport = document.getElementById("blocoFerroport");
-        const cardPresenca = document.getElementById("cardPresenca");
-        const cardListaFerroport = document.getElementById("cardListaFerroport");
-
-        if(blocoFerroport) blocoFerroport.style.display = isPTA ? "none" : "block";
-        if(cardPresenca) cardPresenca.style.display = isPTA ? "none" : "block";
-        if(cardListaFerroport) cardListaFerroport.style.display = isPTA ? "none" : "block";
-
-        const cardPTA = document.getElementById("cardPTA");
-        const cardListaPTA = document.getElementById("cardListaPTA");
-        if(cardPTA) cardPTA.style.display = isPTA ? "block" : "none";
-        if(cardListaPTA) cardListaPTA.style.display = isPTA ? "block" : "none";
-
-        const printFerroport = document.getElementById("printFerroport");
-        const printPTA = document.getElementById("printPTA");
-        if(printFerroport) printFerroport.style.display = isPTA ? "none" : "block";
-        if(printPTA) printPTA.style.display = isPTA ? "block" : "none";
-
-        if(isPTA){
-          const ptaData = document.getElementById("ptaData");
-          if(ptaData && !ptaData.value) ptaData.value = hojeISO();
-          setTimeout(() => ptaInitAssinatura(), 80);
-        }
-      }
-
-      // ===================== FERROPORT =====================
-      async function excluirRegistroDiario(dataISO){
-        try{
-          if(!isAdmin) return alert("Apenas Gestor pode excluir registros.");
-          if(!dataISO) return;
-          if(!confirm(`Excluir o registro do dia ${formatarDataBR(dataISO)}?`)) return;
-
-          await refDiarios.doc(dataISO).delete();
-          alert("Registro excluído.");
-        }catch(e){
-          console.error(e);
-          alert("Erro ao excluir registro:\n\n" + (e?.message || e));
-        }
-      }
-      window.excluirRegistroDiario = excluirRegistroDiario;
-
-      async function excluirNome(nome){
-        try{
-          if(!isAdmin) return alert("Apenas Gestor pode excluir nomes.");
-          if(!nome) return;
-
-          const removerDosRegistros = confirm(
-            `Excluir o nome "${nome}" da lista?\n\n` +
-            `OK = também remover "${nome}" de TODOS os registros do contrato.\n` +
-            `Cancelar = remover apenas da lista (os registros antigos continuam mostrando o nome).`
-          );
-
-          await refNomes.doc(idSeguro(nome)).delete();
-
-          if(removerDosRegistros){
-            const snap = await refDiarios.get();
-            if(!snap.empty){
-              const batch = db.batch();
-              snap.docs.forEach(doc => {
-                const d = doc.data() || {};
-                const pessoas = Array.isArray(d.pessoas) ? d.pessoas : [];
-                if(pessoas.includes(nome)){
-                  const novas = pessoas.filter(p => p !== nome);
-                  batch.set(doc.ref, { pessoas: novas }, { merge:true });
-                }
-              });
-              await batch.commit();
-            }
-
-            selecaoDiaria = selecaoDiaria.filter(n => n !== nome);
-            renderChipsDiario();
-          }
-
-          alert("Nome excluído.");
-        }catch(e){
-          console.error(e);
-          alert("Erro ao excluir nome:\n\n" + (e?.message || e));
-        }
-      }
-      window.excluirNome = excluirNome;
-
-      function renderChipsDiario(){
-        const wrap = document.getElementById("chipsDiario");
-        if(!wrap) return;
-        wrap.innerHTML = "";
-
-        NOMES.forEach(nome => {
-          const box = document.createElement("div");
-          box.className = "chip-box";
-
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "chip" + (selecaoDiaria.includes(nome) ? " active" : "");
-          btn.innerText = nome;
-
-          btn.onclick = () => {
-            selecaoDiaria = selecaoDiaria.includes(nome)
-              ? selecaoDiaria.filter(n => n !== nome)
-              : [...selecaoDiaria, nome];
-            renderChipsDiario();
-          };
-
-          box.appendChild(btn);
-
-          if(isAdmin){
-            const del = document.createElement("button");
-            del.type = "button";
-            del.className = "chip-del";
-            del.title = `Excluir "${nome}"`;
-            del.setAttribute("aria-label", `Excluir ${nome}`);
-            del.textContent = "×";
-            del.onclick = (e) => {
-              e.stopPropagation();
-              excluirNome(nome);
-            };
-            box.appendChild(del);
-          }
-
-          wrap.appendChild(box);
+      // ===================== FOTOS (BASE64) =====================
+      function fileToBase64(file){
+        return new Promise((resolve, reject)=>{
+          const r = new FileReader();
+          r.onload = ()=> resolve(r.result);
+          r.onerror = reject;
+          r.readAsDataURL(file);
         });
       }
-      window.renderChipsDiario = renderChipsDiario;
+      function configurarPreview(inputId, previewId){
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if(!input || !preview) return;
 
-      async function adicionarNome(){
-        try{
-          const input = document.getElementById("novoNome");
-          const nome = input.value.trim();
-          if(!nome) return alert("Digite um nome.");
-
-          const existe = NOMES.some(n => n.toLowerCase() === nome.toLowerCase());
-          if(existe) return alert("Esse nome já existe.");
-
-          await refNomes.doc(idSeguro(nome)).set({ nome });
-          input.value = "";
-        }catch(e){
-          console.error(e);
-          alert("Erro ao adicionar nome:\n\n" + (e?.message || e));
-        }
+        input.addEventListener("change", async ()=>{
+          const file = input.files[0];
+          if(!file) return;
+          const base64 = await fileToBase64(file);
+          preview.src = base64;
+        });
       }
-      window.adicionarNome = adicionarNome;
-
-      async function salvarDiario(){
-        try{
-          const data = document.getElementById("dataDia").value;
-          if(!data) return alert("Selecione a data.");
-          if(selecaoDiaria.length === 0) return alert("Selecione pelo menos uma pessoa.");
-
-          const item = { dataISO: data, dataBR: formatarDataBR(data), pessoas: [...selecaoDiaria] };
-          await refDiarios.doc(data).set(item);
-
-          limparDiario();
-        }catch(e){
-          console.error(e);
-          alert("Erro ao salvar o dia:\n\n" + (e?.message || e));
-        }
+      function limparFotosPTAUI(){
+        ["ptaFotoFrente","ptaFotoTras","ptaFotoLatEsq","ptaFotoLatDir"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = "";
+        });
+        ["previewFrente","previewTras","previewLatEsq","previewLatDir"].forEach(id => {
+          const img = document.getElementById(id);
+          if(img) img.src = "";
+        });
       }
-      window.salvarDiario = salvarDiario;
 
-      function limparDiario(silencioso=false){
-        const dataDia = document.getElementById("dataDia");
-        if(dataDia) dataDia.value = hojeISO();
-        selecaoDiaria = [];
-        renderChipsDiario();
-        if(!silencioso){
-          const novoNome = document.getElementById("novoNome");
-          if(novoNome) novoNome.value = "";
-        }
-      }
-      window.limparDiario = limparDiario;
+      // ===================== CHECKLIST UI =====================
+      function renderChecklistRapido(){
+        const body = document.getElementById("checkBody");
+        if(!body) return;
+        body.innerHTML = "";
 
-      function carregarDiario(){
-        const tbody = document.getElementById("tabelaDiario");
-        if(!tbody) return;
+        CHECK_ITEMS.forEach((label, idx)=>{
+          const key = `it_${idx}`;
 
-        tbody.innerHTML = "";
-
-        const dados = [...LISTA].sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||""));
-        const visiveis = mostrarTodosRegistros ? dados : dados.slice(0, LIMITE_REGISTROS);
-
-        visiveis.forEach(item => {
           const tr = document.createElement("tr");
-
-          const tdData = document.createElement("td");
-          tdData.textContent = item.dataBR || formatarDataBR(item.dataISO);
-
-          const tdPessoas = document.createElement("td");
-          tdPessoas.textContent = Array.isArray(item.pessoas) ? item.pessoas.join(", ") : "";
-
-          const tdAcoes = document.createElement("td");
-          tdAcoes.className = "row-actions";
-
-          const btnEditar = document.createElement("button");
-          btnEditar.className = "btn secondary small";
-          btnEditar.type = "button";
-          btnEditar.textContent = "Editar";
-          btnEditar.onclick = () => {
-            document.getElementById("dataDia").value = item.dataISO || hojeISO();
-            selecaoDiaria = Array.isArray(item.pessoas) ? [...item.pessoas] : [];
-            renderChipsDiario();
-            document.getElementById("cardPresenca")?.scrollIntoView({ behavior:"smooth", block:"start" });
-          };
-          tdAcoes.appendChild(btnEditar);
-
-          if(isAdmin){
-            const btnExcluir = document.createElement("button");
-            btnExcluir.className = "btn danger small";
-            btnExcluir.type = "button";
-            btnExcluir.textContent = "Excluir";
-            btnExcluir.onclick = () => excluirRegistroDiario(item.dataISO);
-            tdAcoes.appendChild(btnExcluir);
-          }
-
-          tr.appendChild(tdData);
-          tr.appendChild(tdPessoas);
-          tr.appendChild(tdAcoes);
-          tbody.appendChild(tr);
+          tr.innerHTML = `
+            <td class="item-cell">${label}</td>
+            <td class="center"><input type="radio" name="${key}" value="ok"></td>
+            <td class="center"><input type="radio" name="${key}" value="nok"></td>
+            <td class="center"><input type="radio" name="${key}" value="na"></td>
+          `;
+          body.appendChild(tr);
         });
-
-        atualizarBotaoVerMais();
       }
 
-      function atualizarBotaoVerMais(){
-        const btn = document.getElementById("btnVerMais");
-        if(!btn) return;
-        btn.style.display = LISTA.length > LIMITE_REGISTROS ? "inline-block" : "none";
-        btn.textContent = mostrarTodosRegistros ? "Ver menos" : "Ver mais registros";
+      function getChecklistRapidoValues(){
+        const values = {};
+        CHECK_ITEMS.forEach((_, idx)=>{
+          const key = `it_${idx}`;
+          const sel = document.querySelector(`input[name="${key}"]:checked`);
+          values[key] = sel ? sel.value : "";
+        });
+        return values;
       }
 
-      function toggleVerMais(){
-        mostrarTodosRegistros = !mostrarTodosRegistros;
-        carregarDiario();
-      }
-      window.toggleVerMais = toggleVerMais;
-
-      function carregarMes(itensMes){
-        const tbody = document.getElementById("tabelaMes");
-        if(tbody){
-          tbody.innerHTML = "";
-          const vis = mostrarTodosMes ? itensMes : itensMes.slice(0, LIMITE_MES);
-          vis.forEach(item => {
-            const tr = document.createElement("tr");
-            tr.innerHTML =
-              `<td>${item.dataBR || formatarDataBR(item.dataISO)}</td>` +
-              `<td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>`;
-            tbody.appendChild(tr);
-          });
-
-          const btn = document.getElementById("btnVerMaisMes");
-          if(btn){
-            btn.style.display = itensMes.length > LIMITE_MES ? "inline-block" : "none";
-            btn.textContent = mostrarTodosMes ? "Ver menos registros" : "Ver mais registros";
-          }
-        }
-
-        const pMes = document.getElementById("printMes");
-        if(pMes){
-          pMes.innerHTML = "";
-          itensMes.forEach(item => {
-            const tr = document.createElement("tr");
-            tr.innerHTML =
-              `<td>${item.dataBR || formatarDataBR(item.dataISO)}</td>` +
-              `<td>${Array.isArray(item.pessoas) ? item.pessoas.join(", ") : ""}</td>`;
-            pMes.appendChild(tr);
-          });
-        }
+      function setChecklistRapidoValues(values){
+        CHECK_ITEMS.forEach((_, idx)=>{
+          const key = `it_${idx}`;
+          const v = values?.[key] || "";
+          if(!v) return;
+          const el = document.querySelector(`input[name="${key}"][value="${v}"]`);
+          if(el) el.checked = true;
+        });
       }
 
-      function toggleVerMaisMes(){
-        mostrarTodosMes = !mostrarTodosMes;
-        atualizarPainel();
+      // Tipo de checagem
+      function getTipoChecagem(){
+        return {
+          recebimento: !!document.getElementById("chkRecebimento")?.checked,
+          devolucao: !!document.getElementById("chkDevolucao")?.checked,
+          manutencao: !!document.getElementById("chkManutencao")?.checked,
+          periodico: !!document.getElementById("chkPeriodico")?.checked,
+        };
       }
-      window.toggleVerMaisMes = toggleVerMaisMes;
-
-      async function apagarDiarios(){
-        try{
-          if(!isAdmin) return alert("Apenas Gestor pode apagar tudo.");
-          if(!confirm("Tem certeza que deseja apagar TODOS os registros deste contrato (Ferroport/diarios)?")) return;
-
-          const snap = await refDiarios.get();
-          const batch = db.batch();
-          snap.docs.forEach(doc => batch.delete(doc.ref));
-          await batch.commit();
-
-          alert("Registros apagados.");
-        }catch(e){
-          console.error(e);
-          alert("Erro ao apagar:\n\n" + (e?.message || e));
-        }
+      function setTipoChecagem(v){
+        document.getElementById("chkRecebimento").checked = !!v?.recebimento;
+        document.getElementById("chkDevolucao").checked = !!v?.devolucao;
+        document.getElementById("chkManutencao").checked = !!v?.manutencao;
+        document.getElementById("chkPeriodico").checked = !!v?.periodico;
       }
-      window.apagarDiarios = apagarDiarios;
 
-      function exportarDiarioCSV(){
-        try{
-          const dados = [...LISTA].sort((a,b)=> (a.dataISO||"").localeCompare(b.dataISO||""));
-          const linhas = [];
-          linhas.push(["Data","Pessoas"].join(";"));
-
-          dados.forEach(item => {
-            const data = item.dataBR || formatarDataBR(item.dataISO);
-            const pessoas = Array.isArray(item.pessoas) ? item.pessoas.join(", ") : "";
-            linhas.push([data, pessoas].map(v => `"${String(v).replace(/"/g,'""')}"`).join(";"));
-          });
-
-          const csv = "\uFEFF" + linhas.join("\n");
-          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-          const url = URL.createObjectURL(blob);
-
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `contrato_${contratoAtual}_${(document.getElementById("mesAno")?.value || "export")}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        }catch(e){
-          console.error(e);
-          alert("Erro ao exportar:\n\n" + (e?.message || e));
-        }
-      }
-      window.exportarDiarioCSV = exportarDiarioCSV;
-
-      // ===================== PTA: ASSINATURA =====================
+      // ===================== ASSINATURA =====================
       function ptaInitAssinatura(){
         const canvas = document.getElementById("ptaAssinatura");
         if(!canvas) return;
@@ -1188,7 +748,7 @@
         const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
 
-        canvas.width  = Math.floor(rect.width  * dpr);
+        canvas.width = Math.floor(rect.width * dpr);
         canvas.height = Math.floor(rect.height * dpr);
 
         const ctx = canvas.getContext("2d");
@@ -1228,9 +788,6 @@
           e.preventDefault();
         }
         function end(){ desenhando = false; }
-
-        canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = canvas.onmouseleave = null;
-        canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
 
         canvas.onmousedown = start;
         canvas.onmousemove = move;
@@ -1273,27 +830,177 @@
         img.src = dataUrl || "";
       }
 
-      function ptaLimparFormulario(){
-        const d = document.getElementById("ptaData");
-        if(d) d.value = hojeISO();
+      // ===================== PERMISSÕES =====================
+      async function carregarPermissoesUsuario(user){
+        const snap = await db.collection("users").doc(user.uid).get();
+        const data = snap.exists ? (snap.data() || {}) : {};
+        allowedContracts = Array.isArray(data.allowedContracts) ? data.allowedContracts : ["pta-inveco"];
+        isAdmin = String(data.role || "").toLowerCase() === "gestor";
+      }
 
-        const ids = ["ptaCondutor","ptaKmInicial","ptaKmFinal","ptaLocal","ptaDescricao"];
-        ids.forEach(id => {
+      function montarSelectContratos(){
+        const sel = document.getElementById("contratoSelect");
+        if(!sel) return;
+
+        sel.innerHTML = "";
+
+        const allowed = allowedContracts.length ? allowedContracts : ["pta-inveco"];
+
+        CONTRATOS
+          .filter(c => allowed.includes(c.value))
+          .forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.value;
+            opt.textContent = c.label;
+            sel.appendChild(opt);
+          });
+
+        sel.disabled = false;
+
+        if(!allowed.includes(contratoAtual)){
+          contratoAtual = allowed[0];
+          localStorage.setItem(KEY_CONTRATO, contratoAtual);
+        }
+
+        sel.value = contratoAtual;
+      }
+
+      function aplicarPermissoesUI(){
+        const pill = document.getElementById("rolePill");
+        const btnApagarPTA = document.getElementById("btnApagarPTA");
+        if(pill){
+          pill.textContent = isAdmin ? "Gestor" : "Técnico";
+          pill.classList.toggle("admin", isAdmin);
+        }
+        if(btnApagarPTA) btnApagarPTA.style.display = isAdmin ? "inline-block" : "none";
+      }
+
+      // ===================== REFS / REALTIME =====================
+      function setRefsContrato(){
+        refPTA = db.collection("contratos").doc(contratoAtual).collection("ptauso");
+      }
+
+      function desligarRealtime(){
+        if(typeof unsubPTA === "function") unsubPTA();
+        unsubPTA = null;
+      }
+
+      function ligarRealtime(){
+        desligarRealtime();
+
+        unsubPTA = refPTA.onSnapshot(
+          (snap) => {
+            LISTA_PTA = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+            carregarTabelaPTA();
+            atualizarPainel();
+          },
+          (err) => {
+            console.error("Erro PTA:", err);
+            alert("Erro PTA:\n\n" + (err?.message || err));
+          }
+        );
+      }
+
+      // ===================== UI =====================
+      function mostrarApp(logado){
+        const a = document.getElementById("loginBox");
+        const b = document.getElementById("appRoot");
+        if(a) a.style.display = logado ? "none" : "flex";
+        if(b) b.style.display = logado ? "block" : "none";
+      }
+
+      function aplicarTelaPorContrato(){
+        const isPTA = contratoAtual === "pta-inveco";
+        document.getElementById("cardPTA").style.display = isPTA ? "block" : "none";
+        document.getElementById("cardListaPTA").style.display = isPTA ? "block" : "none";
+
+        if(isPTA){
+          const ptaData = document.getElementById("ptaData");
+          if(ptaData && !ptaData.value) ptaData.value = hojeISO();
+          setTimeout(() => ptaInitAssinatura(), 80);
+        }
+      }
+
+      // ===================== PAINEL =====================
+      function atualizarPainel(){
+        const sel = getMesAnoSelecionado();
+        if(!sel){
+          const hoje = new Date();
+          const pad = (n)=> String(n).padStart(2,"0");
+          document.getElementById("mesAno").value = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
+          return;
+        }
+
+        // KPI PTA
+        const itensMesPTA = [...LISTA_PTA].filter(x => inMesAno(x.dataISO, sel.y, sel.m));
+        const registros = itensMesPTA.length;
+        const condutoresSet = new Set(itensMesPTA.map(x => x.condutor).filter(Boolean));
+        const kmTotal = itensMesPTA.reduce((acc,x)=> acc + Math.max(0, (Number(x.kmFinal||0) - Number(x.kmInicial||0))), 0);
+
+        document.getElementById("kpiLabel1").textContent = "Registros no mês";
+        document.getElementById("kpiLabel2").textContent = "Condutores";
+        document.getElementById("kpiLabel3").textContent = "Km rodados (estim.)";
+
+        document.getElementById("kpiDias").textContent = String(registros);
+        document.getElementById("kpiTecnicos").textContent = String(condutoresSet.size);
+        document.getElementById("kpiPresencas").textContent = String(kmTotal);
+      }
+      window.atualizarPainel = atualizarPainel;
+
+      // ===================== PTA CRUD =====================
+      function getPatolas(){
+        return {
+          dianteiroDireito: document.getElementById("patolaDD")?.value?.trim() || "",
+          dianteiroEsquerdo: document.getElementById("patolaDE")?.value?.trim() || "",
+          traseiroDireito: document.getElementById("patolaTD")?.value?.trim() || "",
+          traseiroEsquerdo: document.getElementById("patolaTE")?.value?.trim() || "",
+        };
+      }
+      function setPatolas(v){
+        document.getElementById("patolaDD").value = v?.dianteiroDireito || "";
+        document.getElementById("patolaDE").value = v?.dianteiroEsquerdo || "";
+        document.getElementById("patolaTD").value = v?.traseiroDireito || "";
+        document.getElementById("patolaTE").value = v?.traseiroEsquerdo || "";
+      }
+
+      function ptaLimparFormulario(){
+        document.getElementById("ptaData").value = hojeISO();
+        ["ptaCondutor","ptaKmInicial","ptaKmFinal","ptaLocal","ptaDescricao","ptaHorimetro","ptaObs"].forEach(id=>{
           const el = document.getElementById(id);
           if(el) el.value = "";
         });
 
+        // checkboxes tipo
+        ["chkRecebimento","chkDevolucao","chkManutencao","chkPeriodico"].forEach(id=>{
+          const el = document.getElementById(id);
+          if(el) el.checked = false;
+        });
+
+        // combustível
+        const fuel = document.getElementById("ptaCombustivel");
+        if(fuel) fuel.value = "50";
+        document.getElementById("fuelPct").textContent = "50%";
+
+        // patolas
+        setPatolas(null);
+
+        // checklist rápido
+        CHECK_ITEMS.forEach((_, idx)=>{
+          const key = `it_${idx}`;
+          const sel = document.querySelector(`input[name="${key}"]:checked`);
+          if(sel) sel.checked = false;
+        });
+
+        // assinatura e fotos
         ptaEditId = null;
+        ptaEditFotos = null;
         ptaLimparAssinatura();
+        limparFotosPTAUI();
       }
       window.ptaLimparFormulario = ptaLimparFormulario;
 
       async function ptaSalvar(){
         try{
-          if(contratoAtual !== "pta-inveco"){
-            return alert("Selecione o contrato PTA IVECO para salvar este tipo de registro."); // ✅
-          }
-
           const dataISO = document.getElementById("ptaData")?.value || "";
           const condutor = document.getElementById("ptaCondutor")?.value.trim() || "";
           const kmInicial = Number(document.getElementById("ptaKmInicial")?.value || 0);
@@ -1302,14 +1009,46 @@
           const descricao = document.getElementById("ptaDescricao")?.value.trim() || "";
           const assinatura = ptaAssinaturaDataURL();
 
+          // checklist
+          const tipoChecagem = getTipoChecagem();
+          const horimetro = document.getElementById("ptaHorimetro")?.value ? Number(document.getElementById("ptaHorimetro").value) : null;
+          const combustivel = Number(document.getElementById("ptaCombustivel")?.value || 0);
+          const patolas = getPatolas();
+          const checklistRapido = getChecklistRapidoValues();
+          const observacoes = document.getElementById("ptaObs")?.value?.trim() || "";
+
           if(!dataISO) return alert("Selecione a data.");
           if(!condutor) return alert("Informe o nome do condutor.");
           if(!Number.isFinite(kmInicial)) return alert("Informe o Km Inicial.");
           if(!Number.isFinite(kmFinal)) return alert("Informe o Km Final.");
           if(kmFinal < kmInicial) return alert("Km Final não pode ser menor que o Km Inicial.");
           if(!local) return alert("Informe o local da atividade.");
-          if(!descricao) return alert("Informe a descrição da atividade.");
+          if!descricao) return alert("Informe a descrição da atividade.");
           if(!assinatura || assinatura.length < 100) return alert("Faça a assinatura no campo abaixo.");
+
+          // Fotos obrigatórias (ou manter do registro editado)
+          const fFrente = document.getElementById("ptaFotoFrente")?.files?.[0] || null;
+          const fTras   = document.getElementById("ptaFotoTras")?.files?.[0] || null;
+          const fEsq    = document.getElementById("ptaFotoLatEsq")?.files?.[0] || null;
+          const fDir    = document.getElementById("ptaFotoLatDir")?.files?.[0] || null;
+
+          let fotoFrente = null, fotoTras = null, fotoLatEsq = null, fotoLatDir = null;
+
+          if(fFrente && fTras && fEsq && fDir){
+            [fotoFrente, fotoTras, fotoLatEsq, fotoLatDir] = await Promise.all([
+              fileToBase64(fFrente),
+              fileToBase64(fTras),
+              fileToBase64(fEsq),
+              fileToBase64(fDir),
+            ]);
+          }else if(ptaEditFotos && ptaEditFotos.fotoFrente && ptaEditFotos.fotoTras && ptaEditFotos.fotoLatEsq && ptaEditFotos.fotoLatDir){
+            fotoFrente = ptaEditFotos.fotoFrente;
+            fotoTras   = ptaEditFotos.fotoTras;
+            fotoLatEsq = ptaEditFotos.fotoLatEsq;
+            fotoLatDir = ptaEditFotos.fotoLatDir;
+          }else{
+            return alert("Adicione TODAS as 4 fotos do veículo (frente, traseira e laterais).");
+          }
 
           const payload = {
             dataISO,
@@ -1320,11 +1059,24 @@
             local,
             descricao,
             assinaturaDataUrl: assinatura,
+
+            // fotos
+            fotoFrente, fotoTras, fotoLatEsq, fotoLatDir,
+
+            // checklist
+            checklist: {
+              tipoChecagem,
+              horimetro,
+              combustivel,
+              patolas,
+              checklistRapido,
+              observacoes
+            },
+
             atualizadoEm: new Date().toISOString()
           };
 
           const docId = ptaEditId || `${dataISO}_${idSeguro(condutor)}`.slice(0, 90);
-
           await refPTA.doc(docId).set(payload, { merge: true });
 
           ptaLimparFormulario();
@@ -1339,39 +1091,30 @@
       async function ptaExcluirRegistro(docId){
         try{
           if(!isAdmin) return alert("Apenas Gestor pode excluir registros da PTA.");
-          if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA IVECO."); // ✅
           if(!docId) return;
-
           if(!confirm("Excluir este registro da PTA?")) return;
 
           await refPTA.doc(docId).delete();
-          alert("Registro da PTA excluído.");
+          alert("Registro excluído.");
         }catch(e){
           console.error(e);
-          alert("Erro ao excluir PTA:\n\n" + (e?.message || e));
+          alert("Erro ao excluir:\n\n" + (e?.message || e));
         }
       }
       window.ptaExcluirRegistro = ptaExcluirRegistro;
 
       async function ptaApagarTudo(){
         try{
-          if(!isAdmin) return alert("Apenas Gestor pode apagar registros da PTA.");
-          if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA IVECO."); // ✅
-          if(!auth.currentUser) return alert("Sessão expirada. Faça login novamente.");
-
-          if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA IVECO?")) return; // ✅
+          if(!isAdmin) return alert("Apenas Gestor pode apagar tudo.");
+          if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA?")) return;
 
           const snap = await refPTA.get();
-          if(snap.empty){
-            alert("Não há registros para apagar.");
-            return;
-          }
+          if(snap.empty) return alert("Não há registros para apagar.");
 
           const batch = db.batch();
           snap.docs.forEach(d => batch.delete(d.ref));
           await batch.commit();
-
-          alert("Registros da PTA apagados com sucesso!");
+          alert("Registros apagados com sucesso!");
         }catch(e){
           console.error(e);
           alert("Erro ao apagar:\n\n" + (e?.message || e));
@@ -1384,7 +1127,6 @@
         if(!tbody) return;
 
         tbody.innerHTML = "";
-
         const dados = [...LISTA_PTA].sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||""));
 
         dados.forEach(item => {
@@ -1407,6 +1149,24 @@
 
           const tdAcoes = tr.querySelector("td.row-actions");
 
+          const btnFotos = document.createElement("button");
+          btnFotos.className = "btn secondary small";
+          btnFotos.type = "button";
+          btnFotos.textContent = "Fotos";
+          btnFotos.onclick = () => {
+            openGaleria({
+              dataBR: item.dataBR || formatarDataBR(item.dataISO),
+              condutor: item.condutor || "",
+              fotos: {
+                fotoFrente: item.fotoFrente || "",
+                fotoTras: item.fotoTras || "",
+                fotoLatEsq: item.fotoLatEsq || "",
+                fotoLatDir: item.fotoLatDir || "",
+              }
+            });
+          };
+          tdAcoes.appendChild(btnFotos);
+
           const btnEditar = document.createElement("button");
           btnEditar.className = "btn secondary small";
           btnEditar.type = "button";
@@ -1414,19 +1174,51 @@
           btnEditar.onclick = () => {
             ptaEditId = item.id || null;
 
-            const d = document.getElementById("ptaData"); if(d) d.value = item.dataISO || hojeISO();
-            const c = document.getElementById("ptaCondutor"); if(c) c.value = item.condutor || "";
-            const ki = document.getElementById("ptaKmInicial"); if(ki) ki.value = String(item.kmInicial ?? "");
-            const kf = document.getElementById("ptaKmFinal"); if(kf) kf.value = String(item.kmFinal ?? "");
-            const l = document.getElementById("ptaLocal"); if(l) l.value = item.local || "";
-            const desc = document.getElementById("ptaDescricao"); if(desc) desc.value = item.descricao || "";
+            document.getElementById("ptaData").value = item.dataISO || hojeISO();
+            document.getElementById("ptaCondutor").value = item.condutor || "";
+            document.getElementById("ptaKmInicial").value = String(item.kmInicial ?? "");
+            document.getElementById("ptaKmFinal").value = String(item.kmFinal ?? "");
+            document.getElementById("ptaLocal").value = item.local || "";
+            document.getElementById("ptaDescricao").value = item.descricao || "";
 
+            // checklist
+            const c = item.checklist || {};
+            setTipoChecagem(c.tipoChecagem || {});
+            document.getElementById("ptaHorimetro").value = (c.horimetro ?? "") === null ? "" : String(c.horimetro ?? "");
+            const fuel = document.getElementById("ptaCombustivel");
+            if(fuel){
+              fuel.value = String(c.combustivel ?? 50);
+              document.getElementById("fuelPct").textContent = `${fuel.value}%`;
+            }
+            setPatolas(c.patolas || {});
+            setChecklistRapidoValues(c.checklistRapido || {});
+            document.getElementById("ptaObs").value = c.observacoes || "";
+
+            // assinatura
             ptaInitAssinatura();
             setTimeout(() => ptaCarregarAssinatura(item.assinaturaDataUrl || ""), 30);
 
+            // fotos
+            ptaEditFotos = {
+              fotoFrente: item.fotoFrente || "",
+              fotoTras: item.fotoTras || "",
+              fotoLatEsq: item.fotoLatEsq || "",
+              fotoLatDir: item.fotoLatDir || "",
+            };
+
+            document.getElementById("previewFrente").src = ptaEditFotos.fotoFrente || "";
+            document.getElementById("previewTras").src = ptaEditFotos.fotoTras || "";
+            document.getElementById("previewLatEsq").src = ptaEditFotos.fotoLatEsq || "";
+            document.getElementById("previewLatDir").src = ptaEditFotos.fotoLatDir || "";
+
+            // limpa inputs file
+            ["ptaFotoFrente","ptaFotoTras","ptaFotoLatEsq","ptaFotoLatDir"].forEach(id => {
+              const el = document.getElementById(id);
+              if(el) el.value = "";
+            });
+
             document.getElementById("cardPTA")?.scrollIntoView({ behavior:"smooth", block:"start" });
           };
-
           tdAcoes.appendChild(btnEditar);
 
           if(isAdmin){
@@ -1434,145 +1226,13 @@
             btnExcluir.className = "btn danger small";
             btnExcluir.type = "button";
             btnExcluir.textContent = "Excluir";
-            btnExcluir.onclick = () => ptaExcluirRegistro(item.id);
+            btnExcluir.onclick = ()=> ptaExcluirRegistro(item.id);
             tdAcoes.appendChild(btnExcluir);
           }
 
           tbody.appendChild(tr);
         });
       }
-
-      // ===================== PAINEL =====================
-      function setKpiLabelsFerroport(){
-        const l1 = document.getElementById("kpiLabel1");
-        const l2 = document.getElementById("kpiLabel2");
-        const l3 = document.getElementById("kpiLabel3");
-        if(l1) l1.textContent = "Dias registrados";
-        if(l2) l2.textContent = "Técnicos/Condutores";
-        if(l3) l3.textContent = "Presenças/Registros";
-      }
-      function setKpiLabelsPTA(){
-        const l1 = document.getElementById("kpiLabel1");
-        const l2 = document.getElementById("kpiLabel2");
-        const l3 = document.getElementById("kpiLabel3");
-        if(l1) l1.textContent = "Registros no mês";
-        if(l2) l2.textContent = "Condutores";
-        if(l3) l3.textContent = "Km rodados (estim.)";
-      }
-
-      function atualizarPainel(){
-        const sel = getMesAnoSelecionado();
-        if(!sel){
-          const hoje = new Date();
-          const pad = (n)=> String(n).padStart(2,"0");
-          document.getElementById("mesAno").value = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
-          return;
-        }
-
-        document.getElementById("reportContrato").textContent = nomeContratoBonito(contratoAtual);
-        document.getElementById("reportPeriodo").innerText = `Período: ${sel.m}/${sel.y}`;
-        document.getElementById("reportGeradoEm").innerText = `Gerado em: ${agoraBR()}`;
-
-        const isPTA = contratoAtual === "pta-inveco";
-
-        if(isPTA){
-          setKpiLabelsPTA();
-
-          const itensMesPTA = [...LISTA_PTA]
-            .filter(x => inMesAno(x.dataISO, sel.y, sel.m))
-            .sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||""));
-
-          const registros = itensMesPTA.length;
-          const condutoresSet = new Set(itensMesPTA.map(x => x.condutor).filter(Boolean));
-          const kmTotal = itensMesPTA.reduce((acc,x)=> acc + Math.max(0, (Number(x.kmFinal||0) - Number(x.kmInicial||0))), 0);
-
-          document.getElementById("kpiDias").textContent = String(registros);
-          document.getElementById("kpiTecnicos").textContent = String(condutoresSet.size);
-          document.getElementById("kpiPresencas").textContent = String(kmTotal);
-
-          const printBody = document.getElementById("printPTATable");
-          if(printBody){
-            printBody.innerHTML = "";
-            itensMesPTA.forEach(item => {
-              const tr = document.createElement("tr");
-              tr.innerHTML = `
-                <td>${item.dataBR || formatarDataBR(item.dataISO)}</td>
-                <td>${item.condutor || ""}</td>
-                <td>${item.kmInicial ?? ""}</td>
-                <td>${item.kmFinal ?? ""}</td>
-                <td>${item.local || ""}</td>
-                <td>${item.descricao || ""}</td>
-              `;
-              printBody.appendChild(tr);
-            });
-          }
-
-          return;
-        }
-
-        setKpiLabelsFerroport();
-
-        const itensMes = [...LISTA]
-          .filter(x => inMesAno(x.dataISO, sel.y, sel.m))
-          .sort((a,b)=> (b.dataISO||"").localeCompare(a.dataISO||""));
-
-        const dias = itensMes.length;
-        const presencas = itensMes.reduce((acc, x)=> acc + (Array.isArray(x.pessoas) ? x.pessoas.length : 0), 0);
-
-        const setTec = new Set();
-        itensMes.forEach(x => (x.pessoas||[]).forEach(p => setTec.add(p)));
-
-        document.getElementById("kpiDias").textContent = String(dias);
-        document.getElementById("kpiPresencas").textContent = String(presencas);
-        document.getElementById("kpiTecnicos").textContent = String(setTec.size);
-
-        carregarMes(itensMes);
-
-        const ranking = contarDiasPorTecnico(itensMes);
-
-        const tbodyRank = document.getElementById("tabelaRanking");
-        if(tbodyRank){
-          tbodyRank.innerHTML = "";
-          const top10 = ranking.slice(0,10);
-          const maxDias = Math.max(...top10.map(x => x.dias), 1);
-
-          top10.forEach((r, idx) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML =
-              `<td>${idx+1}</td>` +
-              `<td>${r.nome}</td>` +
-              `<td>${r.dias}</td>` +
-              `<td><div class="bar"><div class="bar-fill" style="width:${Math.round((r.dias/maxDias)*100)}%"></div></div></td>`;
-            tbodyRank.appendChild(tr);
-          });
-        }
-
-        const pRank = document.getElementById("printRanking");
-        if(pRank){
-          pRank.innerHTML = "";
-          ranking.slice(0, 40).forEach((r, idx) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${idx+1}</td><td>${r.nome}</td><td>${r.dias}</td>`;
-            pRank.appendChild(tr);
-          });
-        }
-
-        const top1 = ranking[0] || { nome:"—", dias:0 };
-        document.getElementById("insightTopNome").textContent = top1.nome;
-        document.getElementById("insightTopDias").textContent = String(top1.dias);
-        document.getElementById("insightMediaDia").textContent = String(dias ? (presencas / dias).toFixed(1) : 0);
-        document.getElementById("insightMediaTec").textContent = String(ranking.length ? (dias / ranking.length).toFixed(1) : 0);
-
-        setTimeout(() => desenharGraficoTop10("chartRanking", ranking), 0);
-      }
-      window.atualizarPainel = atualizarPainel;
-
-      function gerarPDF(){
-        atualizarPainel();
-        aplicarTelaPorContrato();
-        setTimeout(()=> window.print(), 60);
-      }
-      window.gerarPDF = gerarPDF;
 
       // ===================== AUTH =====================
       async function login(){
@@ -1618,36 +1278,51 @@
       async function logout(){ await auth.signOut(); }
       window.logout = logout;
 
+      // ===================== INIT UI =====================
       function initUI(){
-        const dataDia = document.getElementById("dataDia");
-        if(dataDia) dataDia.value = hojeISO();
-
-        const ptaData = document.getElementById("ptaData");
-        if(ptaData) ptaData.value = hojeISO();
+        // defaults
+        document.getElementById("ptaData").value = hojeISO();
 
         const d = new Date();
         const pad = (n)=> String(n).padStart(2,"0");
         const mesAno = document.getElementById("mesAno");
-        if(mesAno){
-          mesAno.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
-          mesAno.addEventListener("change", atualizarPainel);
-        }
+        mesAno.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+        mesAno.addEventListener("change", atualizarPainel);
 
+        // select contrato
         const selContrato = document.getElementById("contratoSelect");
-        if(selContrato){
-          selContrato.addEventListener("change", ()=> {
-            contratoAtual = selContrato.value;
-            localStorage.setItem(KEY_CONTRATO, contratoAtual);
-            setRefsContrato();
-            ligarRealtime();
-            aplicarTelaPorContrato();
-            atualizarPainel();
-          });
-        }
+        selContrato.addEventListener("change", ()=> {
+          contratoAtual = selContrato.value;
+          localStorage.setItem(KEY_CONTRATO, contratoAtual);
+          setRefsContrato();
+          ligarRealtime();
+          aplicarTelaPorContrato();
+          atualizarPainel();
+        });
 
-        window.addEventListener("resize", () => {
-          try{ atualizarPainel(); }catch(_){}
-          try{ if(contratoAtual === "pta-inveco") ptaInitAssinatura(); }catch(_){}
+        // combustível label
+        const fuel = document.getElementById("ptaCombustivel");
+        fuel.addEventListener("input", ()=> {
+          document.getElementById("fuelPct").textContent = `${fuel.value}%`;
+        });
+
+        // previews fotos
+        configurarPreview("ptaFotoFrente","previewFrente");
+        configurarPreview("ptaFotoTras","previewTras");
+        configurarPreview("ptaFotoLatEsq","previewLatEsq");
+        configurarPreview("ptaFotoLatDir","previewLatDir");
+
+        // abrir foto em tela cheia ao clicar
+        ["previewFrente","previewTras","previewLatEsq","previewLatDir"].forEach(id => {
+          const img = document.getElementById(id);
+          img.addEventListener("click", ()=> openImgModal(img.src));
+        });
+
+        // checklist
+        renderChecklistRapido();
+
+        window.addEventListener("resize", ()=> {
+          try{ ptaInitAssinatura(); }catch(_){}
         });
       }
 
@@ -1684,7 +1359,8 @@
           initUI();
           aplicarTelaPorContrato();
 
-          setTimeout(() => atualizarPainel(), 120);
+          setTimeout(() => atualizarPainel(), 150);
+          setTimeout(() => ptaInitAssinatura(), 250);
         }catch(e){
           showFatal(e);
           await auth.signOut();
