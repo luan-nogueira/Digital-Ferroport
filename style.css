@@ -214,21 +214,28 @@ button:disabled{
   justify-content:center;
 }
 
+/* ✅ CENTRALIZA O BLOCO TODO DO TOPO */
 .brand{
   max-width:900px;
   width:100%;
   padding:0 16px;
+
   display:flex;
   align-items:center;
-  gap:18px;
+  justify-content:center;   /* ✅ centraliza tudo */
+  gap:24px;
+  flex-wrap:wrap;
+  text-align:center;
 }
 
+/* ✅ remove “empurrão” pra direita e centraliza ações */
 .top-actions{
-  margin-left:auto;
+  margin-left:0;
   display:flex;
   gap:10px;
   align-items:flex-end;
   flex-wrap:wrap;
+  justify-content:center;   /* ✅ centraliza ações */
 }
 
 .field.inline label{
@@ -241,6 +248,7 @@ button:disabled{
   display:flex;
   align-items:center;
   gap:16px;
+  justify-content:center;
 }
 .logo{
   height:60px;
@@ -388,7 +396,7 @@ textarea{
   color:var(--text);
   outline:none;
   resize:vertical;
-  text-align:left; /* ✅ textarea fica melhor alinhado */
+  text-align:left;
 }
 
 input:focus, select:focus, textarea:focus{
@@ -528,14 +536,14 @@ table{
   width:100%;
   border-collapse:collapse;
   margin-top:10px;
-  table-layout:fixed; /* ✅ evita “estouro” de colunas */
+  table-layout:fixed;
 }
 th, td{
   border:1px solid var(--border);
   padding:10px;
   text-align:center;
   vertical-align:top;
-  word-break:break-word; /* ✅ quebra textos longos */
+  word-break:break-word;
 }
 th{
   background:var(--th-bg);
@@ -729,7 +737,7 @@ th{
   cursor:pointer;
 }
 .preview-img:not([src]), .preview-img[src=""]{
-  display:none; /* ✅ some quando não tem preview */
+  display:none;
 }
 
 /* ============================================================
@@ -878,11 +886,10 @@ th{
 .print-only{ display:none; }
 .no-print{ display:block; }
 
-/* ✅ deixa o relatório “normal” no print preview (sem estourar) */
 .report{
   padding:22px;
-  max-width:980px;   /* ✅ evita ficar gigantesco */
-  margin:0 auto;     /* ✅ centraliza */
+  max-width:980px;
+  margin:0 auto;
 }
 
 .report-head{
@@ -931,7 +938,6 @@ th{
   font-size:13px;
 }
 
-/* ✅ tabela do relatório: não usa o “table” do site */
 .report-table{
   width:100%;
   border-collapse:collapse;
@@ -941,7 +947,7 @@ th{
   border:1px solid #111;
   padding:8px;
   font-size:12px;
-  text-align:left !important;  /* ✅ força corrigir “centrado” */
+  text-align:left !important;
   vertical-align:top;
   word-break:break-word;
 }
@@ -950,14 +956,13 @@ th{
   font-weight:800;
 }
 
-/* ✅ colunas melhores no relatório */
 .report-table th:nth-child(1),
 .report-table td:nth-child(1){
-  width:110px; /* Data ou # */
+  width:110px;
 }
 .report-table th:nth-child(3),
 .report-table td:nth-child(3){
-  width:90px; /* Dias (ranking) */
+  width:90px;
 }
 
 .report-footer{
@@ -979,14 +984,12 @@ th{
   .no-print{ display:none !important; }
   .print-only{ display:block !important; }
 
-  /* ✅ usa a largura da página no PDF, mas com boas quebras */
   .report{
     max-width:none !important;
     margin:0 !important;
     padding:18px !important;
   }
 
-  /* ✅ melhora legibilidade no PDF */
   .report-table th, .report-table td{
     font-size:11.5px !important;
     padding:7px !important;
@@ -1007,16 +1010,16 @@ th{
   .grid-2{ grid-template-columns:1fr; }
   .add-nome{ flex-direction:column; }
 
+  /* no mobile mantém empilhado, mas ainda centralizado */
   .brand{
     flex-direction:column;
-    align-items:flex-start;
+    align-items:center;
+    text-align:center;
   }
-
   .top-actions{
-    margin-left:0;
     width:100%;
-    justify-content:flex-start;
-    align-items:flex-start;
+    justify-content:center;
+    align-items:center;
   }
 
   .logo{ height:50px; }
