@@ -19,8 +19,6 @@
   --th-bg:#f0f2f5;
   --bar-bg:#E6E8EE;
   --chip-bg:#ffffff;
-
-  --focus: rgba(203,51,68,.14);
 }
 
 :root[data-theme="dark"]{
@@ -43,8 +41,6 @@
   --th-bg:rgba(255,255,255,.06);
   --bar-bg:rgba(255,255,255,.10);
   --chip-bg:#151923;
-
-  --focus: rgba(203,51,68,.22);
 }
 
 *{ box-sizing:border-box; }
@@ -52,7 +48,7 @@ html{ -webkit-text-size-adjust:100%; }
 
 body{
   margin:0;
-  font-family: Arial, sans-serif;
+  font-family:Arial, sans-serif;
   background:var(--bg);
   color:var(--text);
 }
@@ -103,10 +99,15 @@ body{
   margin-bottom:18px;
 }
 
-.center{ text-align:center; }
-.tiny{ font-size:11px; }
-.small{ font-size:12px; }
-.muted{ color:var(--muted); }
+.login-card h2{ margin:0 0 8px; font-size:22px; }
+.login-card .muted{ margin:0 0 18px; }
+
+.login-card input,
+.login-card select,
+.login-card textarea,
+.login-card button{
+  font-size:16px;
+}
 
 .login-status{
   margin-top:14px;
@@ -125,6 +126,9 @@ body{
   animation:spin .8s linear infinite;
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
+
+.center{ text-align:center; }
+.tiny{ font-size:11px; }
 
 .hint{
   margin:14px 0 0;
@@ -211,18 +215,12 @@ button:disabled{
 }
 
 .brand{
-  max-width:1000px;
+  max-width:900px;
   width:100%;
   padding:0 16px;
   display:flex;
   align-items:center;
   gap:18px;
-}
-
-.brand-text{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
 }
 
 .top-actions{
@@ -245,19 +243,33 @@ button:disabled{
   gap:16px;
 }
 .logo{
-  height:56px;
+  height:60px;
   width:auto;
   object-fit:contain;
   display:block;
 }
-.logo.emive{ height:96px; }
+.logo.emive{ height:110px; }
 
-.brand-title{ font-weight:900; font-size:18px; letter-spacing:.2px; }
+.brand-title{ font-weight:700; font-size:18px; }
 .brand-subtitle{ color:var(--muted); font-size:13px; }
+
+.role-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:38px;
+  padding:0 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--card);
+  font-weight:800;
+  font-size:12px;
+}
+.role-pill.admin{ border-color: rgba(203,51,68,.4); }
 
 /* ===================== CONTAINER ===================== */
 .container{
-  max-width:1000px;
+  max-width:900px;
   margin:22px auto;
   padding:0 16px;
   display:flex;
@@ -273,9 +285,10 @@ button:disabled{
   box-shadow:var(--shadow);
   padding:18px;
 }
-.card-head{ margin-bottom:12px; }
-.card-head h2{ margin:0 0 6px; }
-.card-head p{ margin:0; }
+.card-head{ margin-bottom:10px; }
+.muted{ color:var(--muted); }
+.small{ font-size:12px; }
+.h3{ margin:8px 0 10px; font-size:14px; }
 
 /* ===================== GRIDS ===================== */
 .grid-2{
@@ -286,7 +299,7 @@ button:disabled{
 }
 .grid-3{
   display:grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: 220px 1fr 260px;
   gap:14px;
   align-items:start;
 }
@@ -297,35 +310,55 @@ button:disabled{
   margin-top:12px;
 }
 
-/* ===================== DIVIDER / SECTION ===================== */
-.divider{
-  height:1px;
-  background:var(--border);
-  margin:18px 0;
+/* ===================== DASHBOARD ===================== */
+.dash{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  margin-top:14px;
 }
-
-.section-title{
+.dash-box{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  background:var(--card-2);
+  min-height:360px;
   display:flex;
-  align-items:flex-start;
-  gap:12px;
-  margin-bottom:12px;
+  flex-direction:column;
 }
-.section-title h3{ margin:0; font-size:16px; font-weight:900; }
-.section-title p{ margin:4px 0 0; }
-
-.badge{
-  display:inline-flex;
+.dash-title{
+  font-weight:800;
+  font-size:14px;
+  margin-bottom:10px;
+  display:flex;
   align-items:center;
-  justify-content:center;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(203,51,68,.25);
-  background: rgba(203,51,68,.10);
-  color: var(--text);
-  font-weight:900;
-  font-size:12px;
-  letter-spacing:.3px;
+  gap:8px;
 }
+
+.dash-canvas{
+  width:100%;
+  flex:1;
+  min-height:260px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card-2);
+}
+
+.insights{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:6px;
+  flex:1;
+}
+.insight{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  background:var(--card);
+}
+.insight-label{ font-size:12px; color:var(--muted); }
+.insight-value{ margin-top:6px; font-size:18px; font-weight:800; }
 
 /* ===================== CAMPOS ===================== */
 .field label{
@@ -335,34 +368,32 @@ button:disabled{
   color:var(--muted);
 }
 
-input, select, textarea{
+input, select{
   width:100%;
-  padding:10px 12px;
+  padding:10px;
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:10px;
+  text-align:center;
   background:var(--card);
   color:var(--text);
   outline:none;
-  transition: box-shadow .15s, border-color .15s, transform .05s;
-  text-align:left;
 }
 
-input[type="number"]{ text-align:center; }
-input[type="date"], input[type="month"]{ text-align:center; }
-
-textarea{ resize:vertical; }
+textarea{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  outline:none;
+  resize:vertical;
+  text-align:left; /* ✅ textarea fica melhor alinhado */
+}
 
 input:focus, select:focus, textarea:focus{
   border-color: rgba(203,51,68,.55);
-  box-shadow: 0 0 0 4px var(--focus);
-}
-
-/* ===================== TABLE WRAP ===================== */
-.table-wrap{
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
-  background:var(--card);
+  box-shadow: 0 0 0 3px rgba(203,51,68,.12);
 }
 
 /* ===================== KPI ===================== */
@@ -373,77 +404,13 @@ input:focus, select:focus, textarea:focus{
 }
 .kpi{
   border:1px solid var(--border);
-  border-radius:14px;
+  border-radius:12px;
   padding:10px 12px;
-  min-width:160px;
+  min-width:150px;
   background:var(--card);
 }
 .kpi-label{ font-size:12px; color:var(--muted); }
-.kpi-value{ font-size:22px; font-weight:900; margin-top:4px; }
-
-/* ===================== BOTÕES ===================== */
-.actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:14px;
-}
-.actions.center{ justify-content:center; }
-
-.btn{
-  background:var(--digital-red);
-  color:#fff;
-  border:none;
-  padding:10px 16px;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:800;
-  transition:.15s;
-}
-.btn:hover{ filter:brightness(.93); transform:translateY(-1px); }
-.btn:active{ transform:translateY(0px); }
-
-.btn.secondary{
-  background:var(--btn-secondary);
-  color:var(--btn-secondary-text);
-}
-.btn.danger{ background:#dc3545; }
-.btn.small{
-  padding:8px 12px;
-  font-size:12px;
-  border-radius:12px;
-}
-
-.row-actions{
-  display:flex;
-  gap:8px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-/* ===================== TABLES ===================== */
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-th, td{
-  border:1px solid var(--border);
-  padding:10px;
-  text-align:center;
-  vertical-align:middle;
-}
-th{
-  background:var(--th-bg);
-  color:var(--text);
-  font-weight:900;
-}
-.table-compact th, .table-compact td{ padding:8px; }
-
-.ver-mais-wrap{
-  text-align:center;
-  margin-top:12px;
-}
+.kpi-value{ font-size:22px; font-weight:800; margin-top:4px; }
 
 /* ===================== BARRA (tabela ranking) ===================== */
 .bar{
@@ -459,22 +426,7 @@ th{
   width:0%;
 }
 
-/* ===================== ROLE PILL ===================== */
-.role-pill{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:38px;
-  padding:0 12px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:var(--card);
-  font-weight:900;
-  font-size:12px;
-}
-.role-pill.admin{ border-color: rgba(203,51,68,.55); }
-
-/* ===================== CHIPS (Ferroport) ===================== */
+/* ===================== CHIPS ===================== */
 .chips{
   display:flex;
   flex-wrap:wrap;
@@ -490,7 +442,6 @@ th{
   color:var(--text);
   transition:.15s;
   user-select:none;
-  font-weight:800;
 }
 .chip:hover{
   transform:translateY(-1px);
@@ -534,81 +485,164 @@ th{
 }
 .add-nome input{ flex:1; }
 
-/* ===================== DASHBOARD (Ferroport) ===================== */
-.dash{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:14px;
+/* ===================== BOTÕES ===================== */
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
   margin-top:14px;
 }
-.dash-box{
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:14px;
-  background:var(--card-2);
-  min-height:360px;
-  display:flex;
-  flex-direction:column;
+.actions.center{ justify-content:center; }
+.btn{
+  background:var(--digital-red);
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+  transition:.2s;
 }
-.dash-title{
-  font-weight:900;
-  font-size:14px;
-  margin-bottom:10px;
+.btn:hover{ filter:brightness(.93); }
+.btn.secondary{
+  background:var(--btn-secondary);
+  color:var(--btn-secondary-text);
+}
+.btn.danger{ background:#dc3545; }
+.btn.small{
+  padding:8px 12px;
+  font-size:12px;
+  border-radius:10px;
+}
+.btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+.row-actions{
   display:flex;
-  align-items:center;
   gap:8px;
+  justify-content:center;
+  flex-wrap:wrap;
 }
-.dash-canvas{
+
+/* ===================== TABELAS (SITE) ===================== */
+table{
   width:100%;
-  flex:1;
-  min-height:260px;
+  border-collapse:collapse;
+  margin-top:10px;
+  table-layout:fixed; /* ✅ evita “estouro” de colunas */
+}
+th, td{
+  border:1px solid var(--border);
+  padding:10px;
+  text-align:center;
+  vertical-align:top;
+  word-break:break-word; /* ✅ quebra textos longos */
+}
+th{
+  background:var(--th-bg);
+  color:var(--text);
+  font-weight:800;
+}
+.table-compact th, .table-compact td{ padding:8px; }
+
+.ver-mais-wrap{
+  text-align:center;
+  margin-top:12px;
+}
+
+.footer{
+  text-align:center;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+/* ===================== ASSINATURA (PTA) ===================== */
+.signature-wrap{
   border:1px solid var(--border);
   border-radius:12px;
   background:var(--card-2);
+  padding:12px;
 }
 
-.insights{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-  margin-top:6px;
-  flex:1;
-}
-.insight{
+.signature-canvas{
+  width:100%;
+  height:200px;
   border:1px solid var(--border);
   border-radius:12px;
-  padding:12px;
   background:var(--card);
+  touch-action:none;
 }
-.insight-label{ font-size:12px; color:var(--muted); font-weight:900; }
-.insight-value{ margin-top:6px; font-size:18px; font-weight:900; }
 
-/* ===================== CHECKBOX GRID (PTA) ===================== */
+.signature-actions{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+/* ============================================================
+   ✅ PTA PROFISSIONAL (CHECKLIST / FUEL / FOTOS / DIVISÓRIAS)
+============================================================ */
+.divider{
+  height:1px;
+  background:var(--border);
+  margin:16px 0;
+}
+
+.section-title{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  margin:8px 0 10px;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:26px;
+  padding:0 10px;
+  border-radius:999px;
+  border:1px solid rgba(203,51,68,.35);
+  background:rgba(203,51,68,.10);
+  color:var(--digital-red);
+  font-weight:900;
+  font-size:11px;
+  letter-spacing:.4px;
+  flex:0 0 auto;
+}
+
+.section-title h3{
+  margin:0;
+  font-size:14px;
+  font-weight:900;
+}
+.section-title p{
+  margin:4px 0 0;
+}
+
 .check-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
-  gap:10px;
-}
-.check-item{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  padding:10px 12px;
+  gap:8px;
+  padding:10px;
   border:1px solid var(--border);
   border-radius:12px;
   background:var(--card);
-  cursor:pointer;
+}
+.check-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  border-radius:10px;
+  border:1px solid transparent;
+}
+.check-item:hover{
+  border-color:rgba(203,51,68,.25);
+  background:rgba(203,51,68,.06);
 }
 .check-item input{ width:auto; }
-.check-item:hover{ border-color: rgba(203,51,68,.45); }
 
-/* ===================== CHECK TABLE (PTA) ===================== */
-.check-table th, .check-table td{ padding:8px; }
-.item-cell{ text-align:left; font-weight:800; }
-.w-item{ width:64%; }
-.w-mini{ width:12%; }
-
-/* ===================== COMBUSTÍVEL (PTA) ===================== */
 .fuel-wrap{
   border:1px solid var(--border);
   border-radius:12px;
@@ -618,66 +652,89 @@ th{
 .fuel-labels{
   display:flex;
   justify-content:space-between;
-  color:var(--muted);
   font-weight:900;
   font-size:12px;
-  margin-bottom:8px;
+  color:var(--muted);
+  margin-bottom:6px;
 }
-.fuel-value{
-  margin-top:8px;
-  font-weight:900;
-  color:var(--text);
-  display:flex;
-  justify-content:flex-end;
-}
-input[type="range"]{
+.fuel-wrap input[type="range"]{
+  width:100%;
   padding:0;
   border:none;
   background:transparent;
   box-shadow:none;
 }
-
-/* ===================== ASSINATURA (PTA) ===================== */
-.signature-wrap{
-  border:1px solid var(--border);
-  border-radius:14px;
-  background:var(--card-2);
-  padding:12px;
+.fuel-value{
+  margin-top:8px;
+  text-align:center;
+  font-weight:900;
 }
-.signature-canvas{
-  width:100%;
-  height:200px;
+
+.table-wrap{
+  overflow:auto;
   border:1px solid var(--border);
   border-radius:12px;
   background:var(--card);
-  touch-action:none;
-}
-.signature-actions{
-  margin-top:10px;
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
 }
 
-/* ===================== FOTOS (PTA) ===================== */
+/* tabela de checklist rápido */
+.check-table{
+  width:100%;
+  border-collapse:collapse;
+  margin:0;
+  table-layout:fixed;
+}
+.check-table th, .check-table td{
+  border:1px solid var(--border);
+  padding:8px;
+  vertical-align:middle;
+  text-align:center;
+}
+.check-table th{
+  background:var(--th-bg);
+}
+.check-table .item-cell{
+  text-align:left;
+  font-weight:700;
+}
+.check-table input[type="radio"]{
+  width:auto;
+  transform:scale(1.05);
+}
+
+.w-item{ width:auto; }
+.w-mini{ width:70px; }
+
+/* Fotos */
 .photo-card{
   border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  background:var(--card-2);
+  border-radius:12px;
+  background:var(--card);
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.photo-card input[type="file"]{
+  text-align:left;
 }
 .preview-img{
   width:100%;
-  margin-top:10px;
+  height:180px;
+  object-fit:cover;
   border-radius:12px;
   border:1px solid var(--border);
-  height:160px;
-  object-fit:cover;
-  background:var(--card);
-  cursor:zoom-in;
+  background:var(--card-2);
+  display:block;
+  cursor:pointer;
+}
+.preview-img:not([src]), .preview-img[src=""]{
+  display:none; /* ✅ some quando não tem preview */
 }
 
-/* ===================== MODAL LIGHTBOX ===================== */
+/* ============================================================
+   ✅ MODAL IMAGEM (LIGHTBOX)
+============================================================ */
 .img-modal{
   position:fixed;
   inset:0;
@@ -686,17 +743,17 @@ input[type="range"]{
 .img-modal-backdrop{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,.75);
+  background:rgba(0,0,0,.65);
 }
 .img-modal-content{
   position:relative;
-  max-width:min(980px, 92vw);
-  max-height:90vh;
-  margin:5vh auto 0;
+  max-width:min(1100px, calc(100vw - 28px));
+  max-height:calc(100vh - 28px);
+  margin:14px auto;
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:16px;
-  box-shadow:0 25px 70px rgba(0,0,0,.35);
+  border-radius:18px;
+  box-shadow:0 22px 70px rgba(0,0,0,.35);
   padding:12px;
   display:flex;
   align-items:center;
@@ -704,15 +761,15 @@ input[type="range"]{
 }
 .img-modal-content img{
   max-width:100%;
-  max-height:calc(90vh - 24px);
-  object-fit:contain;
-  border-radius:12px;
+  max-height:calc(100vh - 110px);
+  border-radius:14px;
+  border:1px solid var(--border);
   background:var(--card-2);
 }
 .img-modal-close{
   position:absolute;
   top:10px;
-  right:12px;
+  right:10px;
   width:38px;
   height:38px;
   border-radius:12px;
@@ -722,11 +779,12 @@ input[type="range"]{
   font-size:22px;
   font-weight:900;
   cursor:pointer;
-  line-height:1;
 }
-.img-modal-close:hover{ filter:brightness(.95); }
+.img-modal-close:hover{ filter:brightness(.96); }
 
-/* ===================== MODAL GALERIA ===================== */
+/* ============================================================
+   ✅ MODAL GALERIA (FOTOS PTA)
+============================================================ */
 .galeria-modal{
   position:fixed;
   inset:0;
@@ -735,24 +793,26 @@ input[type="range"]{
 .galeria-backdrop{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,.65);
+  background:rgba(0,0,0,.55);
 }
 .galeria-content{
   position:relative;
-  max-width:min(980px, 92vw);
-  margin:5vh auto 0;
+  max-width:min(1100px, calc(100vw - 28px));
+  margin:14px auto;
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:16px;
-  box-shadow:0 25px 70px rgba(0,0,0,.35);
+  border-radius:18px;
+  box-shadow:0 22px 70px rgba(0,0,0,.35);
   padding:14px;
 }
 .galeria-head{
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
+  gap:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:12px;
 }
 .galeria-title{
   font-weight:900;
@@ -761,7 +821,7 @@ input[type="range"]{
 .galeria-sub{
   color:var(--muted);
   font-size:12px;
-  margin-top:4px;
+  margin-top:3px;
 }
 .galeria-close{
   width:38px;
@@ -773,9 +833,8 @@ input[type="range"]{
   font-size:22px;
   font-weight:900;
   cursor:pointer;
-  line-height:1;
 }
-.galeria-close:hover{ filter:brightness(.95); }
+.galeria-close:hover{ filter:brightness(.96); }
 
 .galeria-grid{
   display:grid;
@@ -785,27 +844,27 @@ input[type="range"]{
 .galeria-card{
   border:1px solid var(--border);
   border-radius:14px;
-  padding:10px;
   background:var(--card-2);
+  padding:10px;
 }
 .galeria-label{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:8px;
   font-weight:900;
+  font-size:12px;
+  margin-bottom:8px;
+  color:var(--muted);
 }
 .galeria-img{
   width:100%;
-  height:240px;
+  height:220px;
   object-fit:cover;
   border-radius:12px;
   border:1px solid var(--border);
   background:var(--card);
-  cursor:zoom-in;
+  cursor:pointer;
 }
 .galeria-empty{
   width:100%;
-  height:240px;
+  height:220px;
   border-radius:12px;
   border:1px dashed var(--border);
   display:flex;
@@ -815,18 +874,16 @@ input[type="range"]{
   background:var(--card);
 }
 
-/* ===================== FOOTER ===================== */
-.footer{
-  text-align:center;
-  color:var(--muted);
-  margin-top:6px;
-}
-
 /* ===================== PDF / IMPRESSÃO ===================== */
 .print-only{ display:none; }
 .no-print{ display:block; }
 
-.report{ padding:22px; }
+/* ✅ deixa o relatório “normal” no print preview (sem estourar) */
+.report{
+  padding:22px;
+  max-width:980px;   /* ✅ evita ficar gigantesco */
+  margin:0 auto;     /* ✅ centraliza */
+}
 
 .report-head{
   display:flex;
@@ -848,7 +905,7 @@ input[type="range"]{
 
 .report-title{
   font-size:18px;
-  font-weight:900;
+  font-weight:800;
 }
 .report-subtitle{
   font-size:12px;
@@ -869,25 +926,38 @@ input[type="range"]{
 }
 
 .box-title{
-  font-weight:900;
+  font-weight:800;
   margin-bottom:10px;
   font-size:13px;
 }
 
+/* ✅ tabela do relatório: não usa o “table” do site */
 .report-table{
   width:100%;
   border-collapse:collapse;
+  table-layout:fixed;
 }
 .report-table th, .report-table td{
   border:1px solid #111;
   padding:8px;
-  text-align:left;
-  vertical-align:top;
   font-size:12px;
+  text-align:left !important;  /* ✅ força corrigir “centrado” */
+  vertical-align:top;
+  word-break:break-word;
 }
 .report-table th{
   background:#f2f2f2;
-  text-align:left;
+  font-weight:800;
+}
+
+/* ✅ colunas melhores no relatório */
+.report-table th:nth-child(1),
+.report-table td:nth-child(1){
+  width:110px; /* Data ou # */
+}
+.report-table th:nth-child(3),
+.report-table td:nth-child(3){
+  width:90px; /* Dias (ranking) */
 }
 
 .report-footer{
@@ -908,6 +978,19 @@ input[type="range"]{
   }
   .no-print{ display:none !important; }
   .print-only{ display:block !important; }
+
+  /* ✅ usa a largura da página no PDF, mas com boas quebras */
+  .report{
+    max-width:none !important;
+    margin:0 !important;
+    padding:18px !important;
+  }
+
+  /* ✅ melhora legibilidade no PDF */
+  .report-table th, .report-table td{
+    font-size:11.5px !important;
+    padding:7px !important;
+  }
 }
 
 /* ===================== RESPONSIVO ===================== */
@@ -917,40 +1000,43 @@ input[type="range"]{
   .dash{ grid-template-columns: 1fr; }
   .dash-box{ min-height:auto; }
   .dash-canvas{ min-height:380px; }
+  .galeria-grid{ grid-template-columns: 1fr; }
 }
 
 @media (max-width: 800px){
   .grid-2{ grid-template-columns:1fr; }
+  .add-nome{ flex-direction:column; }
 
   .brand{
     flex-direction:column;
     align-items:flex-start;
   }
+
   .top-actions{
     margin-left:0;
     width:100%;
     justify-content:flex-start;
     align-items:flex-start;
   }
-  .logo{ height:48px; }
-  .logo.emive{ height:74px; }
 
-  .galeria-grid{ grid-template-columns: 1fr; }
-  .galeria-img, .galeria-empty{ height:210px; }
-  .signature-canvas{ height:150px; }
+  .logo{ height:50px; }
+  .logo.emive{ height:75px; }
 }
 
 /* ===================== AJUSTES MOBILE - PTA ===================== */
 @media (max-width: 600px) {
   #cardPTA .card-head { margin-bottom: 8px; }
-  #cardPTA .card-head h2 { font-size: 16px; line-height: 1.3; }
-  #cardPTA .card-head p { font-size: 11px; }
 
+  #cardPTA .card-head h2 {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  #cardPTA .card-head p { font-size: 11px; }
   #cardPTA .grid-2 { gap: 10px; }
 
   #cardPTA input,
-  #cardPTA select,
-  #cardPTA textarea{
+  #cardPTA select {
     padding: 8px;
     font-size: 14px;
   }
@@ -971,5 +1057,9 @@ input[type="range"]{
   .kpi { min-width: 100px; padding: 8px; }
   .kpi-value { font-size: 18px; }
 
-  .preview-img{ height:140px; }
+  .preview-img{ height:150px; }
+  .galeria-img, .galeria-empty{ height:180px; }
+
+  .check-grid{ grid-template-columns: 1fr; }
+  .w-mini{ width:56px; }
 }
