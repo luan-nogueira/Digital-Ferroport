@@ -1109,6 +1109,63 @@ th{
 .brand > div{
   text-align:center;
 }
+/* ===================== TOPO (FIX CENTRALIZADO) ===================== */
+.topbar{
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+/* a “caixa” do topo com a mesma largura do container */
+.topbar .brand{
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* logos | título | ações */
+  align-items: center;
+  column-gap: 18px;
+}
+
+/* logos ficam à esquerda */
+.topbar .logos{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* título fica CENTRAL DE VERDADE (não “meio mais ou menos”) */
+.topbar .brand > div{
+  text-align: center;
+  justify-self: center;
+}
+
+/* ações ficam à direita */
+.topbar .top-actions{
+  justify-self: end;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-left: 0 !important;
+}
+
+/* responsivo: empilha bonito no mobile */
+@media (max-width: 900px){
+  .topbar .brand{
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+    justify-items: center;
+    text-align: center;
+  }
+  .topbar .top-actions{
+    justify-self: center;
+    align-items: center;
+    justify-content: center;
+  }
+}
 
 
 
