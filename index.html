@@ -70,7 +70,6 @@
 
     <p class="muted small center" id="loginMsg"></p>
 
-    <!-- Aviso automático (quando abre via file://) -->
     <div class="hint" id="hintFile" style="display:none;">
       <strong>Aviso:</strong> você abriu via <code>file://</code>.  
       Para funcionar com Firebase, rode em um servidor (ex.: Live Server / <code>http://localhost</code>) e autorize o domínio no Firebase Auth.
@@ -223,6 +222,41 @@
         </div>
       </div>
     </div>
+
+    <!-- ===================== BLOCO PTA (painel) ===================== -->
+    <div id="blocoPTA" style="display:none;">
+      <div class="dash">
+        <div class="dash-box">
+          <div class="dash-title">📊 Km rodado por mês (últimos 12 meses)</div>
+          <canvas id="chartKmMes" class="dash-canvas"></canvas>
+          <p class="muted small">Soma mensal de (Km Final - Km Inicial) dos registros PTA.</p>
+        </div>
+
+        <div class="dash-box">
+          <div class="dash-title">📌 Resumo PTA</div>
+          <div class="insights">
+            <div class="insight">
+              <div class="insight-label">Km no mês selecionado</div>
+              <div class="insight-value" id="ptaInsightKmMes">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Média km/registro</div>
+              <div class="insight-value" id="ptaInsightKmMedio">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Maior km em 1 registro</div>
+              <div class="insight-value" id="ptaInsightKmMax">0</div>
+            </div>
+            <div class="insight">
+              <div class="insight-label">Registros no mês</div>
+              <div class="insight-value" id="ptaInsightRegMes">0</div>
+            </div>
+          </div>
+          <p class="muted small">Ajuda a acompanhar a utilização do veículo ao longo do tempo.</p>
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <!-- ===================== Ferroport form ===================== -->
@@ -470,6 +504,7 @@
       </div>
 
       <p class="muted small">Clique na foto para abrir em tela cheia.</p>
+      <p class="muted tiny">As fotos são reduzidas automaticamente antes de salvar (economiza Firestore).</p>
     </div>
 
     <div class="actions">
@@ -549,26 +584,40 @@
     </div>
   </div>
 
-  <!-- ✅ PTA PDF -->
+  <!-- ✅ PTA PDF (melhorado) -->
   <div id="printPTA" style="display:none;">
-    <div class="report-box" style="margin-top:12px;">
-      <div class="box-title">Registros do mês — PTA IVECO</div>
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Condutor</th>
-            <th>Km Inicial</th>
-            <th>Km Final</th>
-            <th>Local</th>
-            <th>Atividade</th>
-          </tr>
-        </thead>
-        <tbody id="printPTATable"></tbody>
-      </table>
-      <p class="muted small" style="margin-top:10px;">
-        Observação: Assinaturas e fotos são armazenadas no sistema e podem ser conferidas na tela do contrato.
-      </p>
+    <div class="report-grid" style="margin-top:12px;">
+      <div class="report-box">
+        <div class="box-title">Resumo do mês — PTA IVECO</div>
+        <table class="report-table">
+          <tbody>
+            <tr><th style="width:180px;">Registros no mês</th><td id="printPtaRegMes">0</td></tr>
+            <tr><th>Condutores (únicos)</th><td id="printPtaCondutores">0</td></tr>
+            <tr><th>Km rodados (total)</th><td id="printPtaKmTotal">0</td></tr>
+            <tr><th>Média km/registro</th><td id="printPtaKmMedio">0</td></tr>
+          </tbody>
+        </table>
+        <p class="muted small" style="margin-top:10px;">
+          Observação: assinaturas e fotos ficam disponíveis no sistema para conferência.
+        </p>
+      </div>
+
+      <div class="report-box">
+        <div class="box-title">Registros do mês — PTA IVECO</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Condutor</th>
+              <th>Km Inicial</th>
+              <th>Km Final</th>
+              <th>Local</th>
+              <th>Atividade</th>
+            </tr>
+          </thead>
+          <tbody id="printPTATable"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -628,7 +677,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     try{
-      // Aviso se abriu via file://
       try{
         if (location.protocol === "file:") {
           const hint = document.getElementById("hintFile");
@@ -694,37 +742,38 @@
       let ptaEditId = null;
       let ptaEditFotos = null;
 
-      // Checklist rápido
-const CHECK_ITEMS = [
-  "Fixação para Transporte",
-  "Giro do cesto",
-  "Comando do cesto",
-  "Estabilizadores",
-  "Comando das patolas",
-  "Lança",
-  "Elevação da plataforma",
-  "Vazamentos hidráulicos",
-  "Eletroválvulas lacradas",
-  "Anti-crash",
-  "Acion. Tomada de força",
-  "Óleo hidráulico",
-  "Comando da torre",
-  "Calços",
-  "Bomba de emergência",
-  "Chave de torre",
-  "Torre",
-  "Mangueiras",
-  "Giroled",
-  "Lanternas laterais",
-  "Sirene de movimentação",
-  "Buzina",
-  "Retrovisores",
-  "Para-brisas",
-  "Limpadores de para-brisa",
-  "Faróis",
-  "Setas",
-  "Luz de freio"
-];
+      // Checklist rápido (já com itens de segurança)
+      const CHECK_ITEMS = [
+        "Fixação para Transporte",
+        "Giro do cesto",
+        "Comando do cesto",
+        "Estabilizadores",
+        "Comando das patolas",
+        "Lança",
+        "Elevação da plataforma",
+        "Vazamentos hidráulicos",
+        "Eletroválvulas lacradas",
+        "Anti-crash",
+        "Acion. Tomada de força",
+        "Óleo hidráulico",
+        "Comando da torre",
+        "Calços",
+        "Bomba de emergência",
+        "Chave de torre",
+        "Torre",
+        "Mangueiras",
+        "Giroled",
+        "Lanternas laterais",
+        "Sirene de movimentação",
+        "Buzina",
+        "Retrovisores",
+        "Para-brisas",
+        "Limpadores de para-brisa",
+        "Faróis",
+        "Setas",
+        "Luz de freio"
+      ];
+
       // ===================== TEMA =====================
       const KEY_TEMA = "tema_site";
       function aplicarTema(theme){
@@ -800,6 +849,11 @@ const CHECK_ITEMS = [
         if(!dataISO) return false;
         return dataISO.startsWith(`${y}-${m}-`);
       }
+      function ymFromISO(dataISO){
+        if(!dataISO || dataISO.length < 7) return "";
+        return dataISO.slice(0,7); // YYYY-MM
+      }
+      function pad2(n){ return String(n).padStart(2,"0"); }
 
       // ===================== MODAIS (IMAGENS) =====================
       function openImgModal(src){
@@ -889,15 +943,48 @@ const CHECK_ITEMS = [
       window.openGaleria = openGaleria;
       window.closeGaleria = closeGaleria;
 
-      // ===================== FOTOS (BASE64) =====================
-      function fileToBase64(file){
-        return new Promise((resolve, reject)=>{
-          const r = new FileReader();
-          r.onload = ()=> resolve(r.result);
-          r.onerror = reject;
-          r.readAsDataURL(file);
-        });
+      // ===================== FOTOS (COMPRESS) =====================
+      async function fileToDataURLCompressed(file, opts = {}){
+        const {
+          maxW = 1600,
+          maxH = 1600,
+          quality = 0.72,
+          mime = "image/jpeg"
+        } = opts;
+
+        if(!file) return "";
+
+        // se já vier pequeno, ainda comprime leve (economiza Firestore de verdade)
+        const imgURL = URL.createObjectURL(file);
+        try{
+          const img = await new Promise((resolve, reject)=>{
+            const im = new Image();
+            im.onload = ()=> resolve(im);
+            im.onerror = reject;
+            im.src = imgURL;
+          });
+
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+
+          const ratio = Math.min(1, maxW / w, maxH / h);
+          const tw = Math.max(1, Math.round(w * ratio));
+          const th = Math.max(1, Math.round(h * ratio));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = tw;
+          canvas.height = th;
+          const ctx = canvas.getContext("2d", { alpha:false });
+
+          ctx.drawImage(img, 0, 0, tw, th);
+
+          // JPEG (menor) — perfeito para Firestore
+          return canvas.toDataURL(mime, quality);
+        }finally{
+          URL.revokeObjectURL(imgURL);
+        }
       }
+
       function configurarPreview(inputId, previewId){
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
@@ -906,10 +993,11 @@ const CHECK_ITEMS = [
         input.addEventListener("change", async ()=>{
           const file = input.files[0];
           if(!file) return;
-          const base64 = await fileToBase64(file);
+          const base64 = await fileToDataURLCompressed(file, { maxW: 1400, maxH: 1400, quality: 0.72 });
           preview.src = base64;
         });
       }
+
       function limparFotosPTAUI(){
         ["ptaFotoFrente","ptaFotoTras","ptaFotoLatEsq","ptaFotoLatDir"].forEach(id => {
           const el = document.getElementById(id);
@@ -1003,7 +1091,7 @@ const CHECK_ITEMS = [
           .sort((a,b) => b.dias - a.dias || a.nome.localeCompare(b.nome, "pt-BR"));
       }
 
-      // ===================== GRÁFICO =====================
+      // ===================== GRÁFICO TOP10 =====================
       function desenharGraficoTop10(canvasId, data){
         const canvas = document.getElementById(canvasId);
         if(!canvas) return;
@@ -1120,6 +1208,123 @@ const CHECK_ITEMS = [
           ctx.closePath();
           ctx.fill();
         }
+      }
+
+      // ===================== GRÁFICO KM/MÊS (PTA) =====================
+      function montarSerieKmUltimos12Meses(listaPTA){
+        const now = new Date();
+        const labels = [];
+        const keys = [];
+        for(let i=11;i>=0;i--){
+          const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+          const key = `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+          keys.push(key);
+          labels.push(key.slice(5,7) + "/" + key.slice(2,4)); // MM/YY
+        }
+
+        const map = new Map(keys.map(k => [k, 0]));
+        (listaPTA || []).forEach(it => {
+          const key = ymFromISO(it.dataISO);
+          if(!map.has(key)) return;
+          const km = Math.max(0, (Number(it.kmFinal||0) - Number(it.kmInicial||0)));
+          map.set(key, (map.get(key) || 0) + km);
+        });
+
+        const values = keys.map(k => map.get(k) || 0);
+        return { labels, values };
+      }
+
+      function desenharGraficoKmMes(canvasId, serie){
+        const canvas = document.getElementById(canvasId);
+        if(!canvas) return;
+
+        const w = canvas.clientWidth || 0;
+        const h = canvas.clientHeight || 0;
+        if(w < 50 || h < 50) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        ctx.clearRect(0,0,w,h);
+
+        const styles = getComputedStyle(document.documentElement);
+        const text   = styles.getPropertyValue("--text").trim() || "#111";
+        const muted  = styles.getPropertyValue("--muted").trim() || "#666";
+        const border = styles.getPropertyValue("--border").trim() || "#ddd";
+        const bar    = styles.getPropertyValue("--digital-red").trim() || "#CB3344";
+        const bg     = styles.getPropertyValue("--card-2").trim() || "#f7f7f7";
+
+        ctx.fillStyle = bg;
+        ctx.fillRect(0,0,w,h);
+
+        const labels = serie?.labels || [];
+        const values = serie?.values || [];
+
+        if(!labels.length){
+          ctx.font = "14px Arial";
+          ctx.fillStyle = muted;
+          ctx.fillText("Sem dados para montar o gráfico.", 12, 24);
+          return;
+        }
+
+        const max = Math.max(1, ...values);
+        const padL = 44;
+        const padR = 14;
+        const padT = 18;
+        const padB = 34;
+
+        const plotW = Math.max(60, w - padL - padR);
+        const plotH = Math.max(60, h - padT - padB);
+
+        // grid horizontal
+        ctx.strokeStyle = border;
+        ctx.globalAlpha = 0.35;
+        for(let i=0;i<=4;i++){
+          const y = padT + (plotH * (i/4));
+          ctx.beginPath();
+          ctx.moveTo(padL, y);
+          ctx.lineTo(w - padR, y);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        const n = labels.length;
+        const gap = 6;
+        const barW = Math.max(6, Math.floor((plotW - gap*(n-1)) / n));
+
+        // bars
+        for(let i=0;i<n;i++){
+          const v = values[i] || 0;
+          const bh = Math.round((v / max) * plotH);
+          const x = padL + i*(barW + gap);
+          const y = padT + (plotH - bh);
+
+          ctx.fillStyle = bar;
+          ctx.fillRect(x, y, barW, bh);
+
+          // labels (a cada 2 meses para não poluir)
+          if(i % 2 === 1 || w < 520){
+            ctx.save();
+            ctx.fillStyle = muted;
+            ctx.font = "11px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText(labels[i], x + barW/2, padT + plotH + 8);
+            ctx.restore();
+          }
+        }
+
+        // eixo Y (max)
+        ctx.fillStyle = muted;
+        ctx.font = "11px Arial";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(String(max), 10, padT);
+        ctx.textBaseline = "bottom";
+        ctx.fillText("0", 10, padT + plotH);
       }
 
       // ===================== PERMISSÕES =====================
@@ -1245,10 +1450,14 @@ const CHECK_ITEMS = [
         const isPTA = contratoAtual === "pta-inveco";
 
         const blocoFerroport = document.getElementById("blocoFerroport");
+        const blocoPTA = document.getElementById("blocoPTA");
+
         const cardPresenca = document.getElementById("cardPresenca");
         const cardListaFerroport = document.getElementById("cardListaFerroport");
 
         if(blocoFerroport) blocoFerroport.style.display = isPTA ? "none" : "block";
+        if(blocoPTA) blocoPTA.style.display = isPTA ? "block" : "none";
+
         if(cardPresenca) cardPresenca.style.display = isPTA ? "none" : "block";
         if(cardListaFerroport) cardListaFerroport.style.display = isPTA ? "none" : "block";
 
@@ -1269,7 +1478,7 @@ const CHECK_ITEMS = [
         }
       }
 
-      // ===================== FERROPORT (seu código original) =====================
+      // ===================== FERROPORT (seu código) =====================
       async function excluirRegistroDiario(dataISO){
         try{
           if(!isAdmin) return alert("Apenas Gestor pode excluir registros.");
@@ -1565,97 +1774,175 @@ const CHECK_ITEMS = [
       }
       window.exportarDiarioCSV = exportarDiarioCSV;
 
-      // ===================== PTA: ASSINATURA =====================
-      function ptaInitAssinatura(){
-        const canvas = document.getElementById("ptaAssinatura");
+      // ===================== PTA: ASSINATURA (MELHORADA) =====================
+      const ptaSig = {
+        strokes: [],
+        current: null,
+        baseImage: "",
+        dpr: 1
+      };
+
+      function ptaGetCanvas(){
+        return document.getElementById("ptaAssinatura");
+      }
+
+      function ptaGetCtx(){
+        const canvas = ptaGetCanvas();
+        if(!canvas) return null;
+        return canvas.getContext("2d");
+      }
+
+      function ptaGetInkColor(){
+        const styles = getComputedStyle(document.documentElement);
+        return styles.getPropertyValue("--text").trim() || "#111";
+      }
+
+      function ptaResizeCanvas(){
+        const canvas = ptaGetCanvas();
         if(!canvas) return;
 
         const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
+        ptaSig.dpr = dpr;
 
-        canvas.width  = Math.floor(rect.width  * dpr);
-        canvas.height = Math.floor(rect.height * dpr);
+        canvas.width  = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
 
         const ctx = canvas.getContext("2d");
         ctx.setTransform(dpr,0,0,dpr,0,0);
 
-        const styles = getComputedStyle(document.documentElement);
-        const cor = styles.getPropertyValue("--text").trim() || "#111";
-        ctx.lineWidth = 2.2;
+        ptaRedraw();
+      }
+
+      function ptaRedraw(){
+        const canvas = ptaGetCanvas();
+        const ctx = ptaGetCtx();
+        if(!canvas || !ctx) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+
+        // limpa em coordenadas CSS
+        ctx.save();
+        ctx.setTransform(ptaSig.dpr,0,0,ptaSig.dpr,0,0);
+        ctx.clearRect(0,0,w,h);
+
+        // desenha base (assinatura carregada no modo editar)
+        if(ptaSig.baseImage){
+          const img = new Image();
+          img.onload = () => {
+            ctx.clearRect(0,0,w,h);
+            ctx.drawImage(img, 0,0,w,h);
+            ptaDrawStrokes(ctx);
+          };
+          img.src = ptaSig.baseImage;
+        }else{
+          ptaDrawStrokes(ctx);
+        }
+        ctx.restore();
+      }
+
+      function ptaDrawStrokes(ctx){
+        ctx.lineWidth = 2.4;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        ctx.strokeStyle = cor;
+        ctx.strokeStyle = ptaGetInkColor();
 
-        let desenhando = false;
-        let lastX = 0, lastY = 0;
-
-        function pos(e){
-          const r = canvas.getBoundingClientRect();
-          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-          return { x: clientX - r.left, y: clientY - r.top };
-        }
-
-        function start(e){
-          desenhando = true;
-          const p = pos(e);
-          lastX = p.x; lastY = p.y;
-          e.preventDefault();
-        }
-        function move(e){
-          if(!desenhando) return;
-          const p = pos(e);
+        const all = ptaSig.strokes || [];
+        for(const stroke of all){
+          if(!stroke || stroke.length < 2) continue;
           ctx.beginPath();
-          ctx.moveTo(lastX, lastY);
-          ctx.lineTo(p.x, p.y);
+          ctx.moveTo(stroke[0].x, stroke[0].y);
+          for(let i=1;i<stroke.length;i++){
+            ctx.lineTo(stroke[i].x, stroke[i].y);
+          }
           ctx.stroke();
-          lastX = p.x; lastY = p.y;
-          e.preventDefault();
         }
-        function end(){ desenhando = false; }
 
-        canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = canvas.onmouseleave = null;
-        canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
+        if(ptaSig.current && ptaSig.current.length >= 2){
+          const s = ptaSig.current;
+          ctx.beginPath();
+          ctx.moveTo(s[0].x, s[0].y);
+          for(let i=1;i<s.length;i++){
+            ctx.lineTo(s[i].x, s[i].y);
+          }
+          ctx.stroke();
+        }
+      }
 
-        canvas.onmousedown = start;
-        canvas.onmousemove = move;
-        canvas.onmouseup = end;
-        canvas.onmouseleave = end;
+      function ptaPointerPos(e){
+        const canvas = ptaGetCanvas();
+        const r = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX - r.left),
+          y: (e.clientY - r.top)
+        };
+      }
 
-        canvas.ontouchstart = start;
-        canvas.ontouchmove = move;
-        canvas.ontouchend = end;
+      function ptaInitAssinatura(){
+        const canvas = ptaGetCanvas();
+        if(!canvas) return;
+
+        // evita duplicar handlers
+        canvas.onpointerdown = null;
+        canvas.onpointermove = null;
+        canvas.onpointerup = null;
+        canvas.onpointercancel = null;
+
+        ptaResizeCanvas();
+
+        canvas.onpointerdown = (e)=>{
+          e.preventDefault();
+          canvas.setPointerCapture(e.pointerId);
+
+          ptaSig.current = [];
+          const p = ptaPointerPos(e);
+          ptaSig.current.push(p);
+        };
+
+        canvas.onpointermove = (e)=>{
+          if(!ptaSig.current) return;
+          e.preventDefault();
+          const p = ptaPointerPos(e);
+          ptaSig.current.push(p);
+          ptaRedraw();
+        };
+
+        function end(e){
+          if(!ptaSig.current) return;
+          e.preventDefault();
+          if(ptaSig.current.length >= 2){
+            ptaSig.strokes.push(ptaSig.current);
+          }
+          ptaSig.current = null;
+          ptaRedraw();
+        }
+
+        canvas.onpointerup = end;
+        canvas.onpointercancel = end;
       }
 
       function ptaLimparAssinatura(){
-        const canvas = document.getElementById("ptaAssinatura");
-        if(!canvas) return;
-        const ctx = canvas.getContext("2d");
-        ctx.setTransform(1,0,0,1,0,0);
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        try{ ptaInitAssinatura(); }catch(_){}
+        ptaSig.strokes = [];
+        ptaSig.current = null;
+        ptaSig.baseImage = "";
+        ptaRedraw();
       }
       window.ptaLimparAssinatura = ptaLimparAssinatura;
 
       function ptaAssinaturaDataURL(){
-        const canvas = document.getElementById("ptaAssinatura");
+        const canvas = ptaGetCanvas();
         if(!canvas) return "";
+        // gera PNG (assinatura leve)
         return canvas.toDataURL("image/png");
       }
 
       function ptaCarregarAssinatura(dataUrl){
-        const canvas = document.getElementById("ptaAssinatura");
-        if(!canvas) return;
-        const ctx = canvas.getContext("2d");
-        const img = new Image();
-        img.onload = () => {
-          const rect = canvas.getBoundingClientRect();
-          const dpr = window.devicePixelRatio || 1;
-          ctx.setTransform(dpr,0,0,dpr,0,0);
-          ctx.clearRect(0,0,rect.width, rect.height);
-          ctx.drawImage(img, 0, 0, rect.width, rect.height);
-        };
-        img.src = dataUrl || "";
+        ptaSig.strokes = [];
+        ptaSig.current = null;
+        ptaSig.baseImage = dataUrl || "";
+        ptaRedraw();
       }
 
       function ptaLimparFormulario(){
@@ -1728,12 +2015,13 @@ const CHECK_ITEMS = [
 
           let fotoFrente = null, fotoTras = null, fotoLatEsq = null, fotoLatDir = null;
 
+          // ✅ compressão automática
           if(fFrente && fTras && fEsq && fDir){
             [fotoFrente, fotoTras, fotoLatEsq, fotoLatDir] = await Promise.all([
-              fileToBase64(fFrente),
-              fileToBase64(fTras),
-              fileToBase64(fEsq),
-              fileToBase64(fDir),
+              fileToDataURLCompressed(fFrente, { maxW: 1600, maxH: 1600, quality: 0.72 }),
+              fileToDataURLCompressed(fTras,   { maxW: 1600, maxH: 1600, quality: 0.72 }),
+              fileToDataURLCompressed(fEsq,    { maxW: 1600, maxH: 1600, quality: 0.72 }),
+              fileToDataURLCompressed(fDir,    { maxW: 1600, maxH: 1600, quality: 0.72 }),
             ]);
           }else if(ptaEditFotos && ptaEditFotos.fotoFrente && ptaEditFotos.fotoTras && ptaEditFotos.fotoLatEsq && ptaEditFotos.fotoLatDir){
             fotoFrente = ptaEditFotos.fotoFrente;
@@ -1835,7 +2123,7 @@ const CHECK_ITEMS = [
           const tr = document.createElement("tr");
 
           const assinaturaThumb = item.assinaturaDataUrl
-            ? `<img src="${item.assinaturaDataUrl}" alt="Assinatura" style="height:34px;max-width:120px;object-fit:contain;border:1px solid var(--border);border-radius:6px;background:var(--card);" />`
+            ? `<img src="${item.assinaturaDataUrl}" alt="Assinatura" class="sig-thumb" />`
             : "—";
 
           tr.innerHTML = `
@@ -1895,7 +2183,7 @@ const CHECK_ITEMS = [
             setChecklistRapidoValues(c.checklistRapido || {});
             document.getElementById("ptaObs").value = c.observacoes || "";
 
-            // assinatura
+            // assinatura (base)
             ptaInitAssinatura();
             setTimeout(() => ptaCarregarAssinatura(item.assinaturaDataUrl || ""), 30);
 
@@ -1912,7 +2200,6 @@ const CHECK_ITEMS = [
             document.getElementById("previewLatEsq").src = ptaEditFotos.fotoLatEsq || "";
             document.getElementById("previewLatDir").src = ptaEditFotos.fotoLatDir || "";
 
-            // limpa inputs file
             ["ptaFotoFrente","ptaFotoTras","ptaFotoLatEsq","ptaFotoLatDir"].forEach(id => {
               const el = document.getElementById(id);
               if(el) el.value = "";
@@ -1950,15 +2237,14 @@ const CHECK_ITEMS = [
         const l3 = document.getElementById("kpiLabel3");
         if(l1) l1.textContent = "Registros no mês";
         if(l2) l2.textContent = "Condutores";
-        if(l3) l3.textContent = "Km rodados (estim.)";
+        if(l3) l3.textContent = "Km rodados (total)";
       }
 
       function atualizarPainel(){
         const sel = getMesAnoSelecionado();
         if(!sel){
           const hoje = new Date();
-          const pad = (n)=> String(n).padStart(2,"0");
-          document.getElementById("mesAno").value = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
+          document.getElementById("mesAno").value = `${hoje.getFullYear()}-${pad2(hoje.getMonth()+1)}`;
           return;
         }
 
@@ -1977,11 +2263,34 @@ const CHECK_ITEMS = [
 
           const registros = itensMesPTA.length;
           const condutoresSet = new Set(itensMesPTA.map(x => x.condutor).filter(Boolean));
-          const kmTotal = itensMesPTA.reduce((acc,x)=> acc + Math.max(0, (Number(x.kmFinal||0) - Number(x.kmInicial||0))), 0);
+          const kms = itensMesPTA.map(x => Math.max(0, (Number(x.kmFinal||0) - Number(x.kmInicial||0))));
+          const kmTotal = kms.reduce((acc,v)=> acc+v, 0);
+          const kmMedio = registros ? (kmTotal / registros) : 0;
+          const kmMax = kms.length ? Math.max(...kms) : 0;
 
           document.getElementById("kpiDias").textContent = String(registros);
           document.getElementById("kpiTecnicos").textContent = String(condutoresSet.size);
           document.getElementById("kpiPresencas").textContent = String(kmTotal);
+
+          // insights PTA
+          document.getElementById("ptaInsightKmMes").textContent = String(kmTotal);
+          document.getElementById("ptaInsightKmMedio").textContent = String(kmMedio.toFixed(1));
+          document.getElementById("ptaInsightKmMax").textContent = String(kmMax);
+          document.getElementById("ptaInsightRegMes").textContent = String(registros);
+
+          // gráfico PTA (últimos 12 meses)
+          const serie = montarSerieKmUltimos12Meses(LISTA_PTA);
+          setTimeout(() => desenharGraficoKmMes("chartKmMes", serie), 0);
+
+          // print resumo PTA
+          const elReg = document.getElementById("printPtaRegMes");
+          const elCond = document.getElementById("printPtaCondutores");
+          const elKmTot = document.getElementById("printPtaKmTotal");
+          const elKmMed = document.getElementById("printPtaKmMedio");
+          if(elReg) elReg.textContent = String(registros);
+          if(elCond) elCond.textContent = String(condutoresSet.size);
+          if(elKmTot) elKmTot.textContent = String(kmTotal);
+          if(elKmMed) elKmMed.textContent = String(kmMedio.toFixed(1));
 
           const printBody = document.getElementById("printPTATable");
           if(printBody){
@@ -2118,10 +2427,9 @@ const CHECK_ITEMS = [
         if(ptaData) ptaData.value = hojeISO();
 
         const d = new Date();
-        const pad = (n)=> String(n).padStart(2,"0");
         const mesAno = document.getElementById("mesAno");
         if(mesAno){
-          mesAno.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+          mesAno.value = `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
           mesAno.addEventListener("change", atualizarPainel);
         }
 
@@ -2137,7 +2445,6 @@ const CHECK_ITEMS = [
           });
         }
 
-        // checklist + fotos (PTA)
         renderChecklistRapido();
 
         const fuel = document.getElementById("ptaCombustivel");
@@ -2161,7 +2468,7 @@ const CHECK_ITEMS = [
 
         window.addEventListener("resize", () => {
           try{ atualizarPainel(); }catch(_){}
-          try{ if(contratoAtual === "pta-inveco") ptaInitAssinatura(); }catch(_){}
+          try{ if(contratoAtual === "pta-inveco") ptaResizeCanvas(); }catch(_){}
         });
       }
 
@@ -2217,4 +2524,3 @@ const CHECK_ITEMS = [
 
 </body>
 </html>
-
