@@ -1,9 +1,5 @@
 /* ============================================================
    STYLE.CSS — COMPLETO (compatível com o HTML enviado)
-   - Visual mais moderno
-   - Sem duplicações do topo
-   - Melhor contraste, tabelas, botões, inputs, PTA e modais
-   - Dark mode via :root[data-theme="dark"]
 ============================================================ */
 
 /* ===================== THEME TOKENS ===================== */
@@ -250,7 +246,7 @@ button:disabled{
   padding:0 16px;
 
   display:grid;
-  grid-template-columns:auto 1fr auto; /* logos | título | ações */
+  grid-template-columns:auto 1fr auto;
   align-items:center;
   column-gap:18px;
 }
@@ -471,7 +467,7 @@ input::placeholder, textarea::placeholder{
 .kpi-label{ font-size:12px; color:var(--muted); }
 .kpi-value{ font-size:22px; font-weight:900; margin-top:4px; }
 
-/* ===================== BARRA (tabela ranking) ===================== */
+/* ===================== BARRA ===================== */
 .bar{
   height:10px;
   border-radius:999px;
@@ -612,7 +608,6 @@ th{
 }
 .table-compact th, .table-compact td{ padding:8px; }
 
-/* zebra + hover leve */
 tbody tr:nth-child(even){
   background: color-mix(in srgb, var(--card) 86%, rgba(203,51,68,.03));
 }
@@ -646,6 +641,8 @@ tbody tr:hover{
   border-radius:12px;
   background:var(--card);
   touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
 }
 
 .signature-actions{
@@ -656,7 +653,7 @@ tbody tr:hover{
 }
 
 /* ============================================================
-   PTA PROFISSIONAL (CHECKLIST / FUEL / FOTOS / DIVISÓRIAS)
+   PTA PROFISSIONAL
 ============================================================ */
 .divider{
   height:1px;
@@ -1142,33 +1139,52 @@ tbody tr:hover{
   .check-grid{ grid-template-columns: 1fr; }
   .w-mini{ width:56px; }
 }
-/* ===== Fix: Tabela PTA (Assinatura/colunas) ===== */
+
+/* ============================================================
+   ✅ FIX: Tabela PTA (Assinatura/colunas) + Thumb
+============================================================ */
 #cardListaPTA table{
-  table-layout: auto;              /* não força colunas apertadas */
+  table-layout: auto; /* melhora no mobile e evita “aperto” */
 }
 
 #cardListaPTA th,
 #cardListaPTA td{
-  word-break: normal;              /* evita quebrar palavras tipo "Assinatura" */
+  word-break: normal;
 }
 
-/* Larguras mais estáveis */
+/* Larguras estáveis */
 #cardListaPTA th:nth-child(7),
 #cardListaPTA td:nth-child(7){
-  width: 150px;                    /* coluna Assinatura */
-  white-space: nowrap;             /* não quebrar "Assinatura" */
+  width: 150px;
+  white-space: nowrap;
 }
 
 #cardListaPTA th:nth-child(8),
 #cardListaPTA td:nth-child(8){
-  width: 140px;                    /* coluna Ações */
+  width: 160px;
 }
 
-/* Thumb da assinatura sempre centralizado e sem “estourar” */
-#cardListaPTA td:nth-child(7) img{
-  display: block;
-  margin: 0 auto;
-  height: 34px !important;
-  max-width: 100% !important;      /* não limita a 120px quando a coluna for menor */
-  object-fit: contain;
+/* Thumb da assinatura (classe usada no HTML) */
+.sig-thumb{
+  display:block;
+  margin:0 auto;
+  height:34px;
+  max-width:100%;
+  object-fit:contain;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card);
+  padding:2px;
+}
+
+/* no celular: deixa ações quebrar linha e dá mais espaço p/ assinatura */
+@media (max-width: 600px){
+  #cardListaPTA th:nth-child(7),
+  #cardListaPTA td:nth-child(7){
+    width: 120px;
+  }
+  #cardListaPTA th:nth-child(8),
+  #cardListaPTA td:nth-child(8){
+    width: 170px;
+  }
 }
