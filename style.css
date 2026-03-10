@@ -1188,3 +1188,17 @@ tbody tr:hover{
     width: 170px;
   }
 }
+/* ===================== GERENCIAR ACESSOS ===================== */
+#cardUsuarios .contracts-grid{
+  max-width: 520px;
+}
+
+.access-status-line{
+  margin-top: 8px;
+  justify-content: flex-start;
+}
+
+#cardUsuarios table td,
+#cardUsuarios table th{
+  vertical-align: middle;
+}
