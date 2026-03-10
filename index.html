@@ -6,7 +6,6 @@
   <title>Presença diária — Contratos</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase (COMPAT) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -14,7 +13,6 @@
 
 <body>
 
-<!-- ===================== LOGIN ===================== -->
 <section class="login-page" id="loginBox">
   <div class="login-card">
     <div class="login-logos">
@@ -60,6 +58,7 @@
     <div class="actions center">
       <button class="btn" id="btnEntrar" type="button" onclick="login()">Entrar</button>
       <button class="btn secondary" type="button" onclick="esqueciSenha()">Esqueci minha senha</button>
+      <button class="btn secondary" type="button" onclick="criarPrimeiroAcesso()">Criar primeiro acesso</button>
       <button class="btn secondary small" type="button" id="btnTemaLogin" onclick="toggleTema()">🌙 Tema</button>
     </div>
 
@@ -79,7 +78,6 @@
   </div>
 </section>
 
-<!-- ===================== APP ===================== -->
 <div id="appRoot" style="display:none;">
 
 <header class="topbar no-print">
@@ -112,7 +110,6 @@
 
 <main class="container">
 
-  <!-- ===================== PAINEL ===================== -->
   <section class="card">
     <div class="card-head">
       <h2>Painel</h2>
@@ -153,7 +150,6 @@
       </div>
     </div>
 
-    <!-- ===================== BLOCO FERROPORT (painel) ===================== -->
     <div id="blocoFerroport">
       <div class="split">
         <div>
@@ -223,7 +219,6 @@
       </div>
     </div>
 
-    <!-- ===================== BLOCO PTA (painel) ===================== -->
     <div id="blocoPTA" style="display:none;">
       <div class="dash">
         <div class="dash-box">
@@ -256,10 +251,8 @@
         </div>
       </div>
     </div>
-
   </section>
 
-  <!-- ===================== Ferroport form ===================== -->
   <section class="card" id="cardPresenca">
     <div class="card-head">
       <h2>Presença por dia (Ferroport)</h2>
@@ -318,14 +311,12 @@
     </div>
   </section>
 
-  <!-- ===================== PTA IVECO ===================== -->
   <section class="card" id="cardPTA" style="display:none;">
     <div class="card-head">
       <h2>PTA IVECO — Placa QRD-7698</h2>
       <p class="muted">Registro profissional com checklist, assinatura e fotos do veículo.</p>
     </div>
 
-    <!-- Dados principais -->
     <div class="grid-2">
       <div class="field">
         <label>Data</label>
@@ -362,7 +353,6 @@
       </div>
     </div>
 
-    <!-- ===================== CHECKLIST (PROFISSIONAL) ===================== -->
     <div class="divider"></div>
 
     <div class="section-title">
@@ -373,7 +363,6 @@
       </div>
     </div>
 
-    <!-- Tipo + Horímetro + Combustível -->
     <div class="grid-3">
       <div class="field">
         <label>Tipo de Checagem</label>
@@ -401,7 +390,6 @@
       </div>
     </div>
 
-    <!-- Checagem das patolas -->
     <div class="field">
       <label>Checagem das Patolas (pneu / estado)</label>
       <div class="table-wrap">
@@ -434,7 +422,6 @@
       </div>
     </div>
 
-    <!-- Checagem rápida -->
     <div class="field">
       <label>Checagem Rápida</label>
       <div class="table-wrap">
@@ -459,7 +446,6 @@
       <p class="muted tiny">Legenda comum: A (Amassado) • R (Riscado) • Q (Quebrado) • T (Trincado) • M (Manchado)</p>
     </div>
 
-    <!-- Assinatura -->
     <div class="divider"></div>
     <div class="field">
       <label>Assinatura (à mão)</label>
@@ -472,7 +458,6 @@
       </div>
     </div>
 
-    <!-- Fotos -->
     <div class="divider"></div>
     <div class="field">
       <label>Fotos do veículo (frente / trás / laterais) — obrigatório</label>
@@ -537,6 +522,81 @@
     </table>
   </section>
 
+  <section class="card no-print" id="cardUsuarios" style="display:none;">
+    <div class="card-head">
+      <h2>Gerenciar acessos</h2>
+      <p class="muted">Somente gestor pode criar, editar, ativar e bloquear acessos.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Nome</label>
+        <input id="usuarioNome" type="text" placeholder="Ex: João Silva">
+      </div>
+
+      <div class="field">
+        <label>E-mail</label>
+        <input id="usuarioEmail" type="email" placeholder="usuario@empresa.com">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Perfil</label>
+        <select id="usuarioRole">
+          <option value="tecnico">Técnico</option>
+          <option value="gestor">Gestor</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <label class="check-item access-status-line">
+          <input type="checkbox" id="usuarioAtivo" checked>
+          <span>Usuário ativo</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Contratos permitidos</label>
+      <div class="check-grid contracts-grid">
+        <label class="check-item">
+          <input type="checkbox" id="acessoFerroport" checked>
+          <span>Ferroport</span>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" id="acessoPTA">
+          <span>PTA IVECO</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="button" onclick="salvarAcessoUsuario()">💾 Salvar acesso</button>
+      <button class="btn secondary" type="button" onclick="limparFormularioUsuario()">🧹 Limpar</button>
+    </div>
+
+    <p class="muted small" style="margin-top:8px;">
+      Depois de liberar o e-mail, o usuário usa <strong>“Criar primeiro acesso”</strong> na tela de login para cadastrar a senha.
+    </p>
+
+    <table style="margin-top:16px;">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Perfil</th>
+          <th>Contratos</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaUsuarios"></tbody>
+    </table>
+  </section>
+
   <footer class="footer no-print">
     DIGITAL • EMIVE • Tecnologia e Segurança
   </footer>
@@ -544,7 +604,6 @@
 </main>
 </div>
 
-<!-- ===================== PDF ===================== -->
 <section class="print-only report">
   <div class="report-head">
     <div class="report-logos">
@@ -559,7 +618,6 @@
     </div>
   </div>
 
-  <!-- ✅ FERROPORT PDF -->
   <div id="printFerroport">
     <div class="report-grid">
       <div class="report-box">
@@ -584,7 +642,6 @@
     </div>
   </div>
 
-  <!-- ✅ PTA PDF (melhorado) -->
   <div id="printPTA" style="display:none;">
     <div class="report-grid" style="margin-top:12px;">
       <div class="report-box">
@@ -626,7 +683,6 @@
   </div>
 </section>
 
-<!-- ✅ MODAL DE IMAGEM (LIGHTBOX) -->
 <div id="imgModal" class="img-modal" style="display:none;" aria-hidden="true">
   <div class="img-modal-backdrop" onclick="closeImgModal()"></div>
   <div class="img-modal-content" role="dialog" aria-modal="true">
@@ -635,7 +691,6 @@
   </div>
 </div>
 
-<!-- ✅ MODAL DE FOTOS (GALERIA PTA) -->
 <div id="galeriaModal" class="galeria-modal" style="display:none;" aria-hidden="true">
   <div class="galeria-backdrop" onclick="closeGaleria()"></div>
 
@@ -656,9 +711,6 @@
   </div>
 </div>
 
-<!-- ===========================================================
-     ✅ SCRIPT FINAL
-=========================================================== -->
 <script>
 (function(){
   function showFatal(err){
@@ -672,23 +724,21 @@
       '<p>Abra o Console (F12) para mais detalhes.</p>' +
       '</div>';
   }
+
   window.addEventListener("error", (e)=> showFatal(e.error || e.message));
   window.addEventListener("unhandledrejection", (e)=> showFatal(e.reason));
 
   document.addEventListener("DOMContentLoaded", () => {
     try{
-      try{
-        if (location.protocol === "file:") {
-          const hint = document.getElementById("hintFile");
-          if (hint) hint.style.display = "block";
-        }
-      }catch(_){}
+      if (location.protocol === "file:") {
+        const hint = document.getElementById("hintFile");
+        if (hint) hint.style.display = "block";
+      }
 
       if(typeof firebase === "undefined"){
         throw new Error("firebase is not defined. Os scripts compat precisam estar carregados antes deste script.");
       }
 
-      // ===================== CONFIG =====================
       const firebaseConfig = {
         apiKey: "AIzaSyBzgChouE4W25XnD-vFybJrKVN9yl3R0IQ",
         authDomain: "ferroportluannogueira.firebaseapp.com",
@@ -709,40 +759,38 @@
       const auth = firebase.auth();
       const db   = firebase.firestore();
 
-      // Ferroport
       let LISTA = [];
       let NOMES = [];
-      let selecaoDiaria = [];
+      let LISTA_PTA = [];
+      let ACESSOS = [];
 
+      let selecaoDiaria = [];
       let mostrarTodosRegistros = false;
       const LIMITE_REGISTROS = 5;
 
       let mostrarTodosMes = false;
       const LIMITE_MES = 6;
 
-      // Contratos / Permissões
       const KEY_CONTRATO = "contrato_atual";
       let contratoAtual = localStorage.getItem(KEY_CONTRATO) || "ferroport";
 
       let allowedContracts = [];
       let isAdmin = false;
 
-      // Firestore refs
       let refDiarios = null;
       let refNomes = null;
       let refPTA = null;
+      let refAcessos = db.collection("access_by_email");
 
-      // Unsub realtime
       let unsubDiarios = null;
       let unsubNomes = null;
       let unsubPTA = null;
+      let unsubAcessos = null;
 
-      // PTA
-      let LISTA_PTA = [];
       let ptaEditId = null;
       let ptaEditFotos = null;
+      let editingAccessId = null;
 
-      // Checklist rápido (já com itens de segurança)
       const CHECK_ITEMS = [
         "Fixação para Transporte",
         "Giro do cesto",
@@ -774,8 +822,8 @@
         "Luz de freio"
       ];
 
-      // ===================== TEMA =====================
       const KEY_TEMA = "tema_site";
+
       function aplicarTema(theme){
         document.documentElement.setAttribute("data-theme", theme);
         localStorage.setItem(KEY_TEMA, theme);
@@ -788,12 +836,12 @@
 
         try{ setTimeout(() => atualizarPainel(), 10); }catch(_){}
       }
+
       function toggleTema(){
         const atual = document.documentElement.getAttribute("data-theme") || "light";
         aplicarTema(atual === "dark" ? "light" : "dark");
       }
       window.toggleTema = toggleTema;
-
       aplicarTema(localStorage.getItem(KEY_TEMA) || "light");
 
       function toggleSenha(inputId, btn){
@@ -812,28 +860,31 @@
       }
       window.toggleSenha = toggleSenha;
 
-      // ===================== HELPERS =====================
       function formatarDataBR(dataISO){
         if(!dataISO) return "";
         const [y,m,d] = dataISO.split("-");
         return `${d}/${m}/${y}`;
       }
+
       function hojeISO(){
         const d = new Date();
         const pad = (n)=> String(n).padStart(2,"0");
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
       }
+
       function agoraBR(){
         const d = new Date();
         const pad = (n)=> String(n).padStart(2,"0");
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
       }
+
       function getMesAnoSelecionado(){
         const v = document.getElementById("mesAno")?.value;
         if(!v) return null;
         const [y,m] = v.split("-");
         return { y, m };
       }
+
       function idSeguro(str){
         return String(str || "")
           .toLowerCase()
@@ -842,20 +893,57 @@
           .replace(/[^a-z0-9\-]/g,"")
           .slice(0,80);
       }
+
+      function emailKey(email){
+        return String(email || "").trim().toLowerCase();
+      }
+
       function nomeContratoBonito(slug){
         return ({ "ferroport":"Ferroport", "pta-inveco":"PTA IVECO" }[slug] || slug);
       }
+
       function inMesAno(dataISO, y, m){
         if(!dataISO) return false;
         return dataISO.startsWith(`${y}-${m}-`);
       }
+
       function ymFromISO(dataISO){
         if(!dataISO || dataISO.length < 7) return "";
-        return dataISO.slice(0,7); // YYYY-MM
+        return dataISO.slice(0,7);
       }
+
       function pad2(n){ return String(n).padStart(2,"0"); }
 
-      // ===================== MODAIS (IMAGENS) =====================
+      function getAllowedContractsFromForm(){
+        const arr = [];
+        if(document.getElementById("acessoFerroport")?.checked) arr.push("ferroport");
+        if(document.getElementById("acessoPTA")?.checked) arr.push("pta-inveco");
+        return arr;
+      }
+
+      function setAllowedContractsInForm(contracts){
+        const lista = Array.isArray(contracts) ? contracts : [];
+        const ferro = document.getElementById("acessoFerroport");
+        const pta = document.getElementById("acessoPTA");
+        if(ferro) ferro.checked = lista.includes("ferroport");
+        if(pta) pta.checked = lista.includes("pta-inveco");
+      }
+
+      function limparFormularioUsuario(){
+        editingAccessId = null;
+        const nome = document.getElementById("usuarioNome");
+        const email = document.getElementById("usuarioEmail");
+        const role = document.getElementById("usuarioRole");
+        const ativo = document.getElementById("usuarioAtivo");
+
+        if(nome) nome.value = "";
+        if(email) email.value = "";
+        if(role) role.value = "tecnico";
+        if(ativo) ativo.checked = true;
+        setAllowedContractsInForm(["ferroport"]);
+      }
+      window.limparFormularioUsuario = limparFormularioUsuario;
+
       function openImgModal(src){
         if(!src) return;
         const modal = document.getElementById("imgModal");
@@ -866,10 +954,14 @@
         modal.setAttribute("aria-hidden","false");
 
         function esc(e){
-          if(e.key === "Escape"){ closeImgModal(); window.removeEventListener("keydown", esc); }
+          if(e.key === "Escape"){
+            closeImgModal();
+            window.removeEventListener("keydown", esc);
+          }
         }
         window.addEventListener("keydown", esc);
       }
+
       function closeImgModal(){
         const modal = document.getElementById("imgModal");
         const view = document.getElementById("imgModalView");
@@ -928,10 +1020,14 @@
         modal.setAttribute("aria-hidden","false");
 
         function esc(e){
-          if(e.key === "Escape"){ closeGaleria(); window.removeEventListener("keydown", esc); }
+          if(e.key === "Escape"){
+            closeGaleria();
+            window.removeEventListener("keydown", esc);
+          }
         }
         window.addEventListener("keydown", esc);
       }
+
       function closeGaleria(){
         const modal = document.getElementById("galeriaModal");
         const grid = document.getElementById("galeriaGrid");
@@ -943,7 +1039,6 @@
       window.openGaleria = openGaleria;
       window.closeGaleria = closeGaleria;
 
-      // ===================== FOTOS (COMPRESS) =====================
       async function fileToDataURLCompressed(file, opts = {}){
         const {
           maxW = 1600,
@@ -954,7 +1049,6 @@
 
         if(!file) return "";
 
-        // se já vier pequeno, ainda comprime leve (economiza Firestore de verdade)
         const imgURL = URL.createObjectURL(file);
         try{
           const img = await new Promise((resolve, reject)=>{
@@ -977,8 +1071,6 @@
           const ctx = canvas.getContext("2d", { alpha:false });
 
           ctx.drawImage(img, 0, 0, tw, th);
-
-          // JPEG (menor) — perfeito para Firestore
           return canvas.toDataURL(mime, quality);
         }finally{
           URL.revokeObjectURL(imgURL);
@@ -1009,7 +1101,6 @@
         });
       }
 
-      // ===================== CHECKLIST UI =====================
       function renderChecklistRapido(){
         const body = document.getElementById("checkBody");
         if(!body) return;
@@ -1056,6 +1147,7 @@
           periodico: !!document.getElementById("chkPeriodico")?.checked,
         };
       }
+
       function setTipoChecagem(v){
         document.getElementById("chkRecebimento").checked = !!v?.recebimento;
         document.getElementById("chkDevolucao").checked = !!v?.devolucao;
@@ -1071,6 +1163,7 @@
           traseiroEsquerdo: document.getElementById("patolaTE")?.value?.trim() || "",
         };
       }
+
       function setPatolas(v){
         document.getElementById("patolaDD").value = v?.dianteiroDireito || "";
         document.getElementById("patolaDE").value = v?.dianteiroEsquerdo || "";
@@ -1078,7 +1171,6 @@
         document.getElementById("patolaTE").value = v?.traseiroEsquerdo || "";
       }
 
-      // ===================== RANKING (Ferroport) =====================
       function contarDiasPorTecnico(itensMes){
         const map = new Map();
         itensMes.forEach(item => {
@@ -1091,7 +1183,6 @@
           .sort((a,b) => b.dias - a.dias || a.nome.localeCompare(b.nome, "pt-BR"));
       }
 
-      // ===================== GRÁFICO TOP10 =====================
       function desenharGraficoTop10(canvasId, data){
         const canvas = document.getElementById(canvasId);
         if(!canvas) return;
@@ -1210,7 +1301,6 @@
         }
       }
 
-      // ===================== GRÁFICO KM/MÊS (PTA) =====================
       function montarSerieKmUltimos12Meses(listaPTA){
         const now = new Date();
         const labels = [];
@@ -1219,7 +1309,7 @@
           const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
           const key = `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
           keys.push(key);
-          labels.push(key.slice(5,7) + "/" + key.slice(2,4)); // MM/YY
+          labels.push(key.slice(5,7) + "/" + key.slice(2,4));
         }
 
         const map = new Map(keys.map(k => [k, 0]));
@@ -1279,7 +1369,6 @@
         const plotW = Math.max(60, w - padL - padR);
         const plotH = Math.max(60, h - padT - padB);
 
-        // grid horizontal
         ctx.strokeStyle = border;
         ctx.globalAlpha = 0.35;
         for(let i=0;i<=4;i++){
@@ -1295,7 +1384,6 @@
         const gap = 6;
         const barW = Math.max(6, Math.floor((plotW - gap*(n-1)) / n));
 
-        // bars
         for(let i=0;i<n;i++){
           const v = values[i] || 0;
           const bh = Math.round((v / max) * plotH);
@@ -1305,7 +1393,6 @@
           ctx.fillStyle = bar;
           ctx.fillRect(x, y, barW, bh);
 
-          // labels (a cada 2 meses para não poluir)
           if(i % 2 === 1 || w < 520){
             ctx.save();
             ctx.fillStyle = muted;
@@ -1317,7 +1404,6 @@
           }
         }
 
-        // eixo Y (max)
         ctx.fillStyle = muted;
         ctx.font = "11px Arial";
         ctx.textAlign = "left";
@@ -1327,7 +1413,40 @@
         ctx.fillText("0", 10, padT + plotH);
       }
 
-      // ===================== PERMISSÕES =====================
+      async function garantirPerfilUsuario(user){
+        const email = emailKey(user?.email || "");
+        if(!email) throw new Error("Usuário sem e-mail.");
+
+        const accessRef = refAcessos.doc(email);
+        const accessSnap = await accessRef.get();
+
+        if(accessSnap.exists){
+          const a = accessSnap.data() || {};
+          if(a.ativo === false) throw new Error("Seu acesso está inativo. Procure o gestor.");
+
+          const payload = {
+            nome: a.nome || "",
+            email,
+            role: a.role || "tecnico",
+            allowedContracts: Array.isArray(a.allowedContracts) ? a.allowedContracts : [],
+            ativo: a.ativo !== false,
+            atualizadoEm: new Date().toISOString()
+          };
+
+          await db.collection("users").doc(user.uid).set(payload, { merge:true });
+          return payload;
+        }
+
+        const userSnap = await db.collection("users").doc(user.uid).get();
+        if(userSnap.exists){
+          const u = userSnap.data() || {};
+          if(u.ativo === false) throw new Error("Seu acesso está inativo. Procure o gestor.");
+          return u;
+        }
+
+        throw new Error("Seu e-mail não está liberado. Peça ao gestor para cadastrar seu acesso.");
+      }
+
       async function carregarPermissoesUsuario(user){
         const snap = await db.collection("users").doc(user.uid).get();
         const data = snap.exists ? (snap.data() || {}) : {};
@@ -1369,7 +1488,6 @@
         sel.value = contratoAtual;
       }
 
-      // ===================== REFS / REALTIME =====================
       function setRefsContrato(){
         refDiarios = db.collection("contratos").doc(contratoAtual).collection("diarios");
         refNomes   = db.collection("contratos").doc(contratoAtual).collection("nomes");
@@ -1380,7 +1498,8 @@
         if(typeof unsubDiarios === "function") unsubDiarios();
         if(typeof unsubNomes === "function") unsubNomes();
         if(typeof unsubPTA === "function") unsubPTA();
-        unsubDiarios = unsubNomes = unsubPTA = null;
+        if(typeof unsubAcessos === "function") unsubAcessos();
+        unsubDiarios = unsubNomes = unsubPTA = unsubAcessos = null;
       }
 
       function ligarRealtime(){
@@ -1420,9 +1539,25 @@
             alert("Erro PTA:\n\n" + (err?.message || err));
           }
         );
+
+        if(isAdmin){
+          unsubAcessos = refAcessos.onSnapshot(
+            (snap) => {
+              ACESSOS = snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }))
+                .sort((a,b) => String(a.nome || a.email || "").localeCompare(String(b.nome || b.email || ""), "pt-BR"));
+              carregarTabelaUsuarios();
+            },
+            (err) => {
+              console.error("Erro acessos:", err);
+              alert("Erro acessos:\n\n" + (err?.message || err));
+            }
+          );
+        }else{
+          ACESSOS = [];
+          carregarTabelaUsuarios();
+        }
       }
 
-      // ===================== UI =====================
       function mostrarApp(logado){
         const a = document.getElementById("loginBox");
         const b = document.getElementById("appRoot");
@@ -1435,6 +1570,7 @@
         const permMsg = document.getElementById("permMsg");
         const btnApagarTudo = document.getElementById("btnApagarTudo");
         const btnApagarPTA = document.getElementById("btnApagarPTA");
+        const cardUsuarios = document.getElementById("cardUsuarios");
 
         if(pill){
           pill.textContent = isAdmin ? "Gestor" : "Técnico";
@@ -1444,6 +1580,7 @@
         if(btnApagarTudo) btnApagarTudo.style.display = isAdmin ? "inline-block" : "none";
         if(btnApagarPTA) btnApagarPTA.style.display = isAdmin ? "inline-block" : "none";
         if(permMsg) permMsg.style.display = isAdmin ? "none" : "block";
+        if(cardUsuarios) cardUsuarios.style.display = isAdmin ? "block" : "none";
       }
 
       function aplicarTelaPorContrato(){
@@ -1478,7 +1615,178 @@
         }
       }
 
-      // ===================== FERROPORT (seu código) =====================
+      async function salvarAcessoUsuario(){
+        try{
+          if(!isAdmin) return alert("Apenas Gestor pode gerenciar acessos.");
+
+          const nome = document.getElementById("usuarioNome")?.value.trim() || "";
+          const email = emailKey(document.getElementById("usuarioEmail")?.value || "");
+          const role = document.getElementById("usuarioRole")?.value || "tecnico";
+          const ativo = !!document.getElementById("usuarioAtivo")?.checked;
+          const allowed = getAllowedContractsFromForm();
+
+          if(!nome) return alert("Informe o nome.");
+          if(!email) return alert("Informe o e-mail.");
+          if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("Informe um e-mail válido.");
+          if(!allowed.length) return alert("Selecione pelo menos um contrato.");
+
+          const payload = {
+            nome,
+            email,
+            role,
+            allowedContracts: allowed,
+            ativo,
+            atualizadoEm: new Date().toISOString()
+          };
+
+          const ref = refAcessos.doc(editingAccessId || email);
+          const snap = await ref.get();
+          if(!snap.exists){
+            payload.criadoEm = new Date().toISOString();
+          }
+
+          await ref.set(payload, { merge:true });
+
+          const userSnap = await db.collection("users").where("email", "==", email).get();
+          if(!userSnap.empty){
+            const batch = db.batch();
+            userSnap.docs.forEach(doc => batch.set(doc.ref, payload, { merge:true }));
+            await batch.commit();
+          }
+
+          limparFormularioUsuario();
+          alert("Acesso salvo com sucesso.");
+        }catch(e){
+          console.error(e);
+          alert("Erro ao salvar acesso:\n\n" + (e?.message || e));
+        }
+      }
+      window.salvarAcessoUsuario = salvarAcessoUsuario;
+
+      function carregarTabelaUsuarios(){
+        const tbody = document.getElementById("tabelaUsuarios");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+
+        if(!isAdmin){
+          return;
+        }
+
+        ACESSOS.forEach(item => {
+          const tr = document.createElement("tr");
+
+          const contratos = (item.allowedContracts || []).map(nomeContratoBonito).join(", ") || "—";
+          const statusTxt = item.ativo === false ? "Inativo" : "Ativo";
+
+          tr.innerHTML = `
+            <td>${item.nome || ""}</td>
+            <td>${item.email || ""}</td>
+            <td>${item.role === "gestor" ? "Gestor" : "Técnico"}</td>
+            <td>${contratos}</td>
+            <td>${statusTxt}</td>
+            <td class="row-actions"></td>
+          `;
+
+          const tdAcoes = tr.querySelector("td.row-actions");
+
+          const btnEditar = document.createElement("button");
+          btnEditar.className = "btn secondary small";
+          btnEditar.type = "button";
+          btnEditar.textContent = "Editar";
+          btnEditar.onclick = () => editarAcessoUsuario(item.id);
+          tdAcoes.appendChild(btnEditar);
+
+          const btnToggle = document.createElement("button");
+          btnToggle.className = item.ativo === false ? "btn small" : "btn danger small";
+          btnToggle.type = "button";
+          btnToggle.textContent = item.ativo === false ? "Ativar" : "Bloquear";
+          btnToggle.onclick = () => alternarStatusAcesso(item.id, item.ativo === false);
+          tdAcoes.appendChild(btnToggle);
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function alternarStatusAcesso(docId, ativar){
+        try{
+          if(!isAdmin) return alert("Apenas Gestor pode alterar acesso.");
+          if(!docId) return;
+
+          await refAcessos.doc(docId).set({
+            ativo: !!ativar,
+            atualizadoEm: new Date().toISOString()
+          }, { merge:true });
+
+          const email = emailKey(docId);
+          const userSnap = await db.collection("users").where("email", "==", email).get();
+          if(!userSnap.empty){
+            const batch = db.batch();
+            userSnap.docs.forEach(doc => batch.set(doc.ref, {
+              ativo: !!ativar,
+              atualizadoEm: new Date().toISOString()
+            }, { merge:true }));
+            await batch.commit();
+          }
+        }catch(e){
+          console.error(e);
+          alert("Erro ao alterar status:\n\n" + (e?.message || e));
+        }
+      }
+
+      function editarAcessoUsuario(docId){
+        const item = ACESSOS.find(x => x.id === docId);
+        if(!item) return;
+
+        editingAccessId = item.id;
+        document.getElementById("usuarioNome").value = item.nome || "";
+        document.getElementById("usuarioEmail").value = item.email || "";
+        document.getElementById("usuarioRole").value = item.role || "tecnico";
+        document.getElementById("usuarioAtivo").checked = item.ativo !== false;
+        setAllowedContractsInForm(item.allowedContracts || []);
+
+        document.getElementById("cardUsuarios")?.scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+
+      async function criarPrimeiroAcesso(){
+        const email = emailKey(document.getElementById("loginEmail")?.value || "");
+        const senha = document.getElementById("loginSenha")?.value || "";
+        const msg = document.getElementById("loginMsg");
+
+        if(msg) msg.textContent = "";
+
+        try{
+          if(!email) return alert("Digite o e-mail liberado pelo gestor.");
+          if(!senha || senha.length < 6) return alert("Digite uma senha com pelo menos 6 caracteres.");
+
+          const accessSnap = await refAcessos.doc(email).get();
+          if(!accessSnap.exists){
+            return alert("Esse e-mail ainda não foi liberado pelo gestor.");
+          }
+
+          const access = accessSnap.data() || {};
+          if(access.ativo === false){
+            return alert("Seu acesso está inativo. Procure o gestor.");
+          }
+
+          const cred = await auth.createUserWithEmailAndPassword(email, senha);
+
+          await db.collection("users").doc(cred.user.uid).set({
+            nome: access.nome || "",
+            email,
+            role: access.role || "tecnico",
+            allowedContracts: Array.isArray(access.allowedContracts) ? access.allowedContracts : [],
+            ativo: access.ativo !== false,
+            atualizadoEm: new Date().toISOString()
+          }, { merge:true });
+
+          if(msg) msg.textContent = "Primeiro acesso criado com sucesso. Você já pode entrar no sistema.";
+        }catch(e){
+          console.error(e);
+          alert("Erro ao criar primeiro acesso:\n\n" + (e?.message || e));
+        }
+      }
+      window.criarPrimeiroAcesso = criarPrimeiroAcesso;
+
       async function excluirRegistroDiario(dataISO){
         try{
           if(!isAdmin) return alert("Apenas Gestor pode excluir registros.");
@@ -1774,7 +2082,6 @@
       }
       window.exportarDiarioCSV = exportarDiarioCSV;
 
-      // ===================== PTA: ASSINATURA (MELHORADA) =====================
       const ptaSig = {
         strokes: [],
         current: null,
@@ -1782,10 +2089,7 @@
         dpr: 1
       };
 
-      function ptaGetCanvas(){
-        return document.getElementById("ptaAssinatura");
-      }
-
+      function ptaGetCanvas(){ return document.getElementById("ptaAssinatura"); }
       function ptaGetCtx(){
         const canvas = ptaGetCanvas();
         if(!canvas) return null;
@@ -1823,12 +2127,10 @@
         const w = rect.width;
         const h = rect.height;
 
-        // limpa em coordenadas CSS
         ctx.save();
         ctx.setTransform(ptaSig.dpr,0,0,ptaSig.dpr,0,0);
         ctx.clearRect(0,0,w,h);
 
-        // desenha base (assinatura carregada no modo editar)
         if(ptaSig.baseImage){
           const img = new Image();
           img.onload = () => {
@@ -1884,7 +2186,6 @@
         const canvas = ptaGetCanvas();
         if(!canvas) return;
 
-        // evita duplicar handlers
         canvas.onpointerdown = null;
         canvas.onpointermove = null;
         canvas.onpointerup = null;
@@ -1895,7 +2196,6 @@
         canvas.onpointerdown = (e)=>{
           e.preventDefault();
           canvas.setPointerCapture(e.pointerId);
-
           ptaSig.current = [];
           const p = ptaPointerPos(e);
           ptaSig.current.push(p);
@@ -1934,7 +2234,6 @@
       function ptaAssinaturaDataURL(){
         const canvas = ptaGetCanvas();
         if(!canvas) return "";
-        // gera PNG (assinatura leve)
         return canvas.toDataURL("image/png");
       }
 
@@ -1971,7 +2270,6 @@
 
         ptaEditId = null;
         ptaEditFotos = null;
-
         ptaLimparAssinatura();
         limparFotosPTAUI();
       }
@@ -2007,7 +2305,6 @@
           if(!descricao) return alert("Informe a descrição da atividade.");
           if(!assinatura || assinatura.length < 100) return alert("Faça a assinatura no campo abaixo.");
 
-          // Fotos obrigatórias (ou manter do registro editado)
           const fFrente = document.getElementById("ptaFotoFrente")?.files?.[0] || null;
           const fTras   = document.getElementById("ptaFotoTras")?.files?.[0] || null;
           const fEsq    = document.getElementById("ptaFotoLatEsq")?.files?.[0] || null;
@@ -2015,7 +2312,6 @@
 
           let fotoFrente = null, fotoTras = null, fotoLatEsq = null, fotoLatDir = null;
 
-          // ✅ compressão automática
           if(fFrente && fTras && fEsq && fDir){
             [fotoFrente, fotoTras, fotoLatEsq, fotoLatDir] = await Promise.all([
               fileToDataURLCompressed(fFrente, { maxW: 1600, maxH: 1600, quality: 0.72 }),
@@ -2041,9 +2337,7 @@
             local,
             descricao,
             assinaturaDataUrl: assinatura,
-
             fotoFrente, fotoTras, fotoLatEsq, fotoLatDir,
-
             checklist: {
               tipoChecagem,
               horimetro,
@@ -2052,7 +2346,6 @@
               checklistRapido,
               observacoes
             },
-
             atualizadoEm: new Date().toISOString()
           };
 
@@ -2073,7 +2366,6 @@
           if(!isAdmin) return alert("Apenas Gestor pode excluir registros da PTA.");
           if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA IVECO.");
           if(!docId) return;
-
           if(!confirm("Excluir este registro da PTA?")) return;
 
           await refPTA.doc(docId).delete();
@@ -2090,7 +2382,6 @@
           if(!isAdmin) return alert("Apenas Gestor pode apagar registros da PTA.");
           if(contratoAtual !== "pta-inveco") return alert("Selecione o contrato PTA IVECO.");
           if(!auth.currentUser) return alert("Sessão expirada. Faça login novamente.");
-
           if(!confirm("Tem certeza que deseja apagar TODOS os registros da PTA IVECO?")) return;
 
           const snap = await refPTA.get();
@@ -2183,11 +2474,9 @@
             setChecklistRapidoValues(c.checklistRapido || {});
             document.getElementById("ptaObs").value = c.observacoes || "";
 
-            // assinatura (base)
             ptaInitAssinatura();
             setTimeout(() => ptaCarregarAssinatura(item.assinaturaDataUrl || ""), 30);
 
-            // fotos (mantém se não trocar)
             ptaEditFotos = {
               fotoFrente: item.fotoFrente || "",
               fotoTras: item.fotoTras || "",
@@ -2222,7 +2511,6 @@
         });
       }
 
-      // ===================== PAINEL =====================
       function setKpiLabelsFerroport(){
         const l1 = document.getElementById("kpiLabel1");
         const l2 = document.getElementById("kpiLabel2");
@@ -2231,6 +2519,7 @@
         if(l2) l2.textContent = "Técnicos/Condutores";
         if(l3) l3.textContent = "Presenças/Registros";
       }
+
       function setKpiLabelsPTA(){
         const l1 = document.getElementById("kpiLabel1");
         const l2 = document.getElementById("kpiLabel2");
@@ -2272,17 +2561,14 @@
           document.getElementById("kpiTecnicos").textContent = String(condutoresSet.size);
           document.getElementById("kpiPresencas").textContent = String(kmTotal);
 
-          // insights PTA
           document.getElementById("ptaInsightKmMes").textContent = String(kmTotal);
           document.getElementById("ptaInsightKmMedio").textContent = String(kmMedio.toFixed(1));
           document.getElementById("ptaInsightKmMax").textContent = String(kmMax);
           document.getElementById("ptaInsightRegMes").textContent = String(registros);
 
-          // gráfico PTA (últimos 12 meses)
           const serie = montarSerieKmUltimos12Meses(LISTA_PTA);
           setTimeout(() => desenharGraficoKmMes("chartKmMes", serie), 0);
 
-          // print resumo PTA
           const elReg = document.getElementById("printPtaRegMes");
           const elCond = document.getElementById("printPtaCondutores");
           const elKmTot = document.getElementById("printPtaKmTotal");
@@ -2375,7 +2661,6 @@
       }
       window.gerarPDF = gerarPDF;
 
-      // ===================== AUTH =====================
       async function login(){
         const email = document.getElementById("loginEmail").value.trim();
         const senha = document.getElementById("loginSenha").value.trim();
@@ -2466,6 +2751,8 @@
           }
         });
 
+        setAllowedContractsInForm(["ferroport"]);
+
         window.addEventListener("resize", () => {
           try{ atualizarPainel(); }catch(_){}
           try{ if(contratoAtual === "pta-inveco") ptaResizeCanvas(); }catch(_){}
@@ -2486,6 +2773,7 @@
         }
 
         try{
+          await garantirPerfilUsuario(user);
           await carregarPermissoesUsuario(user);
 
           if(!allowedContracts.length){
@@ -2508,7 +2796,7 @@
           setTimeout(() => atualizarPainel(), 120);
           setTimeout(() => { try{ if(contratoAtual === "pta-inveco") ptaInitAssinatura(); }catch(_){} }, 220);
         }catch(e){
-          showFatal(e);
+          if(msg) msg.textContent = e?.message || String(e);
           await auth.signOut();
         }
       });
