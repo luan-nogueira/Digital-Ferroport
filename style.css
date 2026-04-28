@@ -34,7 +34,7 @@
   --header-h: 72px;
 
   /* Button Overrides */
-  --btn-secondary-bg: #1e293b;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.05);
   --btn-secondary-text: #f8fafc;
 }
 
@@ -54,8 +54,8 @@
   --shadow-md: 0 12px 24px -6px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 24px 48px -12px rgba(15, 23, 42, 0.12);
   
-  --btn-secondary-bg: #e2e8f0;
-  --btn-secondary-text: #0f172a;
+  --btn-secondary-bg: #f1f5f9;
+  --btn-secondary-text: #334155;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; outline-color: var(--digital-red); }
@@ -693,7 +693,8 @@ input::placeholder{
 }
 
 .btn.secondary:hover {
-  filter: brightness(0.9);
+  background: var(--border-strong);
+  color: var(--text);
 }
 
 .btn.danger{ 
