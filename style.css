@@ -3898,27 +3898,32 @@ body{
 .modern-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .modern-table th {
-  padding: 16px 20px;
+  padding: 12px 16px;
   background: var(--card-2);
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--muted);
   text-align: left;
-  white-space: nowrap;
 }
 
 .modern-table td {
-  padding: 14px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
+  word-wrap: break-word;
 }
 
-.modern-table tr:last-child td { border-bottom: none; }
-.modern-table tr:hover td { background: rgba(255, 255, 255, 0.01); }
+.modern-table th:nth-child(1), .modern-table td:nth-child(1) { width: 35%; } /* Colaborador */
+.modern-table th:nth-child(2), .modern-table td:nth-child(2) { width: 15%; } /* Perfil */
+.modern-table th:nth-child(3), .modern-table td:nth-child(3) { width: 35%; } /* Contratos */
+.modern-table th:nth-child(4), .modern-table td:nth-child(4) { width: 15%; } /* Ações */
+
+.modern-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 .role-badge {
   display: inline-flex;
@@ -3926,7 +3931,7 @@ body{
   border-radius: 6px;
   font-size: 11px;
   font-weight: 800;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--border);
   color: var(--text-dim);
   white-space: nowrap;
 }
@@ -3939,45 +3944,42 @@ body{
 .contract-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  max-width: 200px;
+  gap: 4px;
 }
 
 .tag-mini {
-  padding: 3px 8px;
+  padding: 2px 6px;
   background: var(--card-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 10px;
+  border-radius: 4px;
+  font-size: 9px;
   font-weight: 600;
   color: var(--muted);
-  white-space: nowrap;
 }
 
 .status-dot {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .status-dot::before {
   content: "";
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
 .status-dot.active { color: #10b981; }
-.status-dot.active::before { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.status-dot.active::before { background: #10b981; }
 
 .status-dot.inactive { color: var(--muted); }
 .status-dot.inactive::before { background: var(--muted); }
 
 .row-actions {
   text-align: right;
-  width: 100px;
 }
 
 /* Mobile Config */
